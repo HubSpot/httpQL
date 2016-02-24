@@ -7,9 +7,9 @@ Installation
 .. code-block:: xml
 
   <dependency>
-    <groupId>com.hubspot</groupId>
+    <groupId>com.hubspot.httpql</groupId>
     <artifactId>httpql</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
   </dependency>
 
 

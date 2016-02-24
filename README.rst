@@ -34,4 +34,4 @@ Sound cool? `Get reading, then!`_
 
 .. _Rosetta: https://github.com/HubSpot/Rosetta
 .. _Jackson: http://wiki.fasterxml.com/JacksonHome
-.. _Get reading, then!: https://.../docs/httpQL/latest
+.. _Get reading, then!: http://github.hubspot.com/httpQL/

@@ -5,6 +5,7 @@
 .externalToolBuilders/
 .factorypath
 .checkstyle
+.build/
 
 # Intellij
 .idea/
