@@ -57,6 +57,16 @@ public class SelectBuilder<T extends QuerySpec> {
   private SelectBuilder(ParsedQuery<T> parsed, DefaultMetaQuerySpec<T> context) {
     this.sourceQuery = parsed;
     this.meta = context;
+
+    for (BoundFilterEntry<T> bfe : sourceQuery.getBoundFilterEntries()) {
+      if (bfe.getFilter() instanceof JoinFilter) {
+        JoinFilter joinFilter = (JoinFilter) bfe.getFilter();
+        joinConditions.add(joinFilter.getJoin());
+        if (factory instanceof DefaultFieldFactory) {
+          factory = new TableQualifiedFieldFactory();
+        }
+      }
+    }
   }
 
   /**
@@ -218,6 +228,14 @@ public class SelectBuilder<T extends QuerySpec> {
     return includedFields;
   }
 
+  public <F> Field<F> getFieldByName(String name, Class<F> type) {
+    return factory.createField(name, type, getTable());
+  }
+
+  public String getFieldName(String name) {
+    return factory.getFieldName(name, getTable());
+  }
+
   private SelectFinalStep<?> buildSelect() {
     Select<?> select;
     SelectFromStep<?> selectFrom;
@@ -225,8 +243,6 @@ public class SelectBuilder<T extends QuerySpec> {
     settings.setRenderNameStyle(renderNameStyle);
     DSLContext ctx = DSL.using(dialect, settings);
     Table<?> table = getTable();
-
-    Collection<JoinCondition> joins = getJoinConditions();
 
     if (asCount) {
       if (includedFieldNames.size() > 0) {
@@ -242,7 +258,7 @@ public class SelectBuilder<T extends QuerySpec> {
       } else {
         String tableName = sourceQuery.getBoundQuery().tableName();
 
-        if (joins.size() > 0) {
+        if (joinConditions.size() > 0) {
           selectStep = ctx.selectDistinct(DSL.field(tableName + ".*"));
         } else {
           selectStep = ctx.select(DSL.field("*"));
@@ -255,7 +271,7 @@ public class SelectBuilder<T extends QuerySpec> {
       }
     }
     select = selectFrom.from(table);
-    for (JoinCondition joinCondition : joins) {
+    for (JoinCondition joinCondition : joinConditions) {
       if (joinCondition.isLeftJoin()) {
         ((SelectJoinStep<?>) select).leftOuterJoin(joinCondition.getTable()).on(joinCondition.getCondition());
       } else {
@@ -296,21 +312,6 @@ public class SelectBuilder<T extends QuerySpec> {
       }
     }
     return conditions;
-  }
-
-  public Collection<JoinCondition> getJoinConditions() {
-    Collection<JoinCondition> joins = new ArrayList<>();
-
-    for (BoundFilterEntry<T> bfe : sourceQuery.getBoundFilterEntries()) {
-      if (bfe.getFilter() instanceof JoinFilter) {
-        JoinFilter joinFilter = (JoinFilter) bfe.getFilter();
-        joins.add(joinFilter.getJoin());
-      }
-    }
-
-    joins.addAll(joinConditions);
-
-    return joins;
   }
 
   public ParsedQuery<T> getSourceQuery() {

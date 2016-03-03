@@ -19,6 +19,8 @@ public interface FieldFactory {
 
   <T> Field<T> createField(String name, Class<T> fieldType, Table<?> table);
 
+  String getFieldName(String name, Table<?> table);
+
   Optional<String> tableAlias(String name);
 
 }

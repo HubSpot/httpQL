@@ -29,6 +29,11 @@ public class PrefixingAliasFieldFactory implements FieldFactory {
   }
 
   @Override
+  public String getFieldName(String name, Table<?> table) {
+    return DSL.field(name).toString();
+  }
+
+  @Override
   public Optional<String> tableAlias(String name) {
     return Optional.empty();
   }
