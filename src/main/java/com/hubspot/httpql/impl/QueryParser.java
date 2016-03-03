@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -170,15 +171,18 @@ public class QueryParser<T extends QuerySpec> {
         fieldName = fieldNameSnakeCase;
       }
 
-      FilterEntry filterEntry = new FilterEntry(byName.get(filterName), fieldName, this.getQueryType());
+      String finalFieldName = fieldName;
+      Optional<BoundFilterEntry<T>> filterEntryOptional = filterTable.rowKeySet().stream().filter(f -> Objects.equals(f.getFieldName(), finalFieldName) && Objects.equals(f.getFilter(), byName.get(filterName))).findFirst();
 
       // Use reserved words instead of simple look-up to throw exception on disallowed fields
-      if (!reservedWords.contains(filterEntry.getQueryName()) && !filterTable.contains(filterEntry, filterName)) {
+      if (!filterEntryOptional.isPresent() || (!reservedWords.contains(filterEntryOptional.get().getQueryName()) && !filterTable.contains(filterEntryOptional.get(), filterName))) {
         throw new FilterViolation(String.format("Filtering by \"%s %s\" is not allowed",
-            filterEntry.getQueryName(), filterName));
-      } else if (reservedWords.contains(filterEntry.getQueryName())) {
+            finalFieldName, filterName));
+      } else if (reservedWords.contains(filterEntryOptional.get().getQueryName())) {
         continue;
       }
+
+      FilterEntry filterEntry = filterEntryOptional.get();
 
       // Add value using key associated with the Type's field name, *not* the query parameter name.
       BeanPropertyDefinition prop = filterTable.get(filterEntry, filterName);
