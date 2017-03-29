@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
+import javax.ws.rs.core.MultivaluedMap;
+
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +24,7 @@ import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.GreaterThan;
 import com.hubspot.httpql.filter.In;
 import com.hubspot.rosetta.annotations.RosettaNaming;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 public class QueryParserTest {
 
@@ -63,6 +66,16 @@ public class QueryParserTest {
 
     assertThat(StringUtils.normalizeSpace(SelectBuilder.forParsedQuery(parsedQuery).build().getRawSelect().toString()))
         .isEqualTo("select * from where `id` in ( 1, 2, 3 ) limit 10");
+  }
+
+
+  @Test
+  public void itPreservesCommasInEqValues() {
+    MultivaluedMap<String, String> query = new MultivaluedMapImpl();
+    query.add("name", "1,2,3");
+
+    final ParsedUriParams parsedUriParams = QueryParser.parseUriParams(query);
+    assertThat(parsedUriParams.getFieldFilters().get(0).getValue()).isEqualTo("1,2,3");
   }
 
   @Test
@@ -124,18 +137,36 @@ public class QueryParserTest {
   }
 
   @Test
+  public void itRemovesReservedParams() {
+
+    MultivaluedMap<String, String> query = new MultivaluedMapImpl();
+    query.add("offset", "1");
+    query.add("limit", "1");
+    query.add("includeDeleted", "1");
+    query.add("order", "1");
+    query.add("orderBy", "1");
+    query.add("orderBy", "2");
+    query.add("access_TOKEN", "2");
+    query.add("hapiKEY", "2");
+
+    final ParsedUriParams parsedUriParams = QueryParser.parseUriParams(query);
+    assertThat(parsedUriParams.getOrderBys()).hasSize(3);
+    assertThat(parsedUriParams.getFieldFilters()).isEmpty();
+  }
+
+  @Test
   public void itGetsLimitAndOffset() {
-    Optional<Integer> limit = parser.getLimit("20");
+    Optional<Integer> limit = parser.getLimit(Optional.of(20));
     assertThat(limit.get()).isEqualTo(20);
-    Optional<Integer> offset = parser.getOffset("10");
+    Optional<Integer> offset = parser.getOffset(Optional.of(10));
     assertThat(offset.get()).isEqualTo(10);
   }
 
   @Test
   public void itUsesDefaultsWhenHigherThanMaxValues() {
-    Optional<Integer> limit = parser.getLimit("1000");
+    Optional<Integer> limit = parser.getLimit(Optional.of(1000));
     assertThat(limit.get()).isEqualTo(100);
-    Optional<Integer> offset = parser.getOffset("200");
+    Optional<Integer> offset = parser.getOffset(Optional.of(200));
     assertThat(offset.get()).isEqualTo(100);
   }
 

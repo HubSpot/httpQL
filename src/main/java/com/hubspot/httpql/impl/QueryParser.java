@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -15,6 +16,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,14 +26,17 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CaseFormat;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
-import com.google.common.base.Splitter;
+import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.DefaultMetaUtils;
 import com.hubspot.httpql.Filter;
+import com.hubspot.httpql.MetaQuerySpec;
+import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.ParsedQuery;
 import com.hubspot.httpql.QueryConstraints;
 import com.hubspot.httpql.QuerySpec;
@@ -58,14 +64,15 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
  */
 public class QueryParser<T extends QuerySpec> {
   private static final Logger LOG = LoggerFactory.getLogger(QueryParser.class);
-  private static final ServiceLoader<Filter> loader = ServiceLoader.load(Filter.class);
-  private static final Map<String, Filter> byName = new HashMap<>();
-  private static final Set<String> reservedWords = ImmutableSet.of("offset", "limit", "order", "includeDeleted");
+  private static final ServiceLoader<Filter> LOADER = ServiceLoader.load(Filter.class);
+  private static final Map<String, Filter> BY_NAME = new HashMap<>();
+  private static final Set<String> RESERVED_WORDS = ImmutableSet.of("offset", "limit", "order", "includeDeleted");
+  private static final Set<String> IGNORED_PARAMS = ImmutableSet.of("hapikey", "access_token", "clienttimeout");
 
   static {
-    for (Filter filter : loader) {
+    for (Filter filter : LOADER) {
       for (String name : filter.names()) {
-        byName.put(name, filter);
+        BY_NAME.put(name, filter);
       }
     }
   }
@@ -76,20 +83,20 @@ public class QueryParser<T extends QuerySpec> {
   private static final Function<String, String> SNAKE_CASE_TRANSFORMER = input -> CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, input);
 
   private final Class<T> queryType;
-  private final Collection<String> orderableFields;
+  protected final Collection<String> orderableFields;
   private final ObjectMapper mapper;
-  private final DefaultMetaQuerySpec<T> meta;
+  private final MetaQuerySpec<T> meta;
   private final boolean strictMode;
 
   private int maxLimit;
   private int maxOffset;
   private int defaultLimit = 100;
 
-  private QueryParser(final Class<T> spec, boolean strictMode) {
+  protected QueryParser(final Class<T> spec, boolean strictMode, MetaQuerySpec<T> meta) {
     this.orderableFields = new ArrayList<>();
     this.queryType = spec;
     this.mapper = Rosetta.getMapper();
-    this.meta = new DefaultMetaQuerySpec<T>(spec);
+    this.meta = meta;
     this.strictMode = strictMode;
   }
 
@@ -115,53 +122,115 @@ public class QueryParser<T extends QuerySpec> {
   }
 
   public static <T extends QuerySpec> Builder<T> newBuilder(Class<T> spec) {
-    return new Builder<T>(spec);
+    return new Builder<>(spec);
   }
 
   public ParsedQuery<T> parse(UriInfo uriInfo) {
     return parse(uriInfo.getQueryParameters());
   }
 
-  public ParsedQuery<T> parse(Multimap<String, String> uriParams) {
-    MultivaluedMap<String, String> mmap = new MultivaluedMapImpl();
-    for (Map.Entry<String, String> entry : uriParams.entries()) {
-      mmap.add(entry.getKey(), entry.getValue());
+  public static MultivaluedMap<String, String> multimapToMultivaluedMap(Multimap<String, String> map) {
+
+    MultivaluedMap<String, String> result = new MultivaluedMapImpl();
+    for (Map.Entry<String, String> entry : map.entries()) {
+      result.add(entry.getKey(), entry.getValue());
     }
-    return parse(mmap);
+
+    return result;
+  }
+
+  public ParsedQuery<T> parse(Multimap<String, String> uriParams) {
+    return parse(multimapToMultivaluedMap(uriParams));
   }
 
   public ParsedQuery<T> createEmptyQuery() {
     return parse(new MultivaluedMapImpl());
   }
 
-  public ParsedQuery<T> parse(MultivaluedMap<String, String> uriParams) {
-    final Map<String, Object> fieldValues = new HashMap<>();
-    final List<BoundFilterEntry<T>> boundFilterEntries = new ArrayList<>();
+  public static ParsedUriParams parseUriParams(Multimap<String, String> uriParams) {
+    return parseUriParams(multimapToMultivaluedMap(uriParams));
+  }
 
-    final boolean includeDeleted = BooleanUtils.toBoolean(uriParams.getFirst("includeDeleted"));
-    final Optional<Integer> limit = getLimit(uriParams.getFirst("limit"));
-    final Optional<Integer> offset = getOffset(uriParams.getFirst("offset"));
+  public static ParsedUriParams parseUriParams(MultivaluedMap<String, String> uriParams) {
 
-    final Collection<Ordering> orderings = getOrderings(uriParams.get("order"), meta);
-    orderings.addAll(getOrderings(uriParams.get("orderBy"), meta));
+    final ParsedUriParams result = new ParsedUriParams();
 
-    final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable = meta.getFilterTable();
-    final Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
-
+    // make a copy so we can modify it
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     for (Map.Entry<String, List<String>> entry : uriParams.entrySet()) {
+      if (!IGNORED_PARAMS.contains(entry.getKey().toLowerCase())) {
+        params.put(entry.getKey(), entry.getValue());
+      }
+    }
+
+    result.setIncludeDeleted(BooleanUtils.toBoolean(params.getFirst("includeDeleted")));
+    params.remove("includeDeleted");
+
+    final int limit = NumberUtils.toInt(params.getFirst("limit"), 0);
+    if (limit != 0) {
+      result.setLimit(limit);
+    }
+    params.remove("limit");
+
+    final int offset = NumberUtils.toInt(params.getFirst("offset"), 0);
+    if (offset != 0) {
+      result.setOffset(offset);
+    }
+    params.remove("offset");
+
+    result.addOrderBys(params.get("order"));
+    params.remove("order");
+    result.addOrderBys(params.get("orderBy"));
+    params.remove("orderBy");
+
+    for (Map.Entry<String, List<String>> entry : params.entrySet()) {
       List<String> parts = FILTER_PARAM_SPLITTER.splitToList(entry.getKey().trim());
       if (parts.size() > 2) {
         continue;
       }
 
-      String filterName = filterNameFromParts(parts);
+      final String fieldName = parts.get(0);
+      final String filterName = filterNameFromParts(parts);
+      final Filter filter = BY_NAME.get(filterName);
 
-      if (!byName.containsKey(filterName)) {
+      if (filter == null) {
         throw new FilterViolation(String.format("Unknown filter type `%s`", filterName));
       }
 
+      List<String> values = entry.getValue();
+      ConditionProvider conditionProvider = filter.getConditionProvider(DSL.field(fieldName));
+
+      if (conditionProvider instanceof MultiParamConditionProvider && values.size() == 1 && values.get(0).contains(",")) {
+        values = MULTIVALUE_PARAM_SPLITTER.splitToList(values.get(0));
+      }
+
+      result.addFieldFilter(new FieldFilter(filter, filterName, fieldName, values));
+    }
+
+    return result;
+  }
+
+  public ParsedQuery<T> parse(MultivaluedMap<String, String> uriParams) {
+    final Map<String, Object> fieldValues = new HashMap<>();
+    final List<BoundFilterEntry<T>> boundFilterEntries = new ArrayList<>();
+
+    final ParsedUriParams parsedUriParams = parseUriParams(uriParams);
+
+    final boolean includeDeleted = parsedUriParams.isIncludeDeleted();
+    final Optional<Integer> limit = getLimit(parsedUriParams.getLimit());
+    final Optional<Integer> offset = getOffset(parsedUriParams.getOffset());
+
+    final Collection<Ordering> orderings = getOrderings(parsedUriParams.getOrderBys(), meta);
+
+    final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable = meta.getFilterTable();
+    final Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
+
+    for (FieldFilter fieldFilter : parsedUriParams.getFieldFilters()) {
+
+      final String filterName = fieldFilter.getFilterName();
+
       // If not in "strict mode", gracefully accept completely unknown query parameters
-      String fieldName = parts.get(0);
+      String fieldName = fieldFilter.getField();
       if (!fieldMap.keySet().contains(fieldName) && !strictMode) {
         String fieldNameSnakeCase = SNAKE_CASE_TRANSFORMER.apply(fieldName);
         if (!fieldMap.keySet().contains(fieldNameSnakeCase)) {
@@ -170,15 +239,19 @@ public class QueryParser<T extends QuerySpec> {
         fieldName = fieldNameSnakeCase;
       }
 
-      FilterEntry filterEntry = new FilterEntry(byName.get(filterName), fieldName, this.getQueryType());
+      String finalFieldName = fieldName;
+      Optional<BoundFilterEntry<T>> filterEntryOptional = filterTable.rowKeySet().stream().filter(f -> Objects.equals(f.getFieldName(), finalFieldName) && Objects.equals(f.getFilter(), BY_NAME
+          .get(filterName))).findFirst();
 
       // Use reserved words instead of simple look-up to throw exception on disallowed fields
-      if (!reservedWords.contains(filterEntry.getQueryName()) && !filterTable.contains(filterEntry, filterName)) {
+      if (!filterEntryOptional.isPresent() || (!RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName()) && !filterTable.contains(filterEntryOptional.get(), filterName))) {
         throw new FilterViolation(String.format("Filtering by \"%s %s\" is not allowed",
-            filterEntry.getQueryName(), filterName));
-      } else if (reservedWords.contains(filterEntry.getQueryName())) {
+            finalFieldName, filterName));
+      } else if (RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName())) {
         continue;
       }
+
+      FilterEntry filterEntry = filterEntryOptional.get();
 
       // Add value using key associated with the Type's field name, *not* the query parameter name.
       BeanPropertyDefinition prop = filterTable.get(filterEntry, filterName);
@@ -186,26 +259,26 @@ public class QueryParser<T extends QuerySpec> {
           .filter(bfe -> bfe.equals(filterEntry)).findFirst()
           .orElseThrow(() -> new FilterViolation("Filter column " + filterEntry + " not found"));
 
-      FilterBy ann = prop.getPrimaryMember().getAnnotation(FilterBy.class);
-      if (Strings.emptyToNull(ann.as()) != null) {
-        boundColumn.setActualField(fieldMap.get(ann.as()));
+      FilterBy ann = null;
+
+      if (prop.getPrimaryMember() != null) {
+        ann = prop.getPrimaryMember().getAnnotation(FilterBy.class);
+        if (Strings.emptyToNull(ann.as()) != null) {
+          boundColumn.setActualField(fieldMap.get(ann.as()));
+        }
       }
 
       if (boundColumn.isMultiValue()) {
-        List<String> paramVals = entry.getValue();
-        // support for comma-delimited param values (e.g. name__in=bob,joe,sarah)
-        if (paramVals.size() == 1 && paramVals.get(0).contains(",")) {
-          paramVals = MULTIVALUE_PARAM_SPLITTER.splitToList(paramVals.get(0));
-        }
+        List<String> paramVals = fieldFilter.getValues();
 
         List<?> boundVals = paramVals.stream()
             .map(v -> Rosetta.getMapper().convertValue(v, prop.getField().getAnnotated().getType()))
             .collect(Collectors.toList());
 
-        boundColumn = new MultiValuedBoundFilterEntry<T>(boundColumn, boundVals);
+        boundColumn = new MultiValuedBoundFilterEntry<>(boundColumn, boundVals);
 
       } else {
-        fieldValues.put(prop.getName(), entry.getValue().get(0));
+        fieldValues.put(prop.getName(), fieldFilter.getValue());
       }
 
       boundFilterEntries.add(boundColumn);
@@ -213,7 +286,7 @@ public class QueryParser<T extends QuerySpec> {
 
     try {
       T boundQuerySpec = mapper.convertValue(fieldValues, queryType);
-      return new ParsedQuery<T>(boundQuerySpec, queryType, boundFilterEntries, meta, limit, offset, orderings, includeDeleted);
+      return new ParsedQuery<>(boundQuerySpec, queryType, boundFilterEntries, meta, limit, offset, orderings, includeDeleted);
 
     } catch (IllegalArgumentException e) {
       if (e.getCause() instanceof InvalidFormatException) {
@@ -241,10 +314,10 @@ public class QueryParser<T extends QuerySpec> {
   }
 
   @VisibleForTesting
-  Optional<Integer> getLimit(String limit) {
-    if (limit != null) {
+  Optional<Integer> getLimit(Optional<Integer> limit) {
+    if (limit.isPresent()) {
       try {
-        int parsedLimit = Integer.parseInt(limit);
+        int parsedLimit = limit.get();
         if (parsedLimit < 0) {
           throw new ConstraintViolation(ConstraintType.OFFSET, LimitViolationType.MINIMUM, parsedLimit, 0);
         }
@@ -258,10 +331,10 @@ public class QueryParser<T extends QuerySpec> {
   }
 
   @VisibleForTesting
-  Optional<Integer> getOffset(String offset) {
-    if (offset != null) {
+  Optional<Integer> getOffset(Optional<Integer> offset) {
+    if (offset.isPresent()) {
       try {
-        int parsedOffset = Integer.parseInt(offset);
+        int parsedOffset = offset.get();
         if (parsedOffset < 0) {
           throw new ConstraintViolation(ConstraintType.OFFSET, LimitViolationType.MINIMUM, parsedOffset, 0);
         }
@@ -274,7 +347,7 @@ public class QueryParser<T extends QuerySpec> {
     return Optional.empty();
   }
 
-  private Collection<Ordering> getOrderings(List<String> orderStrings, DefaultMetaQuerySpec<T> meta) {
+  protected Collection<Ordering> getOrderings(List<String> orderStrings, MetaQuerySpec<T> meta) {
     Collection<Ordering> orderings = new ArrayList<>();
     if (orderStrings != null) {
       for (String order : orderStrings) {
@@ -292,7 +365,7 @@ public class QueryParser<T extends QuerySpec> {
     return orderings;
   }
 
-  private String filterNameFromParts(List<String> parts) {
+  private static String filterNameFromParts(List<String> parts) {
     if (parts.size() == 1) {
       return (new Equal()).names()[0];
     } else {
@@ -304,7 +377,7 @@ public class QueryParser<T extends QuerySpec> {
     return queryType;
   }
 
-  public DefaultMetaQuerySpec<T> getMeta() {
+  public MetaQuerySpec<T> getMeta() {
     return meta;
   }
 
@@ -315,11 +388,17 @@ public class QueryParser<T extends QuerySpec> {
   public static class Builder<T extends QuerySpec> {
     private static final Table<Class<?>, Boolean, QueryParser<?>> CACHED_PARSERS = HashBasedTable.create();
 
-    private Class<T> spec;
-    private boolean strictMode;
+    protected Class<T> spec;
+    protected boolean strictMode;
+    protected MetaQuerySpec<T> meta;
 
     public Builder(Class<T> spec) {
       this.spec = spec;
+    }
+
+    public Builder<T> withMetaQuerySpec(MetaQuerySpec<T> meta) {
+      this.meta = meta;
+      return this;
     }
 
     /**
@@ -339,9 +418,13 @@ public class QueryParser<T extends QuerySpec> {
         return qp;
       }
 
+      if (meta == null) {
+        meta = new DefaultMetaQuerySpec<>(spec);
+      }
+
       Map<String, BeanPropertyDefinition> fields = BeanPropertyIntrospector.getFields(spec);
 
-      qp = new QueryParser<T>(spec, strictMode);
+      qp = new QueryParser<>(spec, strictMode, meta);
       qp.setConstraints(spec);
       qp.buildOrderableFields(fields);
 
@@ -352,7 +435,7 @@ public class QueryParser<T extends QuerySpec> {
   }
 
   public static Filter named(String name) {
-    return byName.get(name);
+    return BY_NAME.get(name);
   }
 
 }

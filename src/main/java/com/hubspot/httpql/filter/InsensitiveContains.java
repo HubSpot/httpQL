@@ -10,7 +10,7 @@ import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.Filter;
 
 public class InsensitiveContains extends FilterBase implements Filter {
-  private static final Escaper escaper = Escapers.builder()
+  private static final Escaper ESCAPER = Escapers.builder()
       .addEscape('\\', "\\\\")
       .addEscape('%', "!%")
       .addEscape('_', "!_")
@@ -31,7 +31,7 @@ public class InsensitiveContains extends FilterBase implements Filter {
       @Override
       public Condition getCondition(Param<T> value) {
         String originalValue = (String) value.getValue();
-        String escapedValue = escaper.escape(originalValue);
+        String escapedValue = ESCAPER.escape(originalValue);
         return field.likeIgnoreCase('%' + escapedValue + '%', '!');
       }
 

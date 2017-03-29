@@ -12,3 +12,4 @@ com.hubspot.httpql.filter.Range
 com.hubspot.httpql.filter.StartsWith
 com.hubspot.httpql.filter.Null
 com.hubspot.httpql.filter.NotNull
+com.hubspot.httpql.filter.NotLike

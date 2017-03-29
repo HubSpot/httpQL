@@ -45,7 +45,7 @@ public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry {
 
   private static String getBestQueryName(BeanPropertyDefinition prop) {
     FilterBy ann = DefaultMetaUtils.findFilterBy(prop);
-    return Strings.emptyToNull(ann.as()) != null ? ann.as() : prop.getName();
+    return Strings.emptyToNull(ann == null ? "" : ann.as()) != null ? ann.as() : prop.getName();
   }
 
   public BeanPropertyDefinition getProperty() {

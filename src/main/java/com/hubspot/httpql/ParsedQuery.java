@@ -206,6 +206,7 @@ public class ParsedQuery<T extends QuerySpec> {
 
     cacheKeyParts.add(offset.orElse(0));
     cacheKeyParts.add(limit.orElse(0));
+    cacheKeyParts.add(includeDeleted);
 
     return StringUtils.join(cacheKeyParts, ":");
   }
