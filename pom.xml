@@ -23,9 +23,11 @@
 
   <developers>
     <developer>
-      <id>jaredstehler</id>
       <name>Jared Stehler</name>
-      <email>jstehler@hubspot.com</email>
+    </developer>
+    <developer>
+      <name>Nate Belisle</name>
+      <email>nbelisle11@gmail.com</email>
     </developer>
   </developers>
 
