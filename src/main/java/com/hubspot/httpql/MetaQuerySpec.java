@@ -53,7 +53,7 @@ public interface MetaQuerySpec<T extends QuerySpec> {
    * This method should *not* perform validation on the entries in {@code filters} to, e.g., check for existence of the filter on the field.
    */
   Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> tableFor(BeanPropertyDefinition field,
-                                                                      @SuppressWarnings("unchecked") Class<? extends Filter>... filters);
+      @SuppressWarnings("unchecked") Class<? extends Filter>... filters);
 
   Class<T> getQueryType();
 }

@@ -7,7 +7,7 @@ import org.jooq.impl.DSL;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -215,7 +215,7 @@ public class SelectBuilderTest {
     selectBuilder = parser.newSelectBuilder(query);
 
     selectBuilder.withJoinCondition(DSL.table("other_table"),
-      DSL.field("example.full_name").eq(DSL.field("other_table.full_name")));
+        DSL.field("example.full_name").eq(DSL.field("other_table.full_name")));
 
     String sql = selectBuilder.build().toString();
     assertThat(sql).contains("order by `example`.`full_name` asc");
@@ -228,7 +228,7 @@ public class SelectBuilderTest {
 
     selectBuilder.withAdditionalFields(DSL.field("LENGTH(name)").as("name_length"));
     selectBuilder.withJoinCondition(DSL.table("other_table"),
-      DSL.field("example.full_name").eq(DSL.field("other_table.full_name")));
+        DSL.field("example.full_name").eq(DSL.field("other_table.full_name")));
 
     String sql = selectBuilder.build().toString();
     assertThat(sql).contains("order by `name_length` desc");
@@ -236,7 +236,7 @@ public class SelectBuilderTest {
   }
 
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
-  @RosettaNaming(LowerCaseWithUnderscoresStrategy.class)
+  @RosettaNaming(SnakeCaseStrategy.class)
   public static class Spec implements QuerySpec {
 
     @FilterBy({

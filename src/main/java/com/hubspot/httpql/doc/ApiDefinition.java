@@ -42,7 +42,7 @@ public class ApiDefinition {
 
     private final SortedSet<String> filters;
 
-    FilterableField(String field, Class<?> fieldType, boolean sortable) {
+    public FilterableField(String field, Class<?> fieldType, boolean sortable) {
       this.field = field;
       this.fieldType = fieldType;
       this.sortable = sortable;

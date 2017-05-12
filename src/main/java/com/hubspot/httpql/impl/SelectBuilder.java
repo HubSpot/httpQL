@@ -338,11 +338,12 @@ public class SelectBuilder<T extends QuerySpec> {
     return sorts;
   }
 
-  private Field<?> getSortField(Ordering order) {
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private Field getSortField(Ordering order) {
     Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
     BeanPropertyDefinition bpd = fieldMap.get(order.getQueryName());
     String fieldName = order.getQueryName();
-    Class<?> fieldType = meta.getFieldType(order.getFieldName());
+    Class fieldType = meta.getFieldType(order.getFieldName());
     if (bpd.getField().getAnnotation(OrderBy.class).isGenerated()) {
       // it's possible to sort by generated fields
       // but we shouldn't qualify them with table name in the ORDER BY clause
@@ -397,7 +398,7 @@ class AdditionalCondition {
   public final Condition condition;
   public final boolean includeInCount;
 
-  AdditionalCondition(Condition condition, boolean includeInCount) {
+  public AdditionalCondition(Condition condition, boolean includeInCount) {
     this.condition = condition;
     this.includeInCount = includeInCount;
   }

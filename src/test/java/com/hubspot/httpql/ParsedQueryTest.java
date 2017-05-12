@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.base.Enums;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -233,7 +233,7 @@ public class ParsedQueryTest {
   }
 
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
-  @RosettaNaming(LowerCaseWithUnderscoresStrategy.class)
+  @RosettaNaming(SnakeCaseStrategy.class)
   public static class Spec extends SpecParent implements QuerySpec {
 
     @OrderBy

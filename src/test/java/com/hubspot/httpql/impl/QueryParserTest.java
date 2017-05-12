@@ -4,13 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
-import javax.ws.rs.core.MultivaluedMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -24,7 +22,6 @@ import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.GreaterThan;
 import com.hubspot.httpql.filter.In;
 import com.hubspot.rosetta.annotations.RosettaNaming;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 public class QueryParserTest {
 
@@ -66,16 +63,6 @@ public class QueryParserTest {
 
     assertThat(StringUtils.normalizeSpace(SelectBuilder.forParsedQuery(parsedQuery).build().getRawSelect().toString()))
         .isEqualTo("select * from where `id` in ( 1, 2, 3 ) limit 10");
-  }
-
-
-  @Test
-  public void itPreservesCommasInEqValues() {
-    MultivaluedMap<String, String> query = new MultivaluedMapImpl();
-    query.add("name", "1,2,3");
-
-    final ParsedUriParams parsedUriParams = QueryParser.parseUriParams(query);
-    assertThat(parsedUriParams.getFieldFilters().get(0).getValue()).isEqualTo("1,2,3");
   }
 
   @Test
@@ -137,24 +124,6 @@ public class QueryParserTest {
   }
 
   @Test
-  public void itRemovesReservedParams() {
-
-    MultivaluedMap<String, String> query = new MultivaluedMapImpl();
-    query.add("offset", "1");
-    query.add("limit", "1");
-    query.add("includeDeleted", "1");
-    query.add("order", "1");
-    query.add("orderBy", "1");
-    query.add("orderBy", "2");
-    query.add("access_TOKEN", "2");
-    query.add("hapiKEY", "2");
-
-    final ParsedUriParams parsedUriParams = QueryParser.parseUriParams(query);
-    assertThat(parsedUriParams.getOrderBys()).hasSize(3);
-    assertThat(parsedUriParams.getFieldFilters()).isEmpty();
-  }
-
-  @Test
   public void itGetsLimitAndOffset() {
     Optional<Integer> limit = parser.getLimit(Optional.of(20));
     assertThat(limit.get()).isEqualTo(20);
@@ -171,7 +140,7 @@ public class QueryParserTest {
   }
 
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
-  @RosettaNaming(LowerCaseWithUnderscoresStrategy.class)
+  @RosettaNaming(SnakeCaseStrategy.class)
   public static class Spec implements QuerySpec {
 
     @FilterBy({
