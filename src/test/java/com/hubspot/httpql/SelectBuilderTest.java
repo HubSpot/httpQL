@@ -7,15 +7,17 @@ import org.jooq.impl.DSL;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.OrderBy;
+import com.hubspot.httpql.filter.Contains;
 import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.GreaterThan;
 import com.hubspot.httpql.filter.In;
+import com.hubspot.httpql.filter.NotLike;
 import com.hubspot.httpql.impl.PrefixingAliasFieldFactory;
 import com.hubspot.httpql.impl.QueryParser;
 import com.hubspot.httpql.impl.SelectBuilder;
@@ -39,10 +41,13 @@ public class SelectBuilderTest {
     query.put("count__gt", "100");
     query.put("full_name__eq", "example");
 
+    query.put("comments__nlike", "%John%");
+    query.put("comments__nlike", "Jane%");
+
     query.put("offset", "5");
 
     parsed = parser.parse(query);
-    queryFormat = "select * from example where (`id` in (%s, %s) and `count` > %s and `full_name` = %s) limit %s offset %s";
+    queryFormat = "select * from example where (`comments` not like %s escape '!' and `comments` not like %s escape '!' and `id` in (%s, %s) and `count` > %s and `full_name` = %s) limit %s offset %s";
   }
 
   @Test
@@ -51,7 +56,7 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).isEqualTo(String.format(queryFormat, "?", "?", "?", "?", "?", "?"));
+    assertThat(sql).isEqualTo(String.format(queryFormat, "?", "?", "?", "?", "?", "?", "?", "?"));
   }
 
   /**
@@ -64,7 +69,7 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).isEqualTo(String.format(queryFormat, ":1", ":2", ":count", ":full_name", ":5", ":6"));
+    assertThat(sql).isEqualTo(String.format(queryFormat, ":1", ":2", ":3", ":4", ":count", ":full_name", ":7", ":8"));
   }
 
   @Test
@@ -73,7 +78,7 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).isEqualTo(String.format(queryFormat, "1", "2", "100", "'example'", "10", "5"));
+    assertThat(sql).isEqualTo(String.format(queryFormat, "'%John%'", "'Jane%'", "1", "2", "100", "'example'", "10", "5"));
   }
 
   @Test
@@ -92,7 +97,7 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).startsWith("select id as `a.id`, full_name as `a.full_name` from example where (`a.id`");
+    assertThat(sql).startsWith("select id as `a.id`, full_name as `a.full_name` from example where (`a.comments` not like '%John%' escape '!' and `a.comments` not like 'Jane%' escape '!' and `a.id`");
   }
 
   @Test
@@ -102,7 +107,7 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).startsWith("select `example`.`id`, `example`.`full_name` from example where (`example`.`id`");
+    assertThat(sql).startsWith("select `example`.`id`, `example`.`full_name` from example where (`example`.`comments` not like '%John%' escape '!' and `example`.`comments` not like 'Jane%' escape '!' and `example`.`id`");
   }
 
   @Test
@@ -112,7 +117,7 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).isEqualTo("select count(*) from example where (`id` in (?, ?) and `count` > ? and `full_name` = ?)");
+    assertThat(sql).isEqualTo("select count(*) from example where (`comments` not like ? escape '!' and `comments` not like ? escape '!' and `id` in (?, ?) and `count` > ? and `full_name` = ?)");
   }
 
   @Test
@@ -204,8 +209,34 @@ public class SelectBuilderTest {
     assertThat(sql).contains("select `id`, `count`, IF(count > 0, 'true', 'false') as `is_positive` from example");
   }
 
+  @Test
+  public void withJoinAndOrderingByTableField() {
+    query.put("order", "fullName");
+    selectBuilder = parser.newSelectBuilder(query);
+
+    selectBuilder.withJoinCondition(DSL.table("other_table"),
+        DSL.field("example.full_name").eq(DSL.field("other_table.full_name")));
+
+    String sql = selectBuilder.build().toString();
+    assertThat(sql).contains("order by `example`.`full_name` asc");
+  }
+
+  @Test
+  public void withJoinAndOrderingByGeneratedField() {
+    query.put("order", "-name_length");
+    selectBuilder = parser.newSelectBuilder(query);
+
+    selectBuilder.withAdditionalFields(DSL.field("LENGTH(name)").as("name_length"));
+    selectBuilder.withJoinCondition(DSL.table("other_table"),
+        DSL.field("example.full_name").eq(DSL.field("other_table.full_name")));
+
+    String sql = selectBuilder.build().toString();
+    assertThat(sql).contains("order by `name_length` desc");
+
+  }
+
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
-  @RosettaNaming(LowerCaseWithUnderscoresStrategy.class)
+  @RosettaNaming(SnakeCaseStrategy.class)
   public static class Spec implements QuerySpec {
 
     @FilterBy({
@@ -217,11 +248,19 @@ public class SelectBuilderTest {
     @OrderBy
     Long count;
 
+    @OrderBy(isGenerated = true)
+    Integer nameLength;
+
     @FilterBy(Equal.class)
     @OrderBy
     String fullName;
 
     boolean secret;
+
+    @FilterBy({
+        Contains.class, NotLike.class
+    })
+    String comments;
 
     @Override
     public String tableName() {
@@ -260,6 +299,21 @@ public class SelectBuilderTest {
       this.secret = secret;
     }
 
+    public Integer getNameLength() {
+      return nameLength;
+    }
+
+    public void setNameLength(Integer nameLength) {
+      this.nameLength = nameLength;
+    }
+
+    public String getComments() {
+      return comments;
+    }
+
+    public void setComments(String comments) {
+      this.comments = comments;
+    }
   }
 
 }

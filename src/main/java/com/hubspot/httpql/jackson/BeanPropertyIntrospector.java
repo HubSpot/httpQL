@@ -1,7 +1,6 @@
 package com.hubspot.httpql.jackson;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -67,20 +66,6 @@ public class BeanPropertyIntrospector {
     }
 
     return fieldType;
-  }
-
-  public static Type getGenericType(BeanPropertyDefinition definition) {
-    Type genericType = null;
-
-    if (definition.hasField()) {
-      genericType = definition.getField().getGenericType();
-    } else if (definition.hasGetter()) {
-      genericType = definition.getGetter().getGenericReturnType();
-    } else if (definition.hasSetter()) {
-      genericType = definition.getSetter().getGenericParameterType(0);
-    }
-
-    return genericType;
   }
 
   public static boolean hasAnnotation(BeanPropertyDefinition definition, Class<? extends Annotation> type) {

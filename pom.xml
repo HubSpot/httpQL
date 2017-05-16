@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>12.5</version>
+    <version>15.11</version>
   </parent>
 
   <groupId>com.hubspot.httpql</groupId>
@@ -25,7 +25,10 @@
     <developer>
       <id>jaredstehler</id>
       <name>Jared Stehler</name>
-      <email>jstehler@hubspot.com</email>
+    </developer>
+    <developer>
+      <name>Nate Belisle</name>
+      <email>nbelisle11@gmail.com</email>
     </developer>
   </developers>
 

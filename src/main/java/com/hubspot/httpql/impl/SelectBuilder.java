@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -25,9 +26,12 @@ import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 
+import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.hubspot.httpql.FieldFactory;
+import com.hubspot.httpql.MetaQuerySpec;
 import com.hubspot.httpql.ParsedQuery;
 import com.hubspot.httpql.QuerySpec;
+import com.hubspot.httpql.ann.OrderBy;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.JoinFilter;
 
@@ -43,7 +47,7 @@ public class SelectBuilder<T extends QuerySpec> {
   private final List<AdditionalCondition> additionalConditions = new ArrayList<>();
   private final List<JoinCondition> joinConditions = new ArrayList<>();
   private final List<Field<?>> groupByFields = new ArrayList<>();
-  private final DefaultMetaQuerySpec<T> meta;
+  private final MetaQuerySpec<T> meta;
   private final ParsedQuery<T> sourceQuery;
 
   private FieldFactory factory = new DefaultFieldFactory();
@@ -54,9 +58,19 @@ public class SelectBuilder<T extends QuerySpec> {
   private boolean includeConstraints = true;
   private boolean asCount = false;
 
-  private SelectBuilder(ParsedQuery<T> parsed, DefaultMetaQuerySpec<T> context) {
+  private SelectBuilder(ParsedQuery<T> parsed, MetaQuerySpec<T> context) {
     this.sourceQuery = parsed;
     this.meta = context;
+
+    for (BoundFilterEntry<T> bfe : sourceQuery.getBoundFilterEntries()) {
+      if (bfe.getFilter() instanceof JoinFilter) {
+        JoinFilter joinFilter = (JoinFilter) bfe.getFilter();
+        joinConditions.add(joinFilter.getJoin());
+        if (factory instanceof DefaultFieldFactory) {
+          factory = new TableQualifiedFieldFactory();
+        }
+      }
+    }
   }
 
   /**
@@ -202,7 +216,7 @@ public class SelectBuilder<T extends QuerySpec> {
   }
 
   public BuiltSelect<T> build() {
-    return new BuiltSelect<T>(buildSelect(), paramType);
+    return new BuiltSelect<>(buildSelect(), paramType);
   }
 
   private Table<?> getTable() {
@@ -218,6 +232,14 @@ public class SelectBuilder<T extends QuerySpec> {
     return includedFields;
   }
 
+  public <F> Field<F> getFieldByName(String name, Class<F> type) {
+    return factory.createField(name, type, getTable());
+  }
+
+  public String getFieldName(String name) {
+    return factory.getFieldName(name, getTable());
+  }
+
   private SelectFinalStep<?> buildSelect() {
     Select<?> select;
     SelectFromStep<?> selectFrom;
@@ -225,8 +247,6 @@ public class SelectBuilder<T extends QuerySpec> {
     settings.setRenderNameStyle(renderNameStyle);
     DSLContext ctx = DSL.using(dialect, settings);
     Table<?> table = getTable();
-
-    Collection<JoinCondition> joins = getJoinConditions();
 
     if (asCount) {
       if (includedFieldNames.size() > 0) {
@@ -242,7 +262,7 @@ public class SelectBuilder<T extends QuerySpec> {
       } else {
         String tableName = sourceQuery.getBoundQuery().tableName();
 
-        if (joins.size() > 0) {
+        if (joinConditions.size() > 0) {
           selectStep = ctx.selectDistinct(DSL.field(tableName + ".*"));
         } else {
           selectStep = ctx.select(DSL.field("*"));
@@ -255,7 +275,7 @@ public class SelectBuilder<T extends QuerySpec> {
       }
     }
     select = selectFrom.from(table);
-    for (JoinCondition joinCondition : joins) {
+    for (JoinCondition joinCondition : joinConditions) {
       if (joinCondition.isLeftJoin()) {
         ((SelectJoinStep<?>) select).leftOuterJoin(joinCondition.getTable()).on(joinCondition.getCondition());
       } else {
@@ -298,39 +318,39 @@ public class SelectBuilder<T extends QuerySpec> {
     return conditions;
   }
 
-  public Collection<JoinCondition> getJoinConditions() {
-    Collection<JoinCondition> joins = new ArrayList<>();
-
-    for (BoundFilterEntry<T> bfe : sourceQuery.getBoundFilterEntries()) {
-      if (bfe.getFilter() instanceof JoinFilter) {
-        JoinFilter joinFilter = (JoinFilter) bfe.getFilter();
-        joins.add(joinFilter.getJoin());
-      }
-    }
-
-    joins.addAll(joinConditions);
-
-    return joins;
-  }
-
   public ParsedQuery<T> getSourceQuery() {
     return sourceQuery;
   }
 
-  public static <T extends QuerySpec> SelectBuilder<T> forParsedQuery(ParsedQuery<T> parsed, DefaultMetaQuerySpec<T> context) {
-    return new SelectBuilder<T>(parsed, context);
+  public static <T extends QuerySpec> SelectBuilder<T> forParsedQuery(ParsedQuery<T> parsed, MetaQuerySpec<T> context) {
+    return new SelectBuilder<>(parsed, context);
   }
 
   public static <T extends QuerySpec> SelectBuilder<T> forParsedQuery(ParsedQuery<T> parsed) {
-    return new SelectBuilder<T>(parsed, new DefaultMetaQuerySpec<T>(parsed.getQueryType()));
+    return new SelectBuilder<>(parsed, new DefaultMetaQuerySpec<>(parsed.getQueryType()));
   }
 
   public Collection<SortField<?>> orderingsToSortFields() {
     ArrayList<SortField<?>> sorts = new ArrayList<>(sourceQuery.getOrderings().size());
     for (Ordering order : sourceQuery.getOrderings()) {
-      sorts.add(factory.createField(order.getQueryName(), meta.getFieldType(order.getFieldName()), getTable()).sort(order.getOrder()));
+      sorts.add(getSortField(order).sort(order.getOrder()));
     }
     return sorts;
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private Field getSortField(Ordering order) {
+    Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
+    BeanPropertyDefinition bpd = fieldMap.get(order.getQueryName());
+    String fieldName = order.getQueryName();
+    Class fieldType = meta.getFieldType(order.getFieldName());
+    if (bpd.getField().getAnnotation(OrderBy.class).isGenerated()) {
+      // it's possible to sort by generated fields
+      // but we shouldn't qualify them with table name in the ORDER BY clause
+      return DSL.field(DSL.name(fieldName), fieldType);
+    } else {
+      return factory.createField(fieldName, fieldType, getTable());
+    }
   }
 
   public boolean containsSortField(String fieldName) {

@@ -39,7 +39,7 @@ public class Range extends FilterBase implements Filter {
       @Override
       public Condition getCondition(Collection<T> values) {
         List<Number> valueList = new ArrayList<Number>((Collection<? extends Number>) values);
-        Preconditions.checkArgument(valueList.size() == 2);
+        Preconditions.checkArgument(valueList.size() == 2, "Range filters require exactly 2 parameters");
 
         Collections.sort(valueList, NUMBER_COMPARATOR);
         return field.between((T) valueList.get(0), (T) valueList.get(1));

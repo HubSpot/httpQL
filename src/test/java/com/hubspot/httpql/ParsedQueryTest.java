@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.base.Enums;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -17,10 +17,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.OrderBy;
+import com.hubspot.httpql.filter.Contains;
 import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.GreaterThan;
 import com.hubspot.httpql.filter.In;
 import com.hubspot.httpql.filter.NotIn;
+import com.hubspot.httpql.filter.NotLike;
 import com.hubspot.httpql.impl.DefaultFieldFactory;
 import com.hubspot.httpql.impl.Ordering;
 import com.hubspot.httpql.impl.QueryParser;
@@ -142,6 +144,17 @@ public class ParsedQueryTest {
   }
 
   @Test
+  public void addNotLikeFilter() {
+    query.put("count__eq", "11");
+    ParsedQuery<Spec> parsed = parser.parse(query);
+
+    parsed.addFilter("comments", NotLike.class, Lists.newArrayList("%John%", "Jane%"));
+
+    assertThat(parsed.getBoundFilterEntries()).hasSize(2);
+    assertThat(parsed.hasFilter("comments"));
+  }
+
+  @Test
   public void itaddsOrderBy() {
     query.put("order", "-count");
     ParsedQuery<Spec> parsed = parser.parse(query);
@@ -195,7 +208,9 @@ public class ParsedQueryTest {
   }
 
   public enum SpecEnum {
-    TEST_ONE, TEST_TWO, TEST_THREE;
+    TEST_ONE,
+    TEST_TWO,
+    TEST_THREE;
 
     @Override
     public String toString() {
@@ -218,7 +233,7 @@ public class ParsedQueryTest {
   }
 
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
-  @RosettaNaming(LowerCaseWithUnderscoresStrategy.class)
+  @RosettaNaming(SnakeCaseStrategy.class)
   public static class Spec extends SpecParent implements QuerySpec {
 
     @OrderBy
@@ -236,7 +251,7 @@ public class ParsedQueryTest {
     boolean secret;
 
     @FilterBy(value = {
-       In.class, NotIn.class
+        In.class, NotIn.class
     })
     private SpecEnum specEnum;
 
@@ -268,6 +283,11 @@ public class ParsedQueryTest {
       return secret;
     }
 
+    @FilterBy({
+        Contains.class, NotLike.class
+    })
+    String comments;
+
     /**
      * @param secret
      *          the secret to set
@@ -290,6 +310,14 @@ public class ParsedQueryTest {
 
     public void setSpecEnum(SpecEnum specEnum) {
       this.specEnum = specEnum;
+    }
+
+    public String getComments() {
+      return comments;
+    }
+
+    public void setComments(String comments) {
+      this.comments = comments;
     }
   }
 

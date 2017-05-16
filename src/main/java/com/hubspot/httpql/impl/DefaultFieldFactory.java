@@ -21,6 +21,11 @@ public class DefaultFieldFactory implements FieldFactory {
   }
 
   @Override
+  public String getFieldName(String name, Table<?> table) {
+    return DSL.field(DSL.name(name)).toString();
+  }
+
+  @Override
   public Optional<String> tableAlias(String name) {
     return Optional.empty();
   }

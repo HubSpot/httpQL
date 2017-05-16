@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Throwables;
@@ -13,6 +14,7 @@ import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.OrderBy;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
+@SuppressWarnings("deprecation")
 public class DefaultMetaUtils {
   @Nullable
   public static OrderBy findOrderBy(BeanPropertyDefinition prop) {
@@ -56,7 +58,10 @@ public class DefaultMetaUtils {
 
   public static String convertToSnakeCaseIfSupported(String name, Class<?> specType) {
     RosettaNaming rosettaNaming = getAnnotation(specType, RosettaNaming.class);
-    boolean snakeCasing = rosettaNaming != null && rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class);
+
+    boolean snakeCasing = rosettaNaming != null &&
+        (rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class) ||
+            rosettaNaming.value().equals(SnakeCaseStrategy.class));
 
     if (snakeCasing && !name.contains("_")) {
       return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);

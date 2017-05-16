@@ -1,6 +1,6 @@
 package com.hubspot.httpql.model;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.hubspot.httpql.QueryConstraints;
 import com.hubspot.httpql.QuerySpec;
 import com.hubspot.httpql.ann.FilterBy;
@@ -9,7 +9,7 @@ import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.In;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
-@RosettaNaming(LowerCaseWithUnderscoresStrategy.class)
+@RosettaNaming(SnakeCaseStrategy.class)
 @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 1000)
 public class EntityWithJoin implements QuerySpec {
 

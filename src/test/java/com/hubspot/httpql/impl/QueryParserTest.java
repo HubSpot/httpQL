@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -125,22 +125,22 @@ public class QueryParserTest {
 
   @Test
   public void itGetsLimitAndOffset() {
-    Optional<Integer> limit = parser.getLimit("20");
+    Optional<Integer> limit = parser.getLimit(Optional.of(20));
     assertThat(limit.get()).isEqualTo(20);
-    Optional<Integer> offset = parser.getOffset("10");
+    Optional<Integer> offset = parser.getOffset(Optional.of(10));
     assertThat(offset.get()).isEqualTo(10);
   }
 
   @Test
   public void itUsesDefaultsWhenHigherThanMaxValues() {
-    Optional<Integer> limit = parser.getLimit("1000");
+    Optional<Integer> limit = parser.getLimit(Optional.of(1000));
     assertThat(limit.get()).isEqualTo(100);
-    Optional<Integer> offset = parser.getOffset("200");
+    Optional<Integer> offset = parser.getOffset(Optional.of(200));
     assertThat(offset.get()).isEqualTo(100);
   }
 
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
-  @RosettaNaming(LowerCaseWithUnderscoresStrategy.class)
+  @RosettaNaming(SnakeCaseStrategy.class)
   public static class Spec implements QuerySpec {
 
     @FilterBy({
