@@ -1,12 +1,14 @@
 package com.hubspot.httpql.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-import javax.ws.rs.core.MultivaluedMap;
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -20,7 +22,6 @@ import com.hubspot.httpql.Filter;
 import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.filter.Equal;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 public class UriParamParser {
 
@@ -48,13 +49,9 @@ public class UriParamParser {
     return ignoredParams;
   }
 
-  public MultivaluedMap<String, String> multimapToMultivaluedMap(Multimap<String, String> map) {
-
-    MultivaluedMap<String, String> result = new MultivaluedMapImpl();
-    for (Map.Entry<String, String> entry : map.entries()) {
-      result.add(entry.getKey(), entry.getValue());
-    }
-
+  public Map<String, List<String>> multimapToMultivaluedMap(Multimap<String, String> map) {
+    Map<String, List<String>> result = new HashMap<>();
+    map.asMap().forEach((key, value) -> result.put(key, new ArrayList<>(value)));
     return result;
   }
 
@@ -63,28 +60,28 @@ public class UriParamParser {
   }
 
   @SuppressWarnings("rawtypes")
-  public ParsedUriParams parseUriParams(MultivaluedMap<String, String> uriParams) {
+  public ParsedUriParams parseUriParams(Map<String, List<String>> uriParams) {
 
     final ParsedUriParams result = new ParsedUriParams();
 
     // make a copy so we can modify it
-    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    Map<String, List<String>> params = new HashMap<>();
     for (Map.Entry<String, List<String>> entry : uriParams.entrySet()) {
       if (!ignoredParams.contains(entry.getKey().toLowerCase())) {
         params.put(entry.getKey(), entry.getValue());
       }
     }
 
-    result.setIncludeDeleted(BooleanUtils.toBoolean(params.getFirst("includeDeleted")));
+    result.setIncludeDeleted(BooleanUtils.toBoolean(getFirst(params, "includeDeleted")));
     params.remove("includeDeleted");
 
-    final int limit = NumberUtils.toInt(params.getFirst("limit"), 0);
+    final int limit = NumberUtils.toInt(getFirst(params, "limit"), 0);
     if (limit != 0) {
       result.setLimit(limit);
     }
     params.remove("limit");
 
-    final int offset = NumberUtils.toInt(params.getFirst("offset"), 0);
+    final int offset = NumberUtils.toInt(getFirst(params, "offset"), 0);
     if (offset != 0) {
       result.setOffset(offset);
     }
@@ -158,4 +155,11 @@ public class UriParamParser {
     }
   }
 
+  @Nullable
+  private static String getFirst(Map<String, List<String>> map, String key) {
+    return Optional.ofNullable(map.get(key))
+        .filter(list -> !list.isEmpty())
+        .map(list -> list.get(0))
+        .orElse(null);
+  }
 }

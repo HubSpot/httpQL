@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
@@ -43,7 +42,6 @@ import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
 import com.hubspot.rosetta.Rosetta;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
  * Primary entry point into httpQL.
@@ -103,6 +101,10 @@ public class QueryParser<T extends QuerySpec> {
     return new Builder<>(spec);
   }
 
+  /**
+   * @deprecated Call {@code parse(uriInfo.getQueryParameters())} instead.
+   */
+  @Deprecated
   public ParsedQuery<T> parse(UriInfo uriInfo) {
     return parse(uriInfo.getQueryParameters());
   }
@@ -112,10 +114,10 @@ public class QueryParser<T extends QuerySpec> {
   }
 
   public ParsedQuery<T> createEmptyQuery() {
-    return parse(new MultivaluedMapImpl());
+    return parse(new HashMap<>());
   }
 
-  public ParsedQuery<T> parse(MultivaluedMap<String, String> uriParams) {
+  public ParsedQuery<T> parse(Map<String, List<String>> uriParams) {
     final Map<String, Object> fieldValues = new HashMap<>();
     final List<BoundFilterEntry<T>> boundFilterEntries = new ArrayList<>();
 
@@ -206,15 +208,19 @@ public class QueryParser<T extends QuerySpec> {
     }
   }
 
-  public SelectBuilder<T> newSelectBuilder(UriInfo query) {
-    return SelectBuilder.forParsedQuery(parse(query), meta);
+  /**
+   * @deprecated Call {@code newSelectBuilder(uriInfo.getQueryParameters())} instead.
+   */
+  @Deprecated
+  public SelectBuilder<T> newSelectBuilder(UriInfo uriInfo) {
+    return SelectBuilder.forParsedQuery(parse(uriInfo), meta);
   }
 
   public SelectBuilder<T> newSelectBuilder(Multimap<String, String> query) {
     return SelectBuilder.forParsedQuery(parse(query), meta);
   }
 
-  public SelectBuilder<T> newSelectBuilder(MultivaluedMap<String, String> query) {
+  public SelectBuilder<T> newSelectBuilder(Map<String, List<String>> query) {
     return SelectBuilder.forParsedQuery(parse(query), meta);
   }
 

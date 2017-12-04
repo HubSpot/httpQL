@@ -2,12 +2,14 @@ package com.hubspot.httpql.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 public class UriParamParserTest {
   UriParamParser uriParamParser;
@@ -20,13 +22,12 @@ public class UriParamParserTest {
   @Test
   public void itRemovesReservedParams() {
 
-    MultivaluedMap<String, String> query = new MultivaluedMapImpl();
-    query.add("offset", "1");
-    query.add("limit", "1");
-    query.add("includeDeleted", "1");
-    query.add("order", "1");
-    query.add("orderBy", "1");
-    query.add("orderBy", "2");
+    Map<String, List<String>> query = new HashMap<>();
+    query.put("offset", Lists.newArrayList("1"));
+    query.put("limit", Lists.newArrayList("1"));
+    query.put("includeDeleted", Lists.newArrayList("1"));
+    query.put("order", Lists.newArrayList("1"));
+    query.put("orderBy", Lists.newArrayList("1", "2"));
 
     final ParsedUriParams parsedUriParams = uriParamParser.parseUriParams(query);
     assertThat(parsedUriParams.getOrderBys()).hasSize(3);
@@ -35,8 +36,7 @@ public class UriParamParserTest {
 
   @Test
   public void itPreservesCommasInEqValues() {
-    MultivaluedMap<String, String> query = new MultivaluedMapImpl();
-    query.add("name", "1,2,3");
+    Map<String, List<String>> query = Collections.singletonMap("name", Collections.singletonList("1,2,3"));
 
     final ParsedUriParams parsedUriParams = uriParamParser.parseUriParams(query);
     assertThat(parsedUriParams.getFieldFilters().get(0).getValue()).isEqualTo("1,2,3");
