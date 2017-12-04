@@ -12,8 +12,6 @@
 
 .. java:import:: java.util Set
 
-.. java:import:: javax.ws.rs.core UriInfo
-
 .. java:import:: com.fasterxml.jackson.databind.introspect BeanPropertyDefinition
 
 .. java:import:: com.google.common.base Optional
@@ -123,12 +121,6 @@ newBuilder
 newSelectBuilder
 ^^^^^^^^^^^^^^^^
 
-.. java:method:: public SelectBuilder<T> newSelectBuilder(UriInfo query)
-   :outertype: QueryParser
-
-newSelectBuilder
-^^^^^^^^^^^^^^^^
-
 .. java:method:: public SelectBuilder<T> newSelectBuilder(Multimap<String, String> query)
    :outertype: QueryParser
 
@@ -136,12 +128,6 @@ newSelectBuilder
 ^^^^^^^^^^^^^^^^
 
 .. java:method:: public SelectBuilder<T> newSelectBuilder(Map<String, List<String>> query)
-   :outertype: QueryParser
-
-parse
-^^^^^
-
-.. java:method:: public ParsedQuery<T> parse(UriInfo uriInfo)
    :outertype: QueryParser
 
 parse

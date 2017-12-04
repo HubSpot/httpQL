@@ -23,7 +23,7 @@ public class BindQueryInjectableProvider implements InjectableProvider<BindQuery
     return new AbstractHttpContextInjectable<ParsedQuery<? extends QuerySpec>>() {
       @Override
       public ParsedQuery<? extends QuerySpec> getValue(HttpContext context) {
-        return QueryParser.newBuilder(a.value()).build().parse(context.getUriInfo());
+        return QueryParser.newBuilder(a.value()).build().parse(context.getUriInfo().getQueryParameters());
       }
     };
   }

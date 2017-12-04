@@ -12,8 +12,6 @@
 
 .. java:import:: java.util Set
 
-.. java:import:: javax.ws.rs.core UriInfo
-
 .. java:import:: com.fasterxml.jackson.databind.introspect BeanPropertyDefinition
 
 .. java:import:: com.google.common.base Optional
