@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jooq.impl.DSL;
@@ -70,16 +72,16 @@ public class UriParamParser {
       }
     }
 
-    result.setIncludeDeleted(BooleanUtils.toBoolean(getFirst(params, "includeDeleted").orElse(null)));
+    result.setIncludeDeleted(BooleanUtils.toBoolean(getFirst(params, "includeDeleted")));
     params.remove("includeDeleted");
 
-    final int limit = NumberUtils.toInt(getFirst(params, "limit").orElse(null), 0);
+    final int limit = NumberUtils.toInt(getFirst(params, "limit"), 0);
     if (limit != 0) {
       result.setLimit(limit);
     }
     params.remove("limit");
 
-    final int offset = NumberUtils.toInt(getFirst(params, "offset").orElse(null), 0);
+    final int offset = NumberUtils.toInt(getFirst(params, "offset"), 0);
     if (offset != 0) {
       result.setOffset(offset);
     }
@@ -153,9 +155,11 @@ public class UriParamParser {
     }
   }
 
-  private static Optional<String> getFirst(Map<String, List<String>> map, String key) {
+  @Nullable
+  private static String getFirst(Map<String, List<String>> map, String key) {
     return Optional.ofNullable(map.get(key))
         .filter(list -> !list.isEmpty())
-        .map(list -> list.get(0));
+        .map(list -> list.get(0))
+        .orElse(null);
   }
 }
