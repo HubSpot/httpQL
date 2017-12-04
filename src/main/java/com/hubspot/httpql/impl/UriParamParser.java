@@ -64,7 +64,11 @@ public class UriParamParser {
 
     // make a copy so we can modify it
     Map<String, List<String>> params = new HashMap<>();
-    uriParams.forEach((key, value) -> params.put(key, new ArrayList<>(value)));
+    for (Map.Entry<String, List<String>> entry : uriParams.entrySet()) {
+      if (!ignoredParams.contains(entry.getKey().toLowerCase())) {
+        params.put(entry.getKey(), entry.getValue());
+      }
+    }
 
     result.setIncludeDeleted(BooleanUtils.toBoolean(getFirst(params, "includeDeleted").orElse(null)));
     params.remove("includeDeleted");
