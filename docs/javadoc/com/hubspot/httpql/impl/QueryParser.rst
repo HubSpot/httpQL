@@ -12,8 +12,6 @@
 
 .. java:import:: java.util Set
 
-.. java:import:: javax.ws.rs.core MultivaluedMap
-
 .. java:import:: javax.ws.rs.core UriInfo
 
 .. java:import:: com.fasterxml.jackson.databind.introspect BeanPropertyDefinition
@@ -67,8 +65,6 @@
 .. java:import:: com.hubspot.rosetta RosettaMapperFactory
 
 .. java:import:: com.hubspot.rosetta Tablet
-
-.. java:import:: com.sun.jersey.core.util MultivaluedMapImpl
 
 QueryParser
 ===========
@@ -139,7 +135,7 @@ newSelectBuilder
 newSelectBuilder
 ^^^^^^^^^^^^^^^^
 
-.. java:method:: public SelectBuilder<T> newSelectBuilder(MultivaluedMap<String, String> query)
+.. java:method:: public SelectBuilder<T> newSelectBuilder(Map<String, List<String>> query)
    :outertype: QueryParser
 
 parse
@@ -157,7 +153,7 @@ parse
 parse
 ^^^^^
 
-.. java:method:: public ParsedQuery<T> parse(MultivaluedMap<String, String> uriParams)
+.. java:method:: public ParsedQuery<T> parse(Map<String, List<String>> uriParams)
    :outertype: QueryParser
 
 setConstraints
