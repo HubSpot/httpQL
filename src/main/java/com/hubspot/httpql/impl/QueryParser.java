@@ -11,8 +11,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.UriInfo;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,14 +97,6 @@ public class QueryParser<T extends QuerySpec> {
 
   public static <T extends QuerySpec> Builder<T> newBuilder(Class<T> spec) {
     return new Builder<>(spec);
-  }
-
-  /**
-   * @deprecated Call {@code parse(uriInfo.getQueryParameters())} instead.
-   */
-  @Deprecated
-  public ParsedQuery<T> parse(UriInfo uriInfo) {
-    return parse(uriInfo.getQueryParameters());
   }
 
   public ParsedQuery<T> parse(Multimap<String, String> uriParams) {
@@ -206,14 +196,6 @@ public class QueryParser<T extends QuerySpec> {
       }
       throw e;
     }
-  }
-
-  /**
-   * @deprecated Call {@code newSelectBuilder(uriInfo.getQueryParameters())} instead.
-   */
-  @Deprecated
-  public SelectBuilder<T> newSelectBuilder(UriInfo uriInfo) {
-    return SelectBuilder.forParsedQuery(parse(uriInfo), meta);
   }
 
   public SelectBuilder<T> newSelectBuilder(Multimap<String, String> query) {
