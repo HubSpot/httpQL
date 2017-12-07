@@ -21,7 +21,7 @@
 BindQueryInjectableProvider
 ===========================
 
-.. java:package:: com.hubspot.httpql.jersey
+.. java:package:: com.hubspot.httpql.jersey1
    :noindex:
 
 .. java:type:: public class BindQueryInjectableProvider implements InjectableProvider<BindQuery, Parameter>

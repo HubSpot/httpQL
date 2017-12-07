@@ -10,5 +10,5 @@ Javadoc
    com/hubspot/httpql/filter/package-index
    com/hubspot/httpql/impl/package-index
    com/hubspot/httpql/internal/package-index
-   com/hubspot/httpql/jersey/package-index
+   com/hubspot/httpql/jersey1/package-index
 
