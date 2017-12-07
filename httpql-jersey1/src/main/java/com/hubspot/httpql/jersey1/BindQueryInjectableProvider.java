@@ -1,4 +1,4 @@
-package com.hubspot.httpql.jersey;
+package com.hubspot.httpql.jersey1;
 
 import com.hubspot.httpql.ParsedQuery;
 import com.hubspot.httpql.QuerySpec;
@@ -11,10 +11,6 @@ import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.InjectableProvider;
 
-/**
- * @deprecated Use {@code com.hubspot.httpql.jersey1.BindQueryInjectableProvider} from httpql-jersey1 instead.
- */
-@Deprecated
 public class BindQueryInjectableProvider implements InjectableProvider<BindQuery, Parameter> {
 
   @Override
