@@ -1,7 +1,7 @@
-com.hubspot.httpql.jersey
+com.hubspot.httpql.jersey1
 =========================
 
-.. java:package:: com.hubspot.httpql.jersey
+.. java:package:: com.hubspot.httpql.jersey1
 
 .. toctree::
    :maxdepth: 1

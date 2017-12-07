@@ -11,7 +11,7 @@
 BindQuery
 =========
 
-.. java:package:: com.hubspot.httpql.jersey
+.. java:package:: com.hubspot.httpql.jersey1
    :noindex:
 
 .. java:type:: @Retention @Target public @interface BindQuery
