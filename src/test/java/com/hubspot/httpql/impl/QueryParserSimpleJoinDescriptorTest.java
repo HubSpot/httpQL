@@ -10,27 +10,27 @@ import org.junit.Test;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.hubspot.httpql.ParsedQuery;
-import com.hubspot.httpql.model.EntitySimpleWithJoin;
+import com.hubspot.httpql.model.EntityWithSimpleJoinDescriptor;
 
-public class QueryParserJoinTest {
+public class QueryParserSimpleJoinDescriptorTest {
 
   private Multimap<String, String> query;
-  private QueryParser<EntitySimpleWithJoin> parser;
+  private QueryParser<EntityWithSimpleJoinDescriptor> parser;
 
   @Before
   public void setup() {
     query = ArrayListMultimap.create();
-    parser = QueryParser.newBuilder(EntitySimpleWithJoin.class).build();
+    parser = QueryParser.newBuilder(EntityWithSimpleJoinDescriptor.class).build();
   }
 
   @Test
   public void joinWithSingleBoundValue() {
     query.put("topicId__eq", "123");
 
-    ParsedQuery<EntitySimpleWithJoin> parsedQuery = parser.parse(query);
+    ParsedQuery<EntityWithSimpleJoinDescriptor> parsedQuery = parser.parse(query);
     assertThat(parsedQuery.getBoundQuery().getTopicId()).isEqualTo(123L);
 
-    SelectBuilder<EntitySimpleWithJoin> selectBuilder = SelectBuilder.forParsedQuery(parsedQuery);
+    SelectBuilder<EntityWithSimpleJoinDescriptor> selectBuilder = SelectBuilder.forParsedQuery(parsedQuery);
 
     SelectFinalStep<?> sql = selectBuilder.build().getRawSelect();
 
@@ -45,9 +45,9 @@ public class QueryParserJoinTest {
     query.put("topicId__in", "123");
     query.put("topicId__in", "456");
 
-    ParsedQuery<EntitySimpleWithJoin> parsedQuery = parser.parse(query);
+    ParsedQuery<EntityWithSimpleJoinDescriptor> parsedQuery = parser.parse(query);
 
-    SelectBuilder<EntitySimpleWithJoin> selectBuilder = SelectBuilder.forParsedQuery(parsedQuery);
+    SelectBuilder<EntityWithSimpleJoinDescriptor> selectBuilder = SelectBuilder.forParsedQuery(parsedQuery);
 
     SelectFinalStep<?> sql = selectBuilder.build().getRawSelect();
 

@@ -10,7 +10,9 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.Throwables;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.FilterJoin;
+import com.hubspot.httpql.ann.FilterJoinByDescriptor;
 import com.hubspot.httpql.ann.OrderBy;
+import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
 public class DefaultMetaUtils {
@@ -27,6 +29,24 @@ public class DefaultMetaUtils {
   @Nullable
   public static FilterJoin findFilterJoin(BeanPropertyDefinition prop) {
     return findAnnotation(prop, FilterJoin.class);
+  }
+
+  @Nullable
+  public static FilterJoinByDescriptor findFilterJoinByDescriptor(BeanPropertyDefinition prop) {
+    return findAnnotation(prop, FilterJoinByDescriptor.class);
+  }
+
+  @Nullable
+  public static JoinDescriptor findJoinDescriptor(BeanPropertyDefinition prop) {
+    try {
+      FilterJoinByDescriptor filterJoinByDescriptor = findFilterJoinByDescriptor(prop);
+      if (filterJoinByDescriptor == null) {
+        return null;
+      }
+      return findFilterJoinByDescriptor(prop).value().newInstance();
+    } catch (InstantiationException | IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static <T extends Annotation> T findAnnotation(BeanPropertyDefinition prop, Class<T> type) {
