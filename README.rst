@@ -35,3 +35,10 @@ Sound cool? `Get reading, then!`_
 .. _Rosetta: https://github.com/HubSpot/Rosetta
 .. _Jackson: http://wiki.fasterxml.com/JacksonHome
 .. _Get reading, then!: http://github.hubspot.com/httpQL/
+
+Class Loader StackOverflow Issue
+-------
+* Sometimes when including ``httpQL`` in your project you will run into intermittent issues where ``java.lang.ClassLoader.loadClass`` will throw a ``StackOverflow`` error. This is because your thread runs out of stack when trying to include all of the necessary classes. You can fix this by increasing your thread stack size with this deploy config option: ``JVM_STACK_SIZE: 384k``. It is only recommended to do this if you run into this issue.
+
+.. |BlazarShield| image:: https://private.hubapi.com/blazar/v2/branches/state/9954/shield
+.. _BlazarShield: https://private.hubteam.com/blazar/builds/branch/9954

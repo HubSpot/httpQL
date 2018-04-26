@@ -12,10 +12,6 @@
 
 .. java:import:: java.util Set
 
-.. java:import:: javax.ws.rs.core MultivaluedMap
-
-.. java:import:: javax.ws.rs.core UriInfo
-
 .. java:import:: com.fasterxml.jackson.databind.introspect BeanPropertyDefinition
 
 .. java:import:: com.google.common.base Optional
@@ -67,8 +63,6 @@
 .. java:import:: com.hubspot.rosetta RosettaMapperFactory
 
 .. java:import:: com.hubspot.rosetta Tablet
-
-.. java:import:: com.sun.jersey.core.util MultivaluedMapImpl
 
 QueryParser.Builder
 ===================
