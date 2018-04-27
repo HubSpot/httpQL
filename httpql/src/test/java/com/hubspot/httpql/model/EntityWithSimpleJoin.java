@@ -11,7 +11,7 @@ import com.hubspot.rosetta.annotations.RosettaNaming;
 
 @RosettaNaming(LowerCaseWithUnderscoresStrategy.class)
 @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 1000)
-public class EntitySimpleWithJoin implements QuerySpec {
+public class EntityWithSimpleJoin implements QuerySpec {
 
   @FilterBy(Equal.class)
   private Long id;
