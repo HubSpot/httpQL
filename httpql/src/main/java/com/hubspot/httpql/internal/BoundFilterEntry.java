@@ -18,7 +18,7 @@ import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.httpql.impl.DefaultFieldFactory;
 
-public class BoundFilterEntry<T extends QuerySpec>extends FilterEntry {
+public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry {
 
   private final BeanPropertyDefinition prop;
   private final MetaQuerySpec<T> meta;
