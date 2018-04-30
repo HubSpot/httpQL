@@ -17,6 +17,7 @@ import com.hubspot.httpql.MetaQuerySpec;
 import com.hubspot.httpql.QuerySpec;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.FilterJoin;
+import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.JoinFilter;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
@@ -94,7 +95,7 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
   @Override
   @SafeVarargs
   public final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> tableFor(BeanPropertyDefinition field,
-      Class<? extends Filter>... filters) {
+                                                                                   Class<? extends Filter>... filters) {
 
     final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> table = HashBasedTable.create();
 
@@ -105,6 +106,11 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
       join = new JoinCondition(DSL.table(DSL.name(filterJoin.table())),
           DSL.field(DSL.name(instance.tableName(), filterJoin.on()))
               .eq(DSL.field(DSL.name(filterJoin.table(), filterJoin.eq()))));
+    } else {
+      JoinDescriptor joinDescriptor = DefaultMetaUtils.findJoinDescriptor(field);
+      if (joinDescriptor != null) {
+        join = joinDescriptor.getJoinCondition(instance);
+      }
     }
 
     for (Class<? extends Filter> filterType : filters) {
@@ -115,7 +121,7 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
         filter = new JoinFilter(filter, join);
       }
 
-      BoundFilterEntry<T> fe = new BoundFilterEntry<T>(filter, field, this);
+      BoundFilterEntry<T> fe = new BoundFilterEntry<>(filter, field, this);
 
       for (String filterName : filter.names()) {
         table.put(fe, filterName, field);

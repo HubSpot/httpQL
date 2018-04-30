@@ -15,6 +15,7 @@ import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.QuerySpec;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.FilterJoin;
+import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.httpql.impl.DefaultFieldFactory;
 
 public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry {
@@ -64,8 +65,11 @@ public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry {
     Field<?> field;
 
     FilterJoin join = DefaultMetaUtils.findFilterJoin(prop);
+    JoinDescriptor joinDescriptor = DefaultMetaUtils.findJoinDescriptor(prop);
     if (join != null) {
       field = DSL.field(DSL.name(join.table(), getQueryName()));
+    } else if (joinDescriptor != null) {
+      field = joinDescriptor.getField(this);
     } else {
       field = meta.createField(getQueryName(), fieldFactory);
     }
