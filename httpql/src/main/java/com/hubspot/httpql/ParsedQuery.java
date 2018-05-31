@@ -12,7 +12,9 @@ import org.jooq.SortOrder;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.base.Strings;
+import com.google.common.collect.Table;
 import com.hubspot.httpql.ann.FilterBy;
+import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.error.UnknownFieldException;
 import com.hubspot.httpql.impl.Ordering;
 import com.hubspot.httpql.internal.BoundFilterEntry;
@@ -41,14 +43,14 @@ public class ParsedQuery<T extends QuerySpec> {
   private boolean includeDeleted;
 
   public ParsedQuery(
-      T boundQuerySpec,
-      Class<T> queryType,
-      List<BoundFilterEntry<T>> boundFilterEntries,
-      MetaQuerySpec<T> meta,
-      Optional<Integer> limit,
-      Optional<Integer> offset,
-      Collection<Ordering> orderings,
-      boolean includeDeleted) {
+                     T boundQuerySpec,
+                     Class<T> queryType,
+                     List<BoundFilterEntry<T>> boundFilterEntries,
+                     MetaQuerySpec<T> meta,
+                     Optional<Integer> limit,
+                     Optional<Integer> offset,
+                     Collection<Ordering> orderings,
+                     boolean includeDeleted) {
 
     this.boundQuerySpec = boundQuerySpec;
     this.queryType = queryType;
@@ -106,11 +108,14 @@ public class ParsedQuery<T extends QuerySpec> {
     // Filter can be null; we only want FilterEntry for name normalization
     Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
     FilterEntry filterEntry = new FilterEntry(filter, fieldName, this.getQueryType());
-    BeanPropertyDefinition filterProperty = getMetaData().getFilterTable().get(filterEntry, filter.names()[0]);
+    final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable = meta.getFilterTable();
+    BeanPropertyDefinition filterProperty = filterTable.get(filterEntry, filter.names()[0]);
     if (filterProperty == null) {
       throw new UnknownFieldException(String.format("No filter %s on field named '%s' exists.", filter.names()[0], fieldName));
     }
-    BoundFilterEntry<T> boundColumn = new BoundFilterEntry<T>(filterEntry, filterProperty, getMetaData());
+    BoundFilterEntry<T> boundColumn = filterTable.rowKeySet().stream()
+        .filter(bfe -> bfe.equals(filterEntry)).findFirst()
+        .orElseThrow(() -> new FilterViolation("Filter column " + filterEntry + " not found"));
     FilterBy ann = filterProperty.getPrimaryMember().getAnnotation(FilterBy.class);
     if (Strings.emptyToNull(ann.as()) != null) {
       boundColumn.setActualField(getMetaData().getFieldMap().get(ann.as()));
@@ -118,7 +123,7 @@ public class ParsedQuery<T extends QuerySpec> {
 
     if (boundColumn.isMultiValue()) {
       Collection<?> values = (Collection<?>) value;
-      boundColumn = new MultiValuedBoundFilterEntry<T>(boundColumn, values);
+      boundColumn = new MultiValuedBoundFilterEntry<>(boundColumn, values);
     } else {
       filterProperty.getSetter().setValue(getBoundQuery(), value);
     }
