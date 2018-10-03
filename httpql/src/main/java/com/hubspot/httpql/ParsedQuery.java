@@ -30,7 +30,7 @@ public class ParsedQuery<T extends QuerySpec> {
 
   private final Class<T> queryType;
 
-  private final List<BoundFilterEntry<T>> boundFilterEntries;
+  private final List<BoundFilterEntry<T>> combinedFilterEntry;
   private final T boundQuerySpec;
 
   private final MetaQuerySpec<T> meta;
@@ -54,7 +54,7 @@ public class ParsedQuery<T extends QuerySpec> {
 
     this.boundQuerySpec = boundQuerySpec;
     this.queryType = queryType;
-    this.boundFilterEntries = boundFilterEntries;
+    this.combinedFilterEntry = boundFilterEntries;
     this.meta = meta;
 
     this.limit = limit;
@@ -193,7 +193,7 @@ public class ParsedQuery<T extends QuerySpec> {
   public String getCacheKey() {
     List<Object> cacheKeyParts = new ArrayList<>();
 
-    for (BoundFilterEntry<T> bfe : boundFilterEntries) {
+    for (BoundFilterEntry<T> bfe : combinedFilterEntry) {
       cacheKeyParts.add(bfe.getFieldName());
       cacheKeyParts.add(bfe.getFilter().getClass().getSimpleName());
 
@@ -249,7 +249,7 @@ public class ParsedQuery<T extends QuerySpec> {
   }
 
   public List<BoundFilterEntry<T>> getBoundFilterEntries() {
-    return boundFilterEntries;
+    return combinedFilterEntry;
   }
 
   public Class<T> getQueryType() {

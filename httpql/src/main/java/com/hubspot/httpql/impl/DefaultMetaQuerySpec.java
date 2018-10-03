@@ -7,7 +7,6 @@ import org.jooq.Field;
 import org.jooq.impl.DSL;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.google.common.base.Throwables;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.hubspot.httpql.DefaultMetaUtils;
@@ -35,7 +34,7 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
     try {
       this.instance = specType.newInstance();
     } catch (InstantiationException | IllegalAccessException e) {
-      throw Throwables.propagate(e);
+      throw new RuntimeException(e);
     }
     buildMetaData();
   }

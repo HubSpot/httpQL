@@ -1,11 +1,14 @@
 package com.hubspot.httpql.internal;
 
+import java.util.Collection;
+
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.DefaultMetaUtils;
 import com.hubspot.httpql.FieldFactory;
@@ -18,7 +21,7 @@ import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.httpql.impl.DefaultFieldFactory;
 
-public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry {
+public class BoundFilterEntry<T extends QuerySpec>extends FilterEntry implements FilterEntryConditionCreator<T> {
 
   private final BeanPropertyDefinition prop;
   private final MetaQuerySpec<T> meta;
@@ -77,12 +80,18 @@ public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry {
     return getFilter().getConditionProvider(field);
   }
 
+  @Override
   public Condition getCondition(QuerySpec value, FieldFactory fieldFactory) {
     return getConditionProvider(fieldFactory).getCondition(getProperty().getGetter().getValue(value), getProperty().getName());
   }
 
   public void setActualField(BeanPropertyDefinition actualField) {
     this.actualField = actualField;
+  }
+
+  @Override
+  public Collection<BoundFilterEntry<T>> getFlattenedBoundFilterEntries() {
+    return ImmutableSet.of(this);
   }
 
 }

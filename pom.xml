@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>15.11</version>
+    <version>25.0</version>
   </parent>
 
   <groupId>com.hubspot.httpql</groupId>
@@ -13,31 +13,12 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <description>A library that exposes SELECT queries through HTTP query parameters.</description>
+
   <modules>
     <module>httpql</module>
     <module>httpql-jersey1</module>
   </modules>
-
-  <description>A library that exposes SELECT queries through HTTP query parameters.</description>
-  <url>https://github.com/HubSpot/httpQL</url>
-
-  <scm>
-    <connection>scm:git:git@github.com:HubSpot/httpQL.git</connection>
-    <developerConnection>scm:git:git@github.com:HubSpot/httpQL.git</developerConnection>
-    <url>git@github.com:HubSpot/httpQL.git</url>
-    <tag>HEAD</tag>
-  </scm>
-
-  <developers>
-    <developer>
-      <id>jaredstehler</id>
-      <name>Jared Stehler</name>
-    </developer>
-    <developer>
-      <name>Nate Belisle</name>
-      <email>nbelisle11@gmail.com</email>
-    </developer>
-  </developers>
 
   <properties>
     <project.build.targetJdk>1.8</project.build.targetJdk>
@@ -88,13 +69,32 @@
           </execution>
           <execution>
             <id>report</id>
-            <phase>test</phase>
             <goals>
               <goal>report</goal>
             </goals>
+            <phase>test</phase>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
+  <url>https://github.com/HubSpot/httpQL</url>
+
+  <developers>
+    <developer>
+      <id>jaredstehler</id>
+      <name>Jared Stehler</name>
+    </developer>
+    <developer>
+      <name>Nate Belisle</name>
+      <email>nbelisle11@gmail.com</email>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:HubSpot/httpQL.git</connection>
+    <developerConnection>scm:git:git@github.com:HubSpot/httpQL.git</developerConnection>
+    <url>git@github.com:HubSpot/httpQL.git</url>
+    <tag>HEAD</tag>
+  </scm>
 </project>
