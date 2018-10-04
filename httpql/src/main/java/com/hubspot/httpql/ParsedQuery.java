@@ -163,7 +163,11 @@ public class ParsedQuery<T extends QuerySpec> {
   }
 
   public BoundFilterEntry<T> getFirstFilterForFieldName(String fieldName) {
-    return combinedFilterEntry.removeFirstFilterForFieldName(fieldName).orElse(null);
+    return combinedFilterEntry.getFirstFilterForFieldName(fieldName).orElse(null);
+  }
+
+  public List<BoundFilterEntry<T>> getAllFiltersForFieldName(String fieldName) {
+    return combinedFilterEntry.getAllFiltersForFieldName(fieldName);
   }
 
   public void removeAllFilters() {

@@ -58,7 +58,7 @@ public class CombinedFilterEntry<T extends QuerySpec> implements FilterEntryCond
     return removedFromThis || removedFromChildren;
   }
 
-  public Optional<BoundFilterEntry<T>> removeFirstFilterForFieldName(String fieldName) {
+  public Optional<BoundFilterEntry<T>> getFirstFilterForFieldName(String fieldName) {
     Optional<BoundFilterEntry<T>> maybeBfe = conditionCreators.stream()
         .filter(cc -> cc instanceof BoundFilterEntry)
         .map(cc -> ((BoundFilterEntry<T>) cc))
@@ -66,7 +66,6 @@ public class CombinedFilterEntry<T extends QuerySpec> implements FilterEntryCond
         .findFirst();
 
     if (maybeBfe.isPresent()) {
-      conditionCreators.remove(maybeBfe.get());
       return maybeBfe;
     } else {
       List<CombinedFilterEntry<T>> combinedFilterEntries = conditionCreators.stream()
@@ -74,13 +73,28 @@ public class CombinedFilterEntry<T extends QuerySpec> implements FilterEntryCond
           .map(cc -> ((CombinedFilterEntry<T>) cc))
           .collect(Collectors.toList());
       for (CombinedFilterEntry<T> combinedFilterEntry : combinedFilterEntries) {
-        maybeBfe = combinedFilterEntry.removeFirstFilterForFieldName(fieldName);
+        maybeBfe = combinedFilterEntry.getFirstFilterForFieldName(fieldName);
         if (maybeBfe.isPresent()) {
           return maybeBfe;
         }
       }
     }
     return maybeBfe;
+  }
+
+  public List<BoundFilterEntry<T>> getAllFiltersForFieldName(String fieldName) {
+    List<BoundFilterEntry<T>> bfeList = conditionCreators.stream()
+        .filter(cc -> cc instanceof BoundFilterEntry)
+        .map(cc -> ((BoundFilterEntry<T>) cc))
+        .filter(bfe -> bfe.getQueryName().equals(fieldName))
+        .collect(Collectors.toList());
+
+    conditionCreators.stream()
+        .filter(cc -> cc instanceof CombinedFilterEntry)
+        .map(cc -> ((CombinedFilterEntry<T>) cc))
+        .map(cc -> bfeList.addAll(cc.getAllFiltersForFieldName(fieldName)));
+
+    return bfeList;
   }
 
   public List<FilterEntryConditionCreator<T>> getConditionCreators() {
