@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.jooq.Operator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,7 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.hubspot.httpql.DefaultMetaUtils;
@@ -36,6 +38,7 @@ import com.hubspot.httpql.error.ConstraintViolation;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.error.LimitViolationType;
 import com.hubspot.httpql.internal.BoundFilterEntry;
+import com.hubspot.httpql.internal.CombinedFilterEntry;
 import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
@@ -51,7 +54,8 @@ import com.hubspot.rosetta.Rosetta;
 public class QueryParser<T extends QuerySpec> {
   private static final Logger LOG = LoggerFactory.getLogger(QueryParser.class);
 
-  private static final Function<String, String> SNAKE_CASE_TRANSFORMER = input -> CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, input);
+  private static final Function<String, String> SNAKE_CASE_TRANSFORMER = input -> CaseFormat.LOWER_CAMEL.to(
+      CaseFormat.LOWER_UNDERSCORE, input);
   private static final Set<String> RESERVED_WORDS = ImmutableSet.of("offset", "limit", "order", "includeDeleted");
 
   private final Class<T> queryType;
@@ -137,11 +141,13 @@ public class QueryParser<T extends QuerySpec> {
       }
 
       String finalFieldName = fieldName;
-      Optional<BoundFilterEntry<T>> filterEntryOptional = filterTable.rowKeySet().stream().filter(f -> Objects.equals(f.getFieldName(), finalFieldName) && Objects.equals(f.getFilter(), UriParamParser.BY_NAME
-          .get(filterName))).findFirst();
+      Optional<BoundFilterEntry<T>> filterEntryOptional = filterTable.rowKeySet().stream().filter(f -> Objects.equals(f
+          .getFieldName(), finalFieldName) && Objects.equals(f.getFilter(), UriParamParser.BY_NAME
+              .get(filterName))).findFirst();
 
       // Use reserved words instead of simple look-up to throw exception on disallowed fields
-      if (!filterEntryOptional.isPresent() || (!RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName()) && !filterTable.contains(filterEntryOptional.get(), filterName))) {
+      if (!filterEntryOptional.isPresent() || (!RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName()) && !filterTable
+          .contains(filterEntryOptional.get(), filterName))) {
         throw new FilterViolation(String.format("Filtering by \"%s %s\" is not allowed",
             finalFieldName, filterName));
       } else if (RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName())) {
@@ -181,10 +187,11 @@ public class QueryParser<T extends QuerySpec> {
       boundFilterEntries.add(boundColumn);
     }
 
+    CombinedFilterEntry<T> combinedFilterEntry = new CombinedFilterEntry<>(Operator.AND, Lists.newArrayList(boundFilterEntries));
+
     try {
       T boundQuerySpec = mapper.convertValue(fieldValues, queryType);
-      return new ParsedQuery<>(boundQuerySpec, queryType, boundFilterEntries, meta, limit, offset, orderings, includeDeleted);
-
+      return new ParsedQuery<>(boundQuerySpec, queryType, combinedFilterEntry, meta, limit, offset, orderings, includeDeleted);
     } catch (IllegalArgumentException e) {
       if (e.getCause() instanceof InvalidFormatException) {
         InvalidFormatException cause = (InvalidFormatException) e.getCause();
@@ -192,7 +199,8 @@ public class QueryParser<T extends QuerySpec> {
         if (cause.getPath().size() > 0 && cause.getPath().get(0).getFieldName() != null) {
           filterLabel = cause.getPath().get(0).getFieldName() + " filter";
         }
-        throw new FilterViolation(String.format("Invalid %s value '%s'; expected a %s", filterLabel, cause.getValue(), cause.getTargetType()));
+        throw new FilterViolation(String.format("Invalid %s value '%s'; expected a %s", filterLabel, cause.getValue(), cause
+            .getTargetType()));
       }
       throw e;
     }
