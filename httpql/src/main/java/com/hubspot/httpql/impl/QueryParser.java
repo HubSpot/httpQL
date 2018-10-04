@@ -31,6 +31,7 @@ import com.hubspot.httpql.MetaQuerySpec;
 import com.hubspot.httpql.ParsedQuery;
 import com.hubspot.httpql.QueryConstraints;
 import com.hubspot.httpql.QuerySpec;
+import com.hubspot.httpql.ann.Aggregated;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.OrderBy;
 import com.hubspot.httpql.error.ConstraintType;
@@ -174,8 +175,14 @@ public class QueryParser<T extends QuerySpec> {
       if (boundColumn.isMultiValue()) {
         List<String> paramVals = fieldFilter.getValues();
 
+        Optional<Aggregated> agg = Lists.newArrayList(prop.getField().getAnnotated().getAnnotations()).stream()
+            .filter(a -> a instanceof Aggregated)
+            .map(a -> (Aggregated) a).findAny();
+
+        Class<?> convertToType = agg.isPresent() ? agg.get().value() : prop.getField().getAnnotated().getType();
+
         List<?> boundVals = paramVals.stream()
-            .map(v -> Rosetta.getMapper().convertValue(v, prop.getField().getAnnotated().getType()))
+            .map(v -> Rosetta.getMapper().convertValue(v, convertToType))
             .collect(Collectors.toList());
 
         boundColumn = new MultiValuedBoundFilterEntry<>(boundColumn, boundVals);

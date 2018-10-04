@@ -247,5 +247,4 @@ public class ParsedQuery<T extends QuerySpec> {
         new ArrayList<>(getOrderings()),
         getIncludeDeleted());
   }
-
 }
