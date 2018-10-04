@@ -7,7 +7,7 @@ import org.jooq.Condition;
 import com.hubspot.httpql.FieldFactory;
 import com.hubspot.httpql.QuerySpec;
 
-public class MultiValuedBoundFilterEntry<T extends QuerySpec> extends BoundFilterEntry<T> {
+public class MultiValuedBoundFilterEntry<T extends QuerySpec>extends BoundFilterEntry<T> {
 
   private final Collection<?> values;
 
@@ -24,5 +24,4 @@ public class MultiValuedBoundFilterEntry<T extends QuerySpec> extends BoundFilte
   public Collection<?> getValues() {
     return values;
   }
-
 }

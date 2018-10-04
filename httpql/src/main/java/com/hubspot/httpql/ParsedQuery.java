@@ -9,11 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jooq.SortOrder;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Table;
-import com.hubspot.httpql.ann.FilterBy;
-import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.error.UnknownFieldException;
 import com.hubspot.httpql.impl.Ordering;
 import com.hubspot.httpql.impl.TableQualifiedFieldFactory;
@@ -107,21 +103,8 @@ public class ParsedQuery<T extends QuerySpec> {
    *           When {@code value} is of the wrong type
    */
   public void addFilter(String fieldName, Class<? extends Filter> filterType, Object value) {
-    // Filter can be null; we only want FilterEntry for name normalization
-    Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
-    FilterEntry filterEntry = new FilterEntry(filter, fieldName, this.getQueryType());
-    final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable = meta.getFilterTable();
-    BeanPropertyDefinition filterProperty = filterTable.get(filterEntry, filter.names()[0]);
-    if (filterProperty == null) {
-      throw new UnknownFieldException(String.format("No filter %s on field named '%s' exists.", filter.names()[0], fieldName));
-    }
-    BoundFilterEntry<T> boundColumn = filterTable.rowKeySet().stream()
-        .filter(bfe -> bfe.equals(filterEntry)).findFirst()
-        .orElseThrow(() -> new FilterViolation("Filter column " + filterEntry + " not found"));
-    FilterBy ann = filterProperty.getPrimaryMember().getAnnotation(FilterBy.class);
-    if (Strings.emptyToNull(ann.as()) != null) {
-      boundColumn.setActualField(getMetaData().getFieldMap().get(ann.as()));
-    }
+    BeanPropertyDefinition filterProperty = meta.getFilterProperty(fieldName, filterType);
+    BoundFilterEntry<T> boundColumn = meta.getNewBoundFilterEntry(fieldName, filterType);
 
     if (boundColumn.isMultiValue()) {
       Collection<?> values = (Collection<?>) value;

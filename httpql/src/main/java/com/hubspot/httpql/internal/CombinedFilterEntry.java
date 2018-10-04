@@ -10,6 +10,7 @@ import org.jooq.Operator;
 import org.jooq.impl.DSL;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.hubspot.httpql.FieldFactory;
 import com.hubspot.httpql.QuerySpec;
 
@@ -21,7 +22,7 @@ public class CombinedFilterEntry<T extends QuerySpec> implements FilterEntryCond
 
   public CombinedFilterEntry(Operator operator, List<FilterEntryConditionCreator<T>> conditionCreators) {
     this.operator = operator;
-    this.conditionCreators = conditionCreators;
+    this.conditionCreators = Lists.newArrayList(conditionCreators);
   }
 
   @Override

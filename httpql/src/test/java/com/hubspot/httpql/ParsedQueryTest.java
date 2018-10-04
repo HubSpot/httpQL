@@ -122,7 +122,9 @@ public class ParsedQueryTest {
 
   @Test
   public void addFilterExclusively() {
-    query.put("id__eq", "1");
+    query.put("id__in", "1");
+    query.put("id__in", "2");
+    query.put("id__eq", "3");
     ParsedQuery<Spec> parsed = parser.parse(query);
 
     parsed.addFilterExclusively("id", Equal.class, 15);
@@ -237,22 +239,25 @@ public class ParsedQueryTest {
   public static class Spec extends SpecParent implements QuerySpec {
 
     @OrderBy
-    @FilterBy(value = {
-        GreaterThan.class, Equal.class
-    })
+    @FilterBy(
+        value = {
+            GreaterThan.class, Equal.class
+        })
     Long count;
 
     @OrderBy
-    @FilterBy(value = {
-        GreaterThan.class, Equal.class
-    })
+    @FilterBy(
+        value = {
+            GreaterThan.class, Equal.class
+        })
     private Long createDate;
 
     boolean secret;
 
-    @FilterBy(value = {
-        In.class, NotIn.class
-    })
+    @FilterBy(
+        value = {
+            In.class, NotIn.class
+        })
     private SpecEnum specEnum;
 
     @Override
