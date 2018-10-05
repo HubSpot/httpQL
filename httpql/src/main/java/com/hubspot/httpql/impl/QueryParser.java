@@ -31,7 +31,6 @@ import com.hubspot.httpql.MetaQuerySpec;
 import com.hubspot.httpql.ParsedQuery;
 import com.hubspot.httpql.QueryConstraints;
 import com.hubspot.httpql.QuerySpec;
-import com.hubspot.httpql.ann.Aggregated;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.OrderBy;
 import com.hubspot.httpql.error.ConstraintType;
@@ -39,7 +38,7 @@ import com.hubspot.httpql.error.ConstraintViolation;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.error.LimitViolationType;
 import com.hubspot.httpql.internal.BoundFilterEntry;
-import com.hubspot.httpql.internal.CombinedFilterEntry;
+import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
@@ -142,13 +141,15 @@ public class QueryParser<T extends QuerySpec> {
       }
 
       String finalFieldName = fieldName;
-      Optional<BoundFilterEntry<T>> filterEntryOptional = filterTable.rowKeySet().stream().filter(f -> Objects.equals(f
-          .getFieldName(), finalFieldName) && Objects.equals(f.getFilter(), UriParamParser.BY_NAME
-              .get(filterName))).findFirst();
+      Optional<BoundFilterEntry<T>> filterEntryOptional = filterTable.rowKeySet().stream()
+          .filter(f -> Objects.equals(f.getFieldName(), finalFieldName)
+              && Objects.equals(f.getFilter(), UriParamParser.BY_NAME.get(filterName)))
+          .findFirst();
 
       // Use reserved words instead of simple look-up to throw exception on disallowed fields
-      if (!filterEntryOptional.isPresent() || (!RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName()) && !filterTable
-          .contains(filterEntryOptional.get(), filterName))) {
+      if (!filterEntryOptional.isPresent()
+          || (!RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName())
+              && !filterTable.contains(filterEntryOptional.get(), filterName))) {
         throw new FilterViolation(String.format("Filtering by \"%s %s\" is not allowed",
             finalFieldName, filterName));
       } else if (RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName())) {
@@ -175,11 +176,7 @@ public class QueryParser<T extends QuerySpec> {
       if (boundColumn.isMultiValue()) {
         List<String> paramVals = fieldFilter.getValues();
 
-        Optional<Aggregated> agg = Lists.newArrayList(prop.getField().getAnnotated().getAnnotations()).stream()
-            .filter(a -> a instanceof Aggregated)
-            .map(a -> (Aggregated) a).findAny();
-
-        Class<?> convertToType = agg.isPresent() ? agg.get().value() : prop.getField().getAnnotated().getType();
+        Class<?> convertToType = ann.typeOverride() == void.class ? prop.getField().getAnnotated().getType() : ann.typeOverride();
 
         List<?> boundVals = paramVals.stream()
             .map(v -> Rosetta.getMapper().convertValue(v, convertToType))
@@ -194,7 +191,7 @@ public class QueryParser<T extends QuerySpec> {
       boundFilterEntries.add(boundColumn);
     }
 
-    CombinedFilterEntry<T> combinedFilterEntry = new CombinedFilterEntry<>(Operator.AND, Lists.newArrayList(boundFilterEntries));
+    CombinedConditionCreator<T> combinedFilterEntry = new CombinedConditionCreator<>(Operator.AND, Lists.newArrayList(boundFilterEntries));
 
     try {
       T boundQuerySpec = mapper.convertValue(fieldValues, queryType);

@@ -25,4 +25,6 @@ public @interface FilterBy {
   Class<? extends Filter>[] value();
 
   String as() default "";
+
+  Class<?> typeOverride() default void.class;
 }

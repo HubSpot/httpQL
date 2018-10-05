@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
+import org.jooq.Operator;
 import org.jooq.SortOrder;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
@@ -14,7 +15,7 @@ import com.hubspot.httpql.error.UnknownFieldException;
 import com.hubspot.httpql.impl.Ordering;
 import com.hubspot.httpql.impl.TableQualifiedFieldFactory;
 import com.hubspot.httpql.internal.BoundFilterEntry;
-import com.hubspot.httpql.internal.CombinedFilterEntry;
+import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.FilterEntryConditionCreator;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
@@ -28,7 +29,8 @@ public class ParsedQuery<T extends QuerySpec> {
 
   private final Class<T> queryType;
 
-  private final CombinedFilterEntry<T> combinedFilterEntry;
+  private final CombinedConditionCreator<T> combinedFilterEntry;
+  @Deprecated
   private final T boundQuerySpec;
 
   private final MetaQuerySpec<T> meta;
@@ -43,7 +45,26 @@ public class ParsedQuery<T extends QuerySpec> {
   public ParsedQuery(
                      T boundQuerySpec,
                      Class<T> queryType,
-                     CombinedFilterEntry<T> combinedFilterEntry,
+                     List<BoundFilterEntry<T>> boundFilterEntries,
+                     MetaQuerySpec<T> meta,
+                     Optional<Integer> limit,
+                     Optional<Integer> offset,
+                     Collection<Ordering> orderings,
+                     boolean includeDeleted) {
+    this(boundQuerySpec,
+        queryType,
+        new CombinedConditionCreator<>(Operator.AND, Lists.newArrayList(boundFilterEntries)),
+        meta,
+        limit,
+        offset,
+        orderings,
+        includeDeleted);
+  }
+
+  public ParsedQuery(
+                     T boundQuerySpec,
+                     Class<T> queryType,
+                     CombinedConditionCreator<T> combinedFilterEntry,
                      MetaQuerySpec<T> meta,
                      Optional<Integer> limit,
                      Optional<Integer> offset,
@@ -151,6 +172,8 @@ public class ParsedQuery<T extends QuerySpec> {
    *
    * @param fieldName
    *          Name as seen in the query; not multi-value proxies ("id", not "ids")
+   * @param filterEntryConditionCreator
+   *          Either a BoundFilterEntry or a CombinedConditionCreator
    */
   public void addFilterEntryConditionCreatorExclusively(String fieldName,
                                                         FilterEntryConditionCreator<T> filterEntryConditionCreator) {
@@ -162,8 +185,9 @@ public class ParsedQuery<T extends QuerySpec> {
     return combinedFilterEntry.removeAllFiltersFor(fieldName);
   }
 
+  @Deprecated
   public BoundFilterEntry<T> getFirstFilterForFieldName(String fieldName) {
-    return combinedFilterEntry.getFirstFilterForFieldName(fieldName).orElse(null);
+    return getAllFiltersForFieldName(fieldName).stream().findAny().orElse(null);
   }
 
   public List<BoundFilterEntry<T>> getAllFiltersForFieldName(String fieldName) {
@@ -219,6 +243,7 @@ public class ParsedQuery<T extends QuerySpec> {
     return includeDeleted;
   }
 
+  @Deprecated
   public T getBoundQuery() {
     return boundQuerySpec;
   }
@@ -227,7 +252,7 @@ public class ParsedQuery<T extends QuerySpec> {
     return Lists.newArrayList(combinedFilterEntry.getFlattenedBoundFilterEntries());
   }
 
-  public CombinedFilterEntry<T> getCombinedFilterEntry() {
+  public CombinedConditionCreator<T> getCombinedFilterEntry() {
     return combinedFilterEntry;
   }
 
@@ -235,7 +260,7 @@ public class ParsedQuery<T extends QuerySpec> {
     return queryType;
   }
 
-  protected MetaQuerySpec<T> getMetaData() {
+  public MetaQuerySpec<T> getMetaData() {
     return meta;
   }
 

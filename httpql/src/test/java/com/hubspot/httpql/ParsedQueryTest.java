@@ -2,6 +2,8 @@ package com.hubspot.httpql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Param;
 import org.junit.Before;
@@ -13,6 +15,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.base.Enums;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.hubspot.httpql.ann.FilterBy;
@@ -27,6 +30,7 @@ import com.hubspot.httpql.impl.DefaultFieldFactory;
 import com.hubspot.httpql.impl.Ordering;
 import com.hubspot.httpql.impl.QueryParser;
 import com.hubspot.httpql.internal.BoundFilterEntry;
+import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
 public class ParsedQueryTest {
@@ -131,6 +135,26 @@ public class ParsedQueryTest {
 
     assertThat(parsed.getBoundFilterEntries()).hasSize(1);
     assertThat(parsed.getBoundQuery().getId()).isEqualTo(15);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void addFilterEntryConditionCreatorExclusively() {
+    query.put("id__in", "1");
+    query.put("id__in", "2");
+    query.put("id__eq", "3");
+    ParsedQuery<Spec> parsed = parser.parse(query);
+
+    BoundFilterEntry<Spec> idFilter = new MultiValuedBoundFilterEntry<>(
+        parsed.getMetaData().getNewBoundFilterEntry("id", Equal.class),
+        ImmutableSet.of(4));
+
+    parsed.addFilterEntryConditionCreatorExclusively("id", idFilter);
+
+    assertThat(parsed.getBoundFilterEntries()).hasSize(1);
+    assertThat(((MultiValuedBoundFilterEntry<Spec>) parsed.getBoundFilterEntries().get(0)).getValues()).hasSize(1);
+    assertThat((Set<Integer>) ((MultiValuedBoundFilterEntry<Spec>) parsed.getBoundFilterEntries().get(0)).getValues())
+        .containsExactly(4);
   }
 
   @Test

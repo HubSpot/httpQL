@@ -2,7 +2,6 @@ package com.hubspot.httpql.internal;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jooq.Condition;
@@ -14,13 +13,13 @@ import com.google.common.collect.Lists;
 import com.hubspot.httpql.FieldFactory;
 import com.hubspot.httpql.QuerySpec;
 
-public class CombinedFilterEntry<T extends QuerySpec> implements FilterEntryConditionCreator<T> {
+public class CombinedConditionCreator<T extends QuerySpec> implements FilterEntryConditionCreator<T> {
 
   private Operator operator;
 
   private List<FilterEntryConditionCreator<T>> conditionCreators;
 
-  public CombinedFilterEntry(Operator operator, List<FilterEntryConditionCreator<T>> conditionCreators) {
+  public CombinedConditionCreator(Operator operator, Collection<FilterEntryConditionCreator<T>> conditionCreators) {
     this.operator = operator;
     this.conditionCreators = Lists.newArrayList(conditionCreators);
   }
@@ -47,54 +46,20 @@ public class CombinedFilterEntry<T extends QuerySpec> implements FilterEntryCond
   }
 
   public boolean removeAllFiltersFor(String fieldName) {
-    boolean removedFromThis = conditionCreators.removeIf(f -> f instanceof BoundFilterEntry && ((BoundFilterEntry<T>) f)
-        .getQueryName()
-        .equals(fieldName));
+    boolean removedFromThis = conditionCreators.removeIf(
+        f -> f instanceof BoundFilterEntry && ((BoundFilterEntry<T>) f).getQueryName().equals(fieldName));
     boolean removedFromChildren = conditionCreators.stream()
-        .filter(cc -> cc instanceof CombinedFilterEntry)
-        .map(cc -> ((CombinedFilterEntry<T>) cc).removeAllFiltersFor(fieldName))
+        .filter(cc -> cc instanceof CombinedConditionCreator)
+        .map(cc -> ((CombinedConditionCreator<T>) cc).removeAllFiltersFor(fieldName))
         .reduce(Boolean::logicalOr).orElse(false);
 
     return removedFromThis || removedFromChildren;
   }
 
-  public Optional<BoundFilterEntry<T>> getFirstFilterForFieldName(String fieldName) {
-    Optional<BoundFilterEntry<T>> maybeBfe = conditionCreators.stream()
-        .filter(cc -> cc instanceof BoundFilterEntry)
-        .map(cc -> ((BoundFilterEntry<T>) cc))
-        .filter(bfe -> bfe.getQueryName().equals(fieldName))
-        .findFirst();
-
-    if (maybeBfe.isPresent()) {
-      return maybeBfe;
-    } else {
-      List<CombinedFilterEntry<T>> combinedFilterEntries = conditionCreators.stream()
-          .filter(cc -> cc instanceof CombinedFilterEntry)
-          .map(cc -> ((CombinedFilterEntry<T>) cc))
-          .collect(Collectors.toList());
-      for (CombinedFilterEntry<T> combinedFilterEntry : combinedFilterEntries) {
-        maybeBfe = combinedFilterEntry.getFirstFilterForFieldName(fieldName);
-        if (maybeBfe.isPresent()) {
-          return maybeBfe;
-        }
-      }
-    }
-    return maybeBfe;
-  }
-
   public List<BoundFilterEntry<T>> getAllFiltersForFieldName(String fieldName) {
-    List<BoundFilterEntry<T>> bfeList = conditionCreators.stream()
-        .filter(cc -> cc instanceof BoundFilterEntry)
-        .map(cc -> ((BoundFilterEntry<T>) cc))
+    return getFlattenedBoundFilterEntries().stream()
         .filter(bfe -> bfe.getQueryName().equals(fieldName))
         .collect(Collectors.toList());
-
-    conditionCreators.stream()
-        .filter(cc -> cc instanceof CombinedFilterEntry)
-        .map(cc -> ((CombinedFilterEntry<T>) cc))
-        .map(cc -> bfeList.addAll(cc.getAllFiltersForFieldName(fieldName)));
-
-    return bfeList;
   }
 
   public List<FilterEntryConditionCreator<T>> getConditionCreators() {

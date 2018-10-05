@@ -25,7 +25,7 @@ import com.hubspot.httpql.impl.QueryParser;
 import com.hubspot.httpql.impl.SelectBuilder;
 import com.hubspot.httpql.impl.TableQualifiedFieldFactory;
 import com.hubspot.httpql.internal.BoundFilterEntry;
-import com.hubspot.httpql.internal.CombinedFilterEntry;
+import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
@@ -67,12 +67,12 @@ public class SelectBuilderTest {
   @Test
   public void simpleSelectWithOr() {
     ParsedQuery<Spec> parsedQuery = parser.parse(query);
-    BoundFilterEntry<Spec> idFilter1 = parsedQuery.getFirstFilterForFieldName("id");
+    BoundFilterEntry<Spec> idFilter1 = parsedQuery.getAllFiltersForFieldName("id").stream().findFirst().get();
     BoundFilterEntry<Spec> idFilter2 = new MultiValuedBoundFilterEntry<>(
         parsedQuery.getMetaData().getNewBoundFilterEntry("id", In.class), ImmutableList.of("4", "5"));
+    parsedQuery.removeFiltersFor("id");
     parsedQuery.getCombinedFilterEntry().addConditionCreator(
-        new CombinedFilterEntry<>(Operator.OR, Lists.newArrayList(idFilter1, idFilter2)));
-
+        new CombinedConditionCreator<>(Operator.OR, Lists.newArrayList(idFilter1, idFilter2)));
     selectBuilder = SelectBuilder.forParsedQuery(parsedQuery);
 
     String sql = selectBuilder.build().toString();
