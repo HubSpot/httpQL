@@ -191,11 +191,11 @@ public class QueryParser<T extends QuerySpec> {
       boundFilterEntries.add(boundColumn);
     }
 
-    CombinedConditionCreator<T> combinedFilterEntry = new CombinedConditionCreator<>(Operator.AND, Lists.newArrayList(boundFilterEntries));
+    CombinedConditionCreator<T> combinedConditionCreator = new CombinedConditionCreator<>(Operator.AND, Lists.newArrayList(boundFilterEntries));
 
     try {
       T boundQuerySpec = mapper.convertValue(fieldValues, queryType);
-      return new ParsedQuery<>(boundQuerySpec, queryType, combinedFilterEntry, meta, limit, offset, orderings, includeDeleted);
+      return new ParsedQuery<>(boundQuerySpec, queryType, combinedConditionCreator, meta, limit, offset, orderings, includeDeleted);
     } catch (IllegalArgumentException e) {
       if (e.getCause() instanceof InvalidFormatException) {
         InvalidFormatException cause = (InvalidFormatException) e.getCause();

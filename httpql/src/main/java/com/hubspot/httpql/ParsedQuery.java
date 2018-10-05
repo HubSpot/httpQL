@@ -29,7 +29,7 @@ public class ParsedQuery<T extends QuerySpec> {
 
   private final Class<T> queryType;
 
-  private final CombinedConditionCreator<T> combinedFilterEntry;
+  private final CombinedConditionCreator<T> combinedConditionCreator;
   @Deprecated
   private final T boundQuerySpec;
 
@@ -64,7 +64,7 @@ public class ParsedQuery<T extends QuerySpec> {
   public ParsedQuery(
                      T boundQuerySpec,
                      Class<T> queryType,
-                     CombinedConditionCreator<T> combinedFilterEntry,
+                     CombinedConditionCreator<T> combinedConditionCreator,
                      MetaQuerySpec<T> meta,
                      Optional<Integer> limit,
                      Optional<Integer> offset,
@@ -73,7 +73,7 @@ public class ParsedQuery<T extends QuerySpec> {
 
     this.boundQuerySpec = boundQuerySpec;
     this.queryType = queryType;
-    this.combinedFilterEntry = combinedFilterEntry;
+    this.combinedConditionCreator = combinedConditionCreator;
     this.meta = meta;
 
     this.limit = limit;
@@ -134,8 +134,8 @@ public class ParsedQuery<T extends QuerySpec> {
       filterProperty.getSetter().setValue(getBoundQuery(), value);
     }
 
-    if (!combinedFilterEntry.getFlattenedBoundFilterEntries().contains(boundColumn)) {
-      combinedFilterEntry.getConditionCreators().add(boundColumn);
+    if (!combinedConditionCreator.getFlattenedBoundFilterEntries().contains(boundColumn)) {
+      combinedConditionCreator.getConditionCreators().add(boundColumn);
     }
   }
 
@@ -178,11 +178,11 @@ public class ParsedQuery<T extends QuerySpec> {
   public void addFilterEntryConditionCreatorExclusively(String fieldName,
                                                         FilterEntryConditionCreator<T> filterEntryConditionCreator) {
     removeFiltersFor(fieldName);
-    combinedFilterEntry.addConditionCreator(filterEntryConditionCreator);
+    combinedConditionCreator.addConditionCreator(filterEntryConditionCreator);
   }
 
   public boolean removeFiltersFor(String fieldName) {
-    return combinedFilterEntry.removeAllFiltersFor(fieldName);
+    return combinedConditionCreator.removeAllFiltersFor(fieldName);
   }
 
   @Deprecated
@@ -191,17 +191,17 @@ public class ParsedQuery<T extends QuerySpec> {
   }
 
   public List<BoundFilterEntry<T>> getAllFiltersForFieldName(String fieldName) {
-    return combinedFilterEntry.getAllFiltersForFieldName(fieldName);
+    return combinedConditionCreator.getAllFiltersForFieldName(fieldName);
   }
 
   public void removeAllFilters() {
-    combinedFilterEntry.getConditionCreators().clear();
+    combinedConditionCreator.getConditionCreators().clear();
   }
 
   public String getCacheKey() {
     List<Object> cacheKeyParts = new ArrayList<>();
 
-    cacheKeyParts.add(combinedFilterEntry.getCondition(boundQuerySpec, new TableQualifiedFieldFactory()));
+    cacheKeyParts.add(combinedConditionCreator.getCondition(boundQuerySpec, new TableQualifiedFieldFactory()));
 
     for (Ordering o : orderings) {
       cacheKeyParts.add(o.getFieldName());
@@ -249,11 +249,11 @@ public class ParsedQuery<T extends QuerySpec> {
   }
 
   public List<BoundFilterEntry<T>> getBoundFilterEntries() {
-    return Lists.newArrayList(combinedFilterEntry.getFlattenedBoundFilterEntries());
+    return Lists.newArrayList(combinedConditionCreator.getFlattenedBoundFilterEntries());
   }
 
-  public CombinedConditionCreator<T> getCombinedFilterEntry() {
-    return combinedFilterEntry;
+  public CombinedConditionCreator<T> getCombinedConditionCreator() {
+    return combinedConditionCreator;
   }
 
   public Class<T> getQueryType() {
@@ -269,7 +269,7 @@ public class ParsedQuery<T extends QuerySpec> {
     return new ParsedQuery<>(
         getBoundQuery(),
         getQueryType(),
-        combinedFilterEntry,
+        combinedConditionCreator,
         getMetaData(),
         getLimit(),
         getOffset(),

@@ -307,7 +307,7 @@ public class SelectBuilder<T extends QuerySpec> {
    */
   public Collection<Condition> getConditions() {
     Collection<Condition> conditions = new ArrayList<>();
-    conditions.add(sourceQuery.getCombinedFilterEntry().getCondition(sourceQuery.getBoundQuery(), factory));
+    conditions.add(sourceQuery.getCombinedConditionCreator().getCondition(sourceQuery.getBoundQuery(), factory));
 
     for (AdditionalCondition c : additionalConditions) {
       if (!asCount || c.includeInCount) {

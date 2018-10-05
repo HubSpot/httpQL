@@ -71,7 +71,7 @@ public class SelectBuilderTest {
     BoundFilterEntry<Spec> idFilter2 = new MultiValuedBoundFilterEntry<>(
         parsedQuery.getMetaData().getNewBoundFilterEntry("id", In.class), ImmutableList.of("4", "5"));
     parsedQuery.removeFiltersFor("id");
-    parsedQuery.getCombinedFilterEntry().addConditionCreator(
+    parsedQuery.getCombinedConditionCreator().addConditionCreator(
         new CombinedConditionCreator<>(Operator.OR, Lists.newArrayList(idFilter1, idFilter2)));
     selectBuilder = SelectBuilder.forParsedQuery(parsedQuery);
 

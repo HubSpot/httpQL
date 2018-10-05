@@ -15,6 +15,8 @@ import com.hubspot.httpql.MultiParamConditionProvider;
  *          One or more @ Filter} (operators) to permit
  * @param as
  *          Real name of the column/field, if we're annotating something for a {@link MultiParamConditionProvider}
+ * @param typeOverride
+ *          Specifies that the type of the filter value is different from the type of the annotated field or method
  * @author tdavis
  */
 @Retention(RetentionPolicy.RUNTIME)
