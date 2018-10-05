@@ -2,23 +2,22 @@ package com.hubspot.httpql;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
+import org.jooq.Operator;
 import org.jooq.SortOrder;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.google.common.base.Strings;
-import com.google.common.collect.Table;
-import com.hubspot.httpql.ann.FilterBy;
-import com.hubspot.httpql.error.FilterViolation;
+import com.google.common.collect.Lists;
 import com.hubspot.httpql.error.UnknownFieldException;
 import com.hubspot.httpql.impl.Ordering;
+import com.hubspot.httpql.impl.TableQualifiedFieldFactory;
 import com.hubspot.httpql.internal.BoundFilterEntry;
+import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.FilterEntry;
+import com.hubspot.httpql.internal.FilterEntryConditionCreator;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 
 /**
@@ -30,7 +29,8 @@ public class ParsedQuery<T extends QuerySpec> {
 
   private final Class<T> queryType;
 
-  private final List<BoundFilterEntry<T>> boundFilterEntries;
+  private final CombinedConditionCreator<T> combinedConditionCreator;
+  @Deprecated
   private final T boundQuerySpec;
 
   private final MetaQuerySpec<T> meta;
@@ -51,10 +51,29 @@ public class ParsedQuery<T extends QuerySpec> {
                      Optional<Integer> offset,
                      Collection<Ordering> orderings,
                      boolean includeDeleted) {
+    this(boundQuerySpec,
+        queryType,
+        new CombinedConditionCreator<>(Operator.AND, Lists.newArrayList(boundFilterEntries)),
+        meta,
+        limit,
+        offset,
+        orderings,
+        includeDeleted);
+  }
+
+  public ParsedQuery(
+                     T boundQuerySpec,
+                     Class<T> queryType,
+                     CombinedConditionCreator<T> combinedConditionCreator,
+                     MetaQuerySpec<T> meta,
+                     Optional<Integer> limit,
+                     Optional<Integer> offset,
+                     Collection<Ordering> orderings,
+                     boolean includeDeleted) {
 
     this.boundQuerySpec = boundQuerySpec;
     this.queryType = queryType;
-    this.boundFilterEntries = boundFilterEntries;
+    this.combinedConditionCreator = combinedConditionCreator;
     this.meta = meta;
 
     this.limit = limit;
@@ -105,21 +124,8 @@ public class ParsedQuery<T extends QuerySpec> {
    *           When {@code value} is of the wrong type
    */
   public void addFilter(String fieldName, Class<? extends Filter> filterType, Object value) {
-    // Filter can be null; we only want FilterEntry for name normalization
-    Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
-    FilterEntry filterEntry = new FilterEntry(filter, fieldName, this.getQueryType());
-    final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable = meta.getFilterTable();
-    BeanPropertyDefinition filterProperty = filterTable.get(filterEntry, filter.names()[0]);
-    if (filterProperty == null) {
-      throw new UnknownFieldException(String.format("No filter %s on field named '%s' exists.", filter.names()[0], fieldName));
-    }
-    BoundFilterEntry<T> boundColumn = filterTable.rowKeySet().stream()
-        .filter(bfe -> bfe.equals(filterEntry)).findFirst()
-        .orElseThrow(() -> new FilterViolation("Filter column " + filterEntry + " not found"));
-    FilterBy ann = filterProperty.getPrimaryMember().getAnnotation(FilterBy.class);
-    if (Strings.emptyToNull(ann.as()) != null) {
-      boundColumn.setActualField(getMetaData().getFieldMap().get(ann.as()));
-    }
+    BeanPropertyDefinition filterProperty = meta.getFilterProperty(fieldName, filterType);
+    BoundFilterEntry<T> boundColumn = meta.getNewBoundFilterEntry(fieldName, filterType);
 
     if (boundColumn.isMultiValue()) {
       Collection<?> values = (Collection<?>) value;
@@ -128,8 +134,8 @@ public class ParsedQuery<T extends QuerySpec> {
       filterProperty.getSetter().setValue(getBoundQuery(), value);
     }
 
-    if (!getBoundFilterEntries().contains(boundColumn)) {
-      getBoundFilterEntries().add(boundColumn);
+    if (!combinedConditionCreator.getFlattenedBoundFilterEntries().contains(boundColumn)) {
+      combinedConditionCreator.getConditionCreators().add(boundColumn);
     }
   }
 
@@ -161,48 +167,41 @@ public class ParsedQuery<T extends QuerySpec> {
     addFilter(fieldName, filterType, value);
   }
 
-  public boolean removeFiltersFor(String fieldName) {
-    boolean removed = false;
-    Iterator<BoundFilterEntry<T>> iterator = getBoundFilterEntries().iterator();
-    while (iterator.hasNext()) {
-      BoundFilterEntry<T> bfe = iterator.next();
-      if (bfe.getQueryName().equals(fieldName)) {
-        iterator.remove();
-        removed = true;
-      }
-    }
-    return removed;
+  /**
+   * Similar to {@link #addFilter} but removes all existing filters for {@code fieldName} first.
+   *
+   * @param fieldName
+   *          Name as seen in the query; not multi-value proxies ("id", not "ids")
+   * @param filterEntryConditionCreator
+   *          Either a BoundFilterEntry or a CombinedConditionCreator
+   */
+  public void addFilterEntryConditionCreatorExclusively(String fieldName,
+                                                        FilterEntryConditionCreator<T> filterEntryConditionCreator) {
+    removeFiltersFor(fieldName);
+    combinedConditionCreator.addConditionCreator(filterEntryConditionCreator);
   }
 
+  public boolean removeFiltersFor(String fieldName) {
+    return combinedConditionCreator.removeAllFiltersFor(fieldName);
+  }
+
+  @Deprecated
   public BoundFilterEntry<T> getFirstFilterForFieldName(String fieldName) {
-    Iterator<BoundFilterEntry<T>> iterator = getBoundFilterEntries().iterator();
-    while (iterator.hasNext()) {
-      BoundFilterEntry<T> bfe = iterator.next();
-      if (bfe.getQueryName().equals(fieldName)) {
-        iterator.remove();
-        return bfe;
-      }
-    }
-    return null;
+    return getAllFiltersForFieldName(fieldName).stream().findAny().orElse(null);
+  }
+
+  public List<BoundFilterEntry<T>> getAllFiltersForFieldName(String fieldName) {
+    return combinedConditionCreator.getAllFiltersForFieldName(fieldName);
   }
 
   public void removeAllFilters() {
-    getBoundFilterEntries().clear();
+    combinedConditionCreator.getConditionCreators().clear();
   }
 
   public String getCacheKey() {
     List<Object> cacheKeyParts = new ArrayList<>();
 
-    for (BoundFilterEntry<T> bfe : boundFilterEntries) {
-      cacheKeyParts.add(bfe.getFieldName());
-      cacheKeyParts.add(bfe.getFilter().getClass().getSimpleName());
-
-      if (bfe instanceof MultiValuedBoundFilterEntry) {
-        cacheKeyParts.addAll(((MultiValuedBoundFilterEntry<T>) bfe).getValues());
-      } else {
-        cacheKeyParts.add(Objects.toString(bfe.getProperty().getGetter().getValue(boundQuerySpec)));
-      }
-    }
+    cacheKeyParts.add(combinedConditionCreator.getCondition(boundQuerySpec, new TableQualifiedFieldFactory()));
 
     for (Ordering o : orderings) {
       cacheKeyParts.add(o.getFieldName());
@@ -244,19 +243,24 @@ public class ParsedQuery<T extends QuerySpec> {
     return includeDeleted;
   }
 
+  @Deprecated
   public T getBoundQuery() {
     return boundQuerySpec;
   }
 
   public List<BoundFilterEntry<T>> getBoundFilterEntries() {
-    return boundFilterEntries;
+    return Lists.newArrayList(combinedConditionCreator.getFlattenedBoundFilterEntries());
+  }
+
+  public CombinedConditionCreator<T> getCombinedConditionCreator() {
+    return combinedConditionCreator;
   }
 
   public Class<T> getQueryType() {
     return queryType;
   }
 
-  protected MetaQuerySpec<T> getMetaData() {
+  public MetaQuerySpec<T> getMetaData() {
     return meta;
   }
 
@@ -265,12 +269,11 @@ public class ParsedQuery<T extends QuerySpec> {
     return new ParsedQuery<>(
         getBoundQuery(),
         getQueryType(),
-        new ArrayList<>(getBoundFilterEntries()),
+        combinedConditionCreator,
         getMetaData(),
         getLimit(),
         getOffset(),
         new ArrayList<>(getOrderings()),
         getIncludeDeleted());
   }
-
 }

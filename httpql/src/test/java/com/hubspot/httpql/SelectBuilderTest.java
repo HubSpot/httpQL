@@ -2,6 +2,7 @@ package com.hubspot.httpql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.jooq.Operator;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 import org.junit.Before;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.OrderBy;
@@ -22,6 +24,9 @@ import com.hubspot.httpql.impl.PrefixingAliasFieldFactory;
 import com.hubspot.httpql.impl.QueryParser;
 import com.hubspot.httpql.impl.SelectBuilder;
 import com.hubspot.httpql.impl.TableQualifiedFieldFactory;
+import com.hubspot.httpql.internal.BoundFilterEntry;
+import com.hubspot.httpql.internal.CombinedConditionCreator;
+import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
 public class SelectBuilderTest {
@@ -59,6 +64,24 @@ public class SelectBuilderTest {
     assertThat(sql).isEqualTo(String.format(queryFormat, "?", "?", "?", "?", "?", "?", "?", "?"));
   }
 
+  @Test
+  public void simpleSelectWithOr() {
+    ParsedQuery<Spec> parsedQuery = parser.parse(query);
+    BoundFilterEntry<Spec> idFilter1 = parsedQuery.getAllFiltersForFieldName("id").stream().findFirst().get();
+    BoundFilterEntry<Spec> idFilter2 = new MultiValuedBoundFilterEntry<>(
+        parsedQuery.getMetaData().getNewBoundFilterEntry("id", In.class), ImmutableList.of("4", "5"));
+    parsedQuery.removeFiltersFor("id");
+    parsedQuery.getCombinedConditionCreator().addConditionCreator(
+        new CombinedConditionCreator<>(Operator.OR, Lists.newArrayList(idFilter1, idFilter2)));
+    selectBuilder = SelectBuilder.forParsedQuery(parsedQuery);
+
+    String sql = selectBuilder.build().toString();
+    String localQueryFormat = "select * from example where (`comments` not like %s escape '!' and `comments` not like %s escape '!' and `count` > %s and `full_name` = %s and (`id` in (%s, %s) or `id` in (%s, %s))) limit %s offset %s";
+
+    assertThat(sql).isEqualTo(
+        String.format(localQueryFormat, "'%John%'", "'Jane%'", "100", "'example'", "1", "2", "4", "5", "10", "5"));
+  }
+
   /**
    * TODO (tdavis): Named placeholder support is incomplete.
    * It doesn't work with limit/offset (because there are no fields for those) or multi-value params (because they don't use single-parameter conditions)
@@ -93,21 +116,25 @@ public class SelectBuilderTest {
   @Test
   public void withPrefixedFields() {
     parser = QueryParser.newBuilder(Spec.class).build();
-    selectBuilder = parser.newSelectBuilder(query).withFields("id", "full_name").withFieldFactory(new PrefixingAliasFieldFactory("a."));
+    selectBuilder = parser.newSelectBuilder(query).withFields("id", "full_name").withFieldFactory(new PrefixingAliasFieldFactory(
+        "a."));
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).startsWith("select id as `a.id`, full_name as `a.full_name` from example where (`a.comments` not like '%John%' escape '!' and `a.comments` not like 'Jane%' escape '!' and `a.id`");
+    assertThat(sql).startsWith(
+        "select id as `a.id`, full_name as `a.full_name` from example where (`a.comments` not like '%John%' escape '!' and `a.comments` not like 'Jane%' escape '!' and `a.id`");
   }
 
   @Test
   public void withTableQualifiedFields() {
     parser = QueryParser.newBuilder(Spec.class).build();
-    selectBuilder = parser.newSelectBuilder(query).withFields("id", "full_name").withFieldFactory(new TableQualifiedFieldFactory());
+    selectBuilder = parser.newSelectBuilder(query).withFields("id", "full_name").withFieldFactory(
+        new TableQualifiedFieldFactory());
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).startsWith("select `example`.`id`, `example`.`full_name` from example where (`example`.`comments` not like '%John%' escape '!' and `example`.`comments` not like 'Jane%' escape '!' and `example`.`id`");
+    assertThat(sql).startsWith(
+        "select `example`.`id`, `example`.`full_name` from example where (`example`.`comments` not like '%John%' escape '!' and `example`.`comments` not like 'Jane%' escape '!' and `example`.`id`");
   }
 
   @Test
@@ -117,7 +144,8 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).isEqualTo("select count(*) from example where (`comments` not like ? escape '!' and `comments` not like ? escape '!' and `id` in (?, ?) and `count` > ? and `full_name` = ?)");
+    assertThat(sql).isEqualTo(
+        "select count(*) from example where (`comments` not like ? escape '!' and `comments` not like ? escape '!' and `id` in (?, ?) and `count` > ? and `full_name` = ?)");
   }
 
   @Test
@@ -153,7 +181,8 @@ public class SelectBuilderTest {
   @Test
   public void withJoin() {
     parser = QueryParser.newBuilder(Spec.class).build();
-    selectBuilder = parser.newSelectBuilder(query).withJoinCondition(DSL.table("joined_table"), DSL.field("example.id").eq(DSL.field("joined_table.id")));
+    selectBuilder = parser.newSelectBuilder(query).withJoinCondition(DSL.table("joined_table"), DSL.field("example.id").eq(DSL
+        .field("joined_table.id")));
 
     String sql = selectBuilder.build().toString();
 
@@ -163,7 +192,8 @@ public class SelectBuilderTest {
   @Test
   public void withLeftJoin() {
     parser = QueryParser.newBuilder(Spec.class).build();
-    selectBuilder = parser.newSelectBuilder(query).withLeftJoinCondition(DSL.table("joined_table"), DSL.field("example.id").eq(DSL.field("joined_table.id")));
+    selectBuilder = parser.newSelectBuilder(query).withLeftJoinCondition(DSL.table("joined_table"), DSL.field("example.id").eq(DSL
+        .field("joined_table.id")));
 
     String sql = selectBuilder.build().toString();
 
@@ -251,7 +281,9 @@ public class SelectBuilderTest {
     @OrderBy(isGenerated = true)
     Integer nameLength;
 
-    @FilterBy(Equal.class)
+    @FilterBy({
+        Equal.class, In.class
+    })
     @OrderBy
     String fullName;
 

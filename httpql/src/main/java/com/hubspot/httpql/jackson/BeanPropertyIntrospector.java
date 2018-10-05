@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.google.common.base.Throwables;
 import com.google.common.primitives.Primitives;
 import com.hubspot.rosetta.Rosetta;
 import com.hubspot.rosetta.annotations.RosettaProperty;
@@ -43,7 +42,7 @@ public class BeanPropertyIntrospector {
           try {
             value = Rosetta.getMapper().writeValueAsString(value);
           } catch (JsonProcessingException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
           }
         }
       }

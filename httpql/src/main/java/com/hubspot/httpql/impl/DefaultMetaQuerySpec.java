@@ -7,7 +7,7 @@ import org.jooq.Field;
 import org.jooq.impl.DSL;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.google.common.base.Throwables;
+import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.hubspot.httpql.DefaultMetaUtils;
@@ -18,7 +18,10 @@ import com.hubspot.httpql.QuerySpec;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
+import com.hubspot.httpql.error.FilterViolation;
+import com.hubspot.httpql.error.UnknownFieldException;
 import com.hubspot.httpql.internal.BoundFilterEntry;
+import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.JoinFilter;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
 
@@ -35,7 +38,7 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
     try {
       this.instance = specType.newInstance();
     } catch (InstantiationException | IllegalAccessException e) {
-      throw Throwables.propagate(e);
+      throw new RuntimeException(e);
     }
     buildMetaData();
   }
@@ -128,6 +131,38 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
       }
     }
     return table;
+  }
+
+  @Override
+  public BoundFilterEntry<T> getNewBoundFilterEntry(String fieldName, Class<? extends Filter> filterType) {
+    // Filter can be null; we only want FilterEntry for name normalization
+    Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
+    FilterEntry filterEntry = new FilterEntry(filter, fieldName, getQueryType());
+    BeanPropertyDefinition filterProperty = getFilterProperty(fieldName, filterType);
+    if (filterProperty == null) {
+      throw new UnknownFieldException(String.format("No filter %s on field named '%s' exists.", filter.names()[0], fieldName));
+    }
+    BoundFilterEntry<T> boundColumn = filterTable.rowKeySet().stream()
+        .filter(bfe -> bfe.equals(filterEntry)).findFirst()
+        .orElseThrow(() -> new FilterViolation("Filter column " + filterEntry + " not found"));
+    FilterBy ann = filterProperty.getPrimaryMember().getAnnotation(FilterBy.class);
+    if (Strings.emptyToNull(ann.as()) != null) {
+      boundColumn.setActualField(getFieldMap().get(ann.as()));
+    }
+    return boundColumn;
+  }
+
+  @Override
+  public BeanPropertyDefinition getFilterProperty(String fieldName, Class<? extends Filter> filterType) {
+    // Filter can be null; we only want FilterEntry for name normalization
+    Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
+    FilterEntry filterEntry = new FilterEntry(filter, fieldName, getQueryType());
+    final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable = getFilterTable();
+    BeanPropertyDefinition filterProperty = filterTable.get(filterEntry, filter.names()[0]);
+    if (filterProperty == null) {
+      throw new UnknownFieldException(String.format("No filter %s on field named '%s' exists.", filter.names()[0], fieldName));
+    }
+    return filterProperty;
   }
 
   @Override

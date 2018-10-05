@@ -277,7 +277,7 @@ public class SelectBuilder<T extends QuerySpec> {
     select = selectFrom.from(table);
     for (JoinCondition joinCondition : joinConditions) {
       if (joinCondition.isLeftJoin()) {
-        ((SelectJoinStep<?>) select).leftOuterJoin(joinCondition.getTable()).on(joinCondition.getCondition());
+        ((SelectJoinStep<?>) select).leftJoin(joinCondition.getTable()).on(joinCondition.getCondition());
       } else {
         ((SelectJoinStep<?>) select).join(joinCondition.getTable()).on(joinCondition.getCondition());
       }
@@ -307,9 +307,8 @@ public class SelectBuilder<T extends QuerySpec> {
    */
   public Collection<Condition> getConditions() {
     Collection<Condition> conditions = new ArrayList<>();
-    for (BoundFilterEntry<T> bfe : sourceQuery.getBoundFilterEntries()) {
-      conditions.add(bfe.getCondition(sourceQuery.getBoundQuery(), factory));
-    }
+    conditions.add(sourceQuery.getCombinedConditionCreator().getCondition(sourceQuery.getBoundQuery(), factory));
+
     for (AdditionalCondition c : additionalConditions) {
       if (!asCount || c.includeInCount) {
         conditions.add(c.condition);
@@ -372,7 +371,6 @@ public class SelectBuilder<T extends QuerySpec> {
   }
 
   public static class BuiltSelect<T> {
-
     private final SelectFinalStep<?> select;
     private final ParamType paramType;
 
@@ -389,9 +387,7 @@ public class SelectBuilder<T extends QuerySpec> {
     public SelectFinalStep<?> getRawSelect() {
       return select;
     }
-
   }
-
 }
 
 class AdditionalCondition {
