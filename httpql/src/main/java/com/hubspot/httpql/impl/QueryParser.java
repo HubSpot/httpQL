@@ -176,7 +176,12 @@ public class QueryParser<T extends QuerySpec> {
       if (boundColumn.isMultiValue()) {
         List<String> paramVals = fieldFilter.getValues();
 
-        Class<?> convertToType = ann.typeOverride() == void.class ? prop.getField().getAnnotated().getType() : ann.typeOverride();
+        final Class<?> convertToType;
+        if (ann != null && ann.typeOverride() != void.class) {
+          convertToType = ann.typeOverride();
+        } else {
+          convertToType = prop.getField().getAnnotated().getType();
+        }
 
         List<?> boundVals = paramVals.stream()
             .map(v -> Rosetta.getMapper().convertValue(v, convertToType))
@@ -191,11 +196,13 @@ public class QueryParser<T extends QuerySpec> {
       boundFilterEntries.add(boundColumn);
     }
 
-    CombinedConditionCreator<T> combinedConditionCreator = new CombinedConditionCreator<>(Operator.AND, Lists.newArrayList(boundFilterEntries));
+    CombinedConditionCreator<T> combinedConditionCreator = new CombinedConditionCreator<>(Operator.AND, Lists.newArrayList(
+        boundFilterEntries));
 
     try {
       T boundQuerySpec = mapper.convertValue(fieldValues, queryType);
-      return new ParsedQuery<>(boundQuerySpec, queryType, combinedConditionCreator, meta, limit, offset, orderings, includeDeleted);
+      return new ParsedQuery<>(boundQuerySpec, queryType, combinedConditionCreator, meta, limit, offset, orderings,
+          includeDeleted);
     } catch (IllegalArgumentException e) {
       if (e.getCause() instanceof InvalidFormatException) {
         InvalidFormatException cause = (InvalidFormatException) e.getCause();
