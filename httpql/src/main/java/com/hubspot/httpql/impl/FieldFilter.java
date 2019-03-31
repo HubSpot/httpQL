@@ -59,7 +59,7 @@ public class FieldFilter {
         ", filterName='" + filterName + '\'' +
         '}';
   }
-  
+
   public String toQueryParam() {
     return this.field + "__" + filterName + "=" + values.stream().collect(Collectors.joining(","));
   }
