@@ -64,4 +64,3 @@ public class FieldFilter {
     return this.field + "__" + filterName + "=" + values.stream().collect(Collectors.joining(","));
   }
 }
-
