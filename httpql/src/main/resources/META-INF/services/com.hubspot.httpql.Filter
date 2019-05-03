@@ -5,6 +5,7 @@ com.hubspot.httpql.filter.GreaterThanOrEqual
 com.hubspot.httpql.filter.In
 com.hubspot.httpql.filter.InsensitiveContains
 com.hubspot.httpql.filter.IsDistinctFrom
+com.hubspot.httpql.filter.IsNotDistinctFrom
 com.hubspot.httpql.filter.LessThan
 com.hubspot.httpql.filter.LessThanOrEqual
 com.hubspot.httpql.filter.NotEqual

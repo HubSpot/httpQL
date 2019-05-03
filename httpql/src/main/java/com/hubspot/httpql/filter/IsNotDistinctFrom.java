@@ -9,12 +9,12 @@ import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.Filter;
 import com.hubspot.httpql.MultiParamConditionProvider;
 
-public class IsDistinctFrom extends FilterBase implements Filter {
+public class IsNotDistinctFrom extends FilterBase implements Filter {
 
   @Override
   public String[] names() {
     return new String[] {
-        "distinct"
+        "ndistinct"
     };
   }
 
@@ -25,7 +25,7 @@ public class IsDistinctFrom extends FilterBase implements Filter {
       @Override
       public Condition getCondition(Collection<T> values) {
         return values.stream()
-            .map(field::isDistinctFrom)
+            .map(field::isNotDistinctFrom)
             .reduce(Condition::and)
             .orElseThrow(IllegalArgumentException::new);
       }
