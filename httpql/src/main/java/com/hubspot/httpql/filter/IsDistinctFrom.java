@@ -1,9 +1,11 @@
 package com.hubspot.httpql.filter;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.impl.DSL;
 
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.Filter;
@@ -24,10 +26,9 @@ public class IsDistinctFrom extends FilterBase implements Filter {
 
       @Override
       public Condition getCondition(Collection<T> values) {
-        return values.stream()
+        return DSL.and(values.stream()
             .map(field::isDistinctFrom)
-            .reduce(Condition::and)
-            .orElseThrow(IllegalArgumentException::new);
+            .collect(Collectors.toList()));
       }
     };
   }
