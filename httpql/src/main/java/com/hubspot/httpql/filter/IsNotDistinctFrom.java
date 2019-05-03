@@ -1,13 +1,11 @@
 package com.hubspot.httpql.filter;
 
-import java.util.Collection;
-
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.Param;
 
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.Filter;
-import com.hubspot.httpql.MultiParamConditionProvider;
 
 public class IsNotDistinctFrom extends FilterBase implements Filter {
 
@@ -20,14 +18,11 @@ public class IsNotDistinctFrom extends FilterBase implements Filter {
 
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
-    return new MultiParamConditionProvider<T>(field) {
+    return new ConditionProvider<T>(field) {
 
       @Override
-      public Condition getCondition(Collection<T> values) {
-        return values.stream()
-            .map(field::isNotDistinctFrom)
-            .reduce(Condition::and)
-            .orElseThrow(IllegalArgumentException::new);
+      public Condition getCondition(Param<T> value) {
+        return field.isNotDistinctFrom(value);
       }
     };
   }

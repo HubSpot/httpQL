@@ -192,7 +192,7 @@ public class ParsedQueryTest {
 
   @Test
   public void itAddsIsNotDistinctFromFilter() {
-    query.put("count__ndistinct", "1,2,3");
+    query.put("count__ndistinct", "1");
     ParsedQuery<Spec> parsed = parser.parse(query);
 
     assertThat(parsed.getBoundFilterEntries()).hasSize(1);
