@@ -24,6 +24,8 @@ import com.hubspot.httpql.filter.Contains;
 import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.GreaterThan;
 import com.hubspot.httpql.filter.In;
+import com.hubspot.httpql.filter.IsDistinctFrom;
+import com.hubspot.httpql.filter.IsNotDistinctFrom;
 import com.hubspot.httpql.filter.NotIn;
 import com.hubspot.httpql.filter.NotLike;
 import com.hubspot.httpql.impl.DefaultFieldFactory;
@@ -181,6 +183,22 @@ public class ParsedQueryTest {
   }
 
   @Test
+  public void itAddsIsDistinctFromFilter() {
+    query.put("count__distinct", "12,100");
+    ParsedQuery<Spec> parsed = parser.parse(query);
+
+    assertThat(parsed.getBoundFilterEntries()).hasSize(1);
+  }
+
+  @Test
+  public void itAddsIsNotDistinctFromFilter() {
+    query.put("count__ndistinct", "1");
+    ParsedQuery<Spec> parsed = parser.parse(query);
+
+    assertThat(parsed.getBoundFilterEntries()).hasSize(1);
+  }
+
+  @Test
   public void itaddsOrderBy() {
     query.put("order", "-count");
     ParsedQuery<Spec> parsed = parser.parse(query);
@@ -265,7 +283,7 @@ public class ParsedQueryTest {
     @OrderBy
     @FilterBy(
         value = {
-            GreaterThan.class, Equal.class
+            GreaterThan.class, Equal.class, IsDistinctFrom.class, IsNotDistinctFrom.class
         })
     Long count;
 

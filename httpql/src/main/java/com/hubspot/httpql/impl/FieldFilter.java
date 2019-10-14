@@ -1,6 +1,7 @@
 package com.hubspot.httpql.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.hubspot.httpql.Filter;
@@ -58,5 +59,8 @@ public class FieldFilter {
         ", filterName='" + filterName + '\'' +
         '}';
   }
-}
 
+  public String toQueryParam() {
+    return this.field + "__" + filterName + "=" + values.stream().collect(Collectors.joining(","));
+  }
+}
