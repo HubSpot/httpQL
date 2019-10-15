@@ -1,7 +1,6 @@
 package com.hubspot.httpql.internal;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -27,7 +26,6 @@ public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry implement
   private final BeanPropertyDefinition prop;
   private final MetaQuerySpec<T> meta;
   private BeanPropertyDefinition actualField;
-  private Optional<Object> value;
 
   public BoundFilterEntry(Filter filter, String fieldName, String queryName, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
     super(filter, fieldName, queryName, meta.getQueryType());
