@@ -1,6 +1,6 @@
 package com.hubspot.httpql;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 import org.jooq.Operator;
 import org.jooq.conf.ParamType;
@@ -27,6 +27,7 @@ import com.hubspot.httpql.impl.TableQualifiedFieldFactory;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
+import com.hubspot.httpql.internal.OverridableBoundFilterEntry;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
 public class SelectBuilderTest {
@@ -65,7 +66,7 @@ public class SelectBuilderTest {
   }
 
   @Test
-  public void simpleSelectWithOr() {
+  public void simpleSelectWithMultiValueOr() {
     ParsedQuery<Spec> parsedQuery = parser.parse(query);
     BoundFilterEntry<Spec> idFilter1 = parsedQuery.getAllFiltersForFieldName("id").stream().findFirst().get();
     BoundFilterEntry<Spec> idFilter2 = new MultiValuedBoundFilterEntry<>(
@@ -77,6 +78,26 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
     String localQueryFormat = "select * from example where (`comments` not like %s escape '!' and `comments` not like %s escape '!' and `count` > %s and `full_name` = %s and (`id` in (%s, %s) or `id` in (%s, %s))) limit %s offset %s";
+
+    assertThat(sql).isEqualTo(
+        String.format(localQueryFormat, "'%John%'", "'Jane%'", "100", "'example'", "1", "2", "4", "5", "10", "5"));
+  }
+
+  @Test
+  public void simpleSelectWithOr() {
+    ParsedQuery<Spec> parsedQuery = parser.parse(query);
+    BoundFilterEntry<Spec> idFilter1 = parsedQuery.getAllFiltersForFieldName("id").stream().findFirst().get();
+    BoundFilterEntry<Spec> idFilter2 = new OverridableBoundFilterEntry<>(
+        parsedQuery.getMetaData().getNewBoundFilterEntry("id", Equal.class), 4);
+    BoundFilterEntry<Spec> idFilter3 = new OverridableBoundFilterEntry<>(
+        parsedQuery.getMetaData().getNewBoundFilterEntry("id", Equal.class), 5);
+    parsedQuery.removeFiltersFor("id");
+    parsedQuery.getCombinedConditionCreator().addConditionCreator(
+        new CombinedConditionCreator<>(Operator.OR, Lists.newArrayList(idFilter1, idFilter2, idFilter3)));
+    selectBuilder = SelectBuilder.forParsedQuery(parsedQuery);
+
+    String sql = selectBuilder.build().toString();
+    String localQueryFormat = "select * from example where (`comments` not like %s escape '!' and `comments` not like %s escape '!' and `count` > %s and `full_name` = %s and (`id` in (%s, %s) or `id` = %s or `id` = %s)) limit %s offset %s";
 
     assertThat(sql).isEqualTo(
         String.format(localQueryFormat, "'%John%'", "'Jane%'", "100", "'example'", "1", "2", "4", "5", "10", "5"));
@@ -262,7 +283,6 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
     assertThat(sql).contains("order by `name_length` desc");
-
   }
 
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
@@ -347,5 +367,4 @@ public class SelectBuilderTest {
       this.comments = comments;
     }
   }
-
 }
