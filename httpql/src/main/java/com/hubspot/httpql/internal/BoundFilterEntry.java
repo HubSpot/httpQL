@@ -21,7 +21,7 @@ import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.httpql.impl.DefaultFieldFactory;
 
-public class BoundFilterEntry<T extends QuerySpec>extends FilterEntry implements FilterEntryConditionCreator<T> {
+public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry implements FilterEntryConditionCreator<T> {
 
   private final BeanPropertyDefinition prop;
   private final MetaQuerySpec<T> meta;
@@ -93,5 +93,4 @@ public class BoundFilterEntry<T extends QuerySpec>extends FilterEntry implements
   public Collection<BoundFilterEntry<T>> getFlattenedBoundFilterEntries() {
     return ImmutableSet.of(this);
   }
-
 }
