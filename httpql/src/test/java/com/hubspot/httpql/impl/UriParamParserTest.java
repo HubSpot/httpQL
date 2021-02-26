@@ -1,6 +1,7 @@
 package com.hubspot.httpql.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +11,8 @@ import java.util.Map;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.hubspot.httpql.error.FilterViolation;
 
 public class UriParamParserTest {
   UriParamParser uriParamParser;
@@ -42,4 +45,37 @@ public class UriParamParserTest {
     assertThat(parsedUriParams.getFieldFilters().get(0).getValue()).isEqualTo("1,2,3");
   }
 
+  @Test
+  public void itAllowsDoubleUnderscoresInFieldNames() {
+    Map<String, List<String>> query = new HashMap<>();
+    query.put("foo1__bar1__eq", Lists.newArrayList("1"));
+    query.put("foo2__bar2__contains", Lists.newArrayList("1"));
+    query.put("foo3__eq", Lists.newArrayList("1"));
+    query.put("foo4", Lists.newArrayList("1"));
+
+    final ParsedUriParams parsedUriParams = uriParamParser.parseUriParams(query, true);
+
+    assertThat(parsedUriParams.getFieldFilters().get(0).getField()).isEqualTo("foo2__bar2");
+    assertThat(parsedUriParams.getFieldFilters().get(0).getFilterName()).isEqualTo("contains");
+
+    assertThat(parsedUriParams.getFieldFilters().get(1).getField()).isEqualTo("foo3");
+    assertThat(parsedUriParams.getFieldFilters().get(1).getFilterName()).isEqualTo("eq");
+
+    assertThat(parsedUriParams.getFieldFilters().get(2).getField()).isEqualTo("foo1__bar1");
+    assertThat(parsedUriParams.getFieldFilters().get(2).getFilterName()).isEqualTo("eq");
+
+    assertThat(parsedUriParams.getFieldFilters().get(3).getField()).isEqualTo("foo4");
+    assertThat(parsedUriParams.getFieldFilters().get(3).getFilterName()).isEqualTo("eq");
+  }
+
+  @Test
+  public void itRequiresExplicitEqualFilterWithDoubleUnderscoreInFieldNames() {
+    Map<String, List<String>> query = new HashMap<>();
+    query.put("foo2__bar2", Lists.newArrayList("1"));
+
+    assertThatThrownBy(
+        () -> uriParamParser.parseUriParams(query, true)
+    )
+        .isInstanceOf(FilterViolation.class);
+  }
 }
