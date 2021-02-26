@@ -14,6 +14,7 @@ import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jooq.impl.DSL;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
@@ -28,7 +29,9 @@ public class UriParamParser {
   public static final Map<String, Filter> BY_NAME = new HashMap<>();
   private static final ServiceLoader<Filter> LOADER = ServiceLoader.load(Filter.class);
 
-  private static final Splitter FILTER_PARAM_SPLITTER = Splitter.on("__").trimResults();
+  private static final String FILTER_PARAM_DELIMITER = "__";
+  private static final Splitter FILTER_PARAM_SPLITTER = Splitter.on(FILTER_PARAM_DELIMITER).trimResults();
+  private static final Joiner FILTER_PARAM_JOINER = Joiner.on(FILTER_PARAM_DELIMITER);
   private static final Splitter MULTIVALUE_PARAM_SPLITTER = Splitter.on(",").omitEmptyStrings().trimResults();
 
   static {
@@ -59,8 +62,12 @@ public class UriParamParser {
     return parseUriParams(multimapToMultivaluedMap(uriParams));
   }
 
-  @SuppressWarnings("rawtypes")
   public ParsedUriParams parseUriParams(Map<String, List<String>> uriParams) {
+    return parseUriParams(uriParams, false);
+  }
+
+  @SuppressWarnings("rawtypes")
+  public ParsedUriParams parseUriParams(Map<String, List<String>> uriParams, boolean allowDoubleUnderscoreInFieldName) {
 
     final ParsedUriParams result = new ParsedUriParams();
 
@@ -94,11 +101,11 @@ public class UriParamParser {
 
     for (Map.Entry<String, List<String>> entry : params.entrySet()) {
       List<String> parts = FILTER_PARAM_SPLITTER.splitToList(entry.getKey().trim());
-      if (parts.size() > 2) {
+      if (parts.size() > 2 && !allowDoubleUnderscoreInFieldName) {
         continue;
       }
 
-      final String fieldName = parts.get(0);
+      final String fieldName = fieldNameFromParts(parts, allowDoubleUnderscoreInFieldName);
       final String filterName = filterNameFromParts(parts);
       final Filter filter = BY_NAME.get(filterName);
 
@@ -123,8 +130,22 @@ public class UriParamParser {
     if (parts.size() == 1) {
       return (new Equal()).names()[0];
     } else {
-      return parts.get(1);
+      return parts.get(parts.size() - 1);
     }
+  }
+
+  private static String fieldNameFromParts(List<String> parts, boolean allowDoubleUnderscoreInFieldName) {
+    if (!allowDoubleUnderscoreInFieldName) {
+      return parts.get(0);
+    }
+
+    if (BY_NAME.keySet().contains(parts.get(parts.size() - 1))) {
+      List<String> partsCopy = new ArrayList<>(parts);
+      partsCopy.remove(parts.size() - 1);
+      return FILTER_PARAM_JOINER.join(partsCopy);
+    }
+
+    return FILTER_PARAM_JOINER.join(parts);
   }
 
   public static Builder newBuilder() {
