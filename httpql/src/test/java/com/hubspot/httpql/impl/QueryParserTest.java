@@ -2,6 +2,8 @@ package com.hubspot.httpql.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.hubspot.httpql.filter.NotNull;
+import com.hubspot.httpql.filter.Null;
 import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
@@ -139,12 +141,26 @@ public class QueryParserTest {
     assertThat(offset.get()).isEqualTo(100);
   }
 
+  @Test
+  public void itBindsDefaultValueForNullFilter() {
+    query.put("id__is_null", "1");
+    Spec spec = parser.parse(query).getBoundQuery();
+    assertThat(spec.getId()).isNull();
+  }
+
+  @Test
+  public void itBindsDefaultValueForNotNullFilter() {
+    query.put("id__not_null", "1");
+    Spec spec = parser.parse(query).getBoundQuery();
+    assertThat(spec.getId()).isNull();
+  }
+
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
   @RosettaNaming(SnakeCaseStrategy.class)
   public static class Spec implements QuerySpec {
 
     @FilterBy({
-        Equal.class, In.class
+        Equal.class, In.class, Null.class, NotNull.class
     })
     Integer id;
 

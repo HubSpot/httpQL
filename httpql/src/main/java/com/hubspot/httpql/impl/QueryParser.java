@@ -1,5 +1,8 @@
 package com.hubspot.httpql.impl;
 
+import com.google.common.base.Defaults;
+import com.hubspot.httpql.filter.NotNull;
+import com.hubspot.httpql.filter.Null;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -173,15 +176,15 @@ public class QueryParser<T extends QuerySpec> {
         }
       }
 
+      final Class<?> convertToType;
+      if (ann != null && ann.typeOverride() != void.class) {
+        convertToType = ann.typeOverride();
+      } else {
+        convertToType = prop.getField().getAnnotated().getType();
+      }
+
       if (boundColumn.isMultiValue()) {
         List<String> paramVals = fieldFilter.getValues();
-
-        final Class<?> convertToType;
-        if (ann != null && ann.typeOverride() != void.class) {
-          convertToType = ann.typeOverride();
-        } else {
-          convertToType = prop.getField().getAnnotated().getType();
-        }
 
         List<?> boundVals = paramVals.stream()
             .map(v -> Rosetta.getMapper().convertValue(v, convertToType))
@@ -189,6 +192,8 @@ public class QueryParser<T extends QuerySpec> {
 
         boundColumn = new MultiValuedBoundFilterEntry<>(boundColumn, boundVals);
 
+      } else if (Null.class.equals(boundColumn.getFilter().getClass()) || NotNull.class.equals(boundColumn.getFilter().getClass())) {
+        fieldValues.put(prop.getName(), Defaults.defaultValue(convertToType));
       } else {
         fieldValues.put(prop.getName(), fieldFilter.getValue());
       }
