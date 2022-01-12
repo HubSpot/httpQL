@@ -164,7 +164,7 @@ public class QueryParserTest {
     })
     Integer id;
 
-    @FilterBy(GreaterThan.class)
+    @FilterBy({GreaterThan.class, Null.class})
     Long count;
 
     @FilterBy(Equal.class)
