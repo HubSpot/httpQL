@@ -2,6 +2,7 @@ package com.hubspot.httpql.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.hubspot.httpql.filter.Null;
 import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
@@ -139,6 +140,17 @@ public class QueryParserTest {
     assertThat(offset.get()).isEqualTo(100);
   }
 
+  @Test
+  public void itSupportsEmptyQueryParamValue() {
+    query.put("count__is_null", "");
+    query.put("fullName", "");
+
+    Spec spec = parser.parse(query).getBoundQuery();
+
+    assertThat(spec.getCount()).isNull();
+    assertThat(spec.getFullName()).isEqualTo("");
+  }
+
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
   @RosettaNaming(SnakeCaseStrategy.class)
   public static class Spec implements QuerySpec {
@@ -148,7 +160,7 @@ public class QueryParserTest {
     })
     Integer id;
 
-    @FilterBy(GreaterThan.class)
+    @FilterBy({GreaterThan.class, Null.class})
     Long count;
 
     @FilterBy(Equal.class)
