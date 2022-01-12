@@ -1,6 +1,8 @@
 package com.hubspot.httpql.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.google.common.base.Defaults;
+import com.hubspot.httpql.filter.NotNull;
+import com.hubspot.httpql.filter.Null;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,7 +60,6 @@ public class QueryParser<T extends QuerySpec> {
   private static final Function<String, String> SNAKE_CASE_TRANSFORMER = input -> CaseFormat.LOWER_CAMEL.to(
       CaseFormat.LOWER_UNDERSCORE, input);
   private static final Set<String> RESERVED_WORDS = ImmutableSet.of("offset", "limit", "order", "includeDeleted");
-  private static final ObjectMapper MAPPER = Rosetta.getMapper().enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
 
   private final Class<T> queryType;
   protected final Collection<String> orderableFields;
@@ -74,7 +75,7 @@ public class QueryParser<T extends QuerySpec> {
   protected QueryParser(final Class<T> spec, boolean strictMode, MetaQuerySpec<T> meta, UriParamParser uriParamParser) {
     this.orderableFields = new ArrayList<>();
     this.queryType = spec;
-    this.mapper = MAPPER;
+    this.mapper = Rosetta.getMapper();
     this.meta = meta;
     this.strictMode = strictMode;
     this.uriParamParser = uriParamParser;
@@ -175,15 +176,15 @@ public class QueryParser<T extends QuerySpec> {
         }
       }
 
+      final Class<?> convertToType;
+      if (ann != null && ann.typeOverride() != void.class) {
+        convertToType = ann.typeOverride();
+      } else {
+        convertToType = prop.getField().getAnnotated().getType();
+      }
+
       if (boundColumn.isMultiValue()) {
         List<String> paramVals = fieldFilter.getValues();
-
-        final Class<?> convertToType;
-        if (ann != null && ann.typeOverride() != void.class) {
-          convertToType = ann.typeOverride();
-        } else {
-          convertToType = prop.getField().getAnnotated().getType();
-        }
 
         List<?> boundVals = paramVals.stream()
             .map(v -> mapper.convertValue(v, convertToType))
@@ -191,6 +192,8 @@ public class QueryParser<T extends QuerySpec> {
 
         boundColumn = new MultiValuedBoundFilterEntry<>(boundColumn, boundVals);
 
+      } else if (Null.class.equals(boundColumn.getFilter().getClass()) || NotNull.class.equals(boundColumn.getFilter().getClass())) {
+        fieldValues.put(prop.getName(), Defaults.defaultValue(convertToType));
       } else {
         fieldValues.put(prop.getName(), fieldFilter.getValue());
       }

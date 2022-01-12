@@ -2,6 +2,7 @@ package com.hubspot.httpql.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.hubspot.httpql.filter.NotNull;
 import com.hubspot.httpql.filter.Null;
 import java.util.Optional;
 
@@ -141,14 +142,17 @@ public class QueryParserTest {
   }
 
   @Test
-  public void itSupportsEmptyQueryParamValue() {
-    query.put("count__is_null", "");
-    query.put("fullName", "");
-
+  public void itBindsDefaultValueForNullFilter() {
+    query.put("id__is_null", " ");
     Spec spec = parser.parse(query).getBoundQuery();
+    assertThat(spec.getId()).isNull();
+  }
 
-    assertThat(spec.getCount()).isNull();
-    assertThat(spec.getFullName()).isEqualTo("");
+  @Test
+  public void itBindsDefaultValueForNotNullFilter() {
+    query.put("id__not_null", " ");
+    Spec spec = parser.parse(query).getBoundQuery();
+    assertThat(spec.getId()).isNull();
   }
 
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
@@ -156,7 +160,7 @@ public class QueryParserTest {
   public static class Spec implements QuerySpec {
 
     @FilterBy({
-        Equal.class, In.class
+        Equal.class, In.class, Null.class, NotNull.class
     })
     Integer id;
 
