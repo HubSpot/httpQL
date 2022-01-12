@@ -143,14 +143,14 @@ public class QueryParserTest {
 
   @Test
   public void itBindsDefaultValueForNullFilter() {
-    query.put("id__is_null", "1");
+    query.put("id__is_null", " ");
     Spec spec = parser.parse(query).getBoundQuery();
     assertThat(spec.getId()).isNull();
   }
 
   @Test
   public void itBindsDefaultValueForNotNullFilter() {
-    query.put("id__not_null", "1");
+    query.put("id__not_null", " ");
     Spec spec = parser.parse(query).getBoundQuery();
     assertThat(spec.getId()).isNull();
   }
