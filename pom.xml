@@ -10,7 +10,7 @@
 
   <groupId>com.hubspot.httpql</groupId>
   <artifactId>httpql-parent</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.1</version>
   <packaging>pom</packaging>
 
   <description>A library that exposes SELECT queries through HTTP query parameters.</description>
@@ -58,7 +58,78 @@
     </dependencies>
   </dependencyManagement>
 
+
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.basepom.maven</groupId>
+          <artifactId>duplicate-finder-maven-plugin</artifactId>
+          <configuration>
+            <exceptions combine.children="append">
+              <!-- Well done, Apache... -->
+              <exception>
+                <conflictingDependencies>
+                  <dependency>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils</artifactId>
+                  </dependency>
+                  <dependency>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils-core</artifactId>
+                  </dependency>
+                  <dependency>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                  </dependency>
+                </conflictingDependencies>
+                <classes>
+                  <class>org.apache.commons.collections.ArrayStack</class>
+                  <class>org.apache.commons.collections.Buffer</class>
+                  <class>org.apache.commons.collections.BufferUnderflowException</class>
+                  <class>org.apache.commons.collections.FastHashMap</class>
+                </classes>
+              </exception>
+              <exception>
+                <conflictingDependencies>
+                  <dependency>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils</artifactId>
+                  </dependency>
+                  <dependency>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils-core</artifactId>
+                  </dependency>
+                </conflictingDependencies>
+                <packages>
+                  <package>org.apache.commons.beanutils</package>
+                </packages>
+              </exception>
+            </exceptions>
+            <!-- Ruby is hopeless -->
+            <ignoredDependencies>
+              <dependency>
+                <groupId>org.jruby</groupId>
+                <artifactId>jruby-complete</artifactId>
+              </dependency>
+              <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq</artifactId>
+              </dependency>
+              <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+              </dependency>
+            </ignoredDependencies>
+            <ignoredClassPatterns>
+              <!-- Can remove once https://github.com/basepom/duplicate-finder-maven-plugin/issues/33 is fixed -->
+              <ignoredClassPattern>^META-INF.versions.9.module-info$</ignoredClassPattern>
+            </ignoredClassPatterns>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <groupId>org.jacoco</groupId>
