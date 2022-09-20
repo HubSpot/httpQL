@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>25.4</version>
+    <version>25.7</version>
   </parent>
 
   <groupId>com.hubspot.httpql</groupId>
@@ -21,6 +21,9 @@
   </modules>
 
   <properties>
+    <project.build.targetJdk>11</project.build.targetJdk>
+    <project.build.sourceJdk>11</project.build.sourceJdk>
+    <project.build.releaseJdk>11</project.build.releaseJdk>
     <basepom.check.skip-findbugs>true</basepom.check.skip-findbugs>
   </properties>
 
@@ -50,7 +53,7 @@
       <dependency>
         <groupId>org.jooq</groupId>
         <artifactId>jooq</artifactId>
-        <version>3.7.2</version>
+        <version>3.15.5</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

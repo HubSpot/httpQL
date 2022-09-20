@@ -53,7 +53,7 @@ public class SelectBuilderTest {
     query.put("offset", "5");
 
     parsed = parser.parse(query);
-    queryFormat = "select * from example where (`comments` not like %s escape '!' and `comments` not like %s escape '!' and `id` in (%s, %s) and `count` > %s and `full_name` = %s) limit %s offset %s";
+    queryFormat = "select * from example where (`comments` not like %s escape '!' and `comments` not like %s escape '!' and `count` > %s and `id` in (%s, %s) and `full_name` = %s) limit %s offset %s";
   }
 
   @Test
@@ -113,7 +113,7 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).isEqualTo(String.format(queryFormat, ":1", ":2", ":3", ":4", ":count", ":full_name", ":7", ":8"));
+    assertThat(sql).isEqualTo(String.format(queryFormat, ":1", ":2", ":count", ":4", ":5", ":full_name", ":7", ":8"));
   }
 
   @Test
@@ -122,7 +122,7 @@ public class SelectBuilderTest {
 
     String sql = selectBuilder.build().toString();
 
-    assertThat(sql).isEqualTo(String.format(queryFormat, "'%John%'", "'Jane%'", "1", "2", "100", "'example'", "10", "5"));
+    assertThat(sql).isEqualTo(String.format(queryFormat, "'%John%'", "'Jane%'", "100", "1", "2", "'example'", "10", "5"));
   }
 
   @Test
@@ -143,7 +143,7 @@ public class SelectBuilderTest {
     String sql = selectBuilder.build().toString();
 
     assertThat(sql).startsWith(
-        "select id as `a.id`, full_name as `a.full_name` from example where (`a.comments` not like '%John%' escape '!' and `a.comments` not like 'Jane%' escape '!' and `a.id`");
+        "select id as `a.id`, full_name as `a.full_name` from example where (`a.comments` not like '%John%' escape '!' and `a.comments` not like 'Jane%' escape '!' and `a.count` > 100 and `a.id`");
   }
 
   @Test
@@ -155,7 +155,7 @@ public class SelectBuilderTest {
     String sql = selectBuilder.build().toString();
 
     assertThat(sql).startsWith(
-        "select `example`.`id`, `example`.`full_name` from example where (`example`.`comments` not like '%John%' escape '!' and `example`.`comments` not like 'Jane%' escape '!' and `example`.`id`");
+        "select `example`.`id`, `example`.`full_name` from example where (`example`.`comments` not like '%John%' escape '!' and `example`.`comments` not like 'Jane%' escape '!' and `example`.`count` > 100 and `example`.`id`");
   }
 
   @Test
@@ -166,7 +166,7 @@ public class SelectBuilderTest {
     String sql = selectBuilder.build().toString();
 
     assertThat(sql).isEqualTo(
-        "select count(*) from example where (`comments` not like ? escape '!' and `comments` not like ? escape '!' and `id` in (?, ?) and `count` > ? and `full_name` = ?)");
+        "select count(*) from example where (`comments` not like ? escape '!' and `comments` not like ? escape '!' and `count` > ? and `id` in (?, ?) and `full_name` = ?)");
   }
 
   @Test
