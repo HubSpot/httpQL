@@ -25,9 +25,7 @@ public abstract class ConditionProvider<T> {
   }
 
   public Param<T> getParam(Object value, String paramName) {
-    Param<T> param = DSL.param(paramName, field.getType());
-    param.setConverted(value);
-    return param;
+    return (Param<T>) DSL.val(value);
   }
 
   public Condition getCondition(Object value, String paramName) {
