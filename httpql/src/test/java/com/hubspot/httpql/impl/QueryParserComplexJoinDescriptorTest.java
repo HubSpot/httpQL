@@ -1,15 +1,16 @@
 package com.hubspot.httpql.impl;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.hubspot.httpql.ParsedQuery;
-import com.hubspot.httpql.model.EntityWithComplexJoinDescriptor;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.SelectFinalStep;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.hubspot.httpql.ParsedQuery;
+import com.hubspot.httpql.model.EntityWithComplexJoinDescriptor;
 
 public class QueryParserComplexJoinDescriptorTest {
 
@@ -39,7 +40,7 @@ public class QueryParserComplexJoinDescriptorTest {
             + "`entity_table`.`group_id` = `join_tbl`.`id` "
             + "and `entity_table`.`tag` = `join_tbl`.`id` "
             + "and `join_tbl`.`meta_type` = 'joinObjects' ) "
-            + "where ifnull(`join_tbl`.`topic_id`, 0) = 123 "
+            + "where ifnull(`join_tbl`.`topic_id`, 0) = '123' "
             + "limit 10");
   }
 
