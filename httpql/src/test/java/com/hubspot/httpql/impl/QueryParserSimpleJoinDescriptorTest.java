@@ -1,15 +1,16 @@
 package com.hubspot.httpql.impl;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.hubspot.httpql.ParsedQuery;
-import com.hubspot.httpql.model.EntityWithSimpleJoinDescriptor;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.SelectFinalStep;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.hubspot.httpql.ParsedQuery;
+import com.hubspot.httpql.model.EntityWithSimpleJoinDescriptor;
 
 public class QueryParserSimpleJoinDescriptorTest {
 
@@ -36,7 +37,7 @@ public class QueryParserSimpleJoinDescriptorTest {
     assertThat(StringUtils.normalizeSpace(sql.toString()))
         .isEqualTo("select distinct entity_table.* from entity_table "
             + "join `join_tbl` on `entity_table`.`id` = `join_tbl`.`entity_id` "
-            + "where `join_tbl`.`topic_id` = 123 limit 10");
+            + "where `join_tbl`.`topic_id` = '123' limit 10");
   }
 
   @Test
