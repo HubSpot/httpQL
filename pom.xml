@@ -25,6 +25,8 @@
     <project.build.sourceJdk>11</project.build.sourceJdk>
     <project.build.releaseJdk>11</project.build.releaseJdk>
     <basepom.check.skip-findbugs>true</basepom.check.skip-findbugs>
+    <dep.jackson.version>2.12.6</dep.jackson.version>
+    <dep.jackson-databind.version>${dep.jackson.version}</dep.jackson-databind.version>
   </properties>
 
   <dependencyManagement>
