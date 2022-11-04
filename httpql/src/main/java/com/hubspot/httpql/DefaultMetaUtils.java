@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
@@ -81,7 +82,8 @@ public class DefaultMetaUtils {
 
     boolean snakeCasing = rosettaNaming != null &&
         (rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class) ||
-            rosettaNaming.value().equals(SnakeCaseStrategy.class));
+            rosettaNaming.value().equals(SnakeCaseStrategy.class) ||
+                rosettaNaming.value().equals(PropertyNamingStrategies.SnakeCaseStrategy.class));
 
     if (snakeCasing && !name.contains("_")) {
       return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
