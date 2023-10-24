@@ -11,7 +11,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.ann.FilterBy;
 import com.hubspot.httpql.core.ann.OrderBy;
 import com.hubspot.httpql.core.ann.QueryConstraints;
@@ -278,7 +278,7 @@ public class ParsedQueryTest {
 
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
   @RosettaNaming(SnakeCaseStrategy.class)
-  public static class Spec extends SpecParent implements QuerySpec {
+  public static class Spec extends SpecParent implements HasTableName {
 
     @OrderBy
     @FilterBy(

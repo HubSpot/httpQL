@@ -3,7 +3,7 @@ package com.hubspot.httpql.lib;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.collect.Lists;
 import com.hubspot.httpql.core.FilterEntry;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.httpql.lib.error.UnknownFieldException;
 import com.hubspot.httpql.lib.impl.Ordering;
@@ -26,7 +26,7 @@ import org.jooq.SortOrder;
  * @author tdavis
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class ParsedQuery<T extends QuerySpec> {
+public class ParsedQuery<T extends HasTableName> {
 
   private final Class<T> queryType;
 

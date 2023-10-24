@@ -5,7 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.hubspot.httpql.core.FilterEntry;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.ann.FilterBy;
 import com.hubspot.httpql.core.ann.FilterJoin;
 import com.hubspot.httpql.core.filter.Filter;
@@ -23,7 +23,7 @@ import java.util.Map;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
-public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<T> {
+public class DefaultMetaQuerySpec<T extends HasTableName> implements MetaQuerySpec<T> {
   private final Map<String, BeanPropertyDefinition> fieldMap;
   private final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable;
   private final T instance;

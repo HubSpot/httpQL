@@ -1,7 +1,7 @@
 package com.hubspot.httpql.lib.model;
 
 import com.hubspot.httpql.core.FilterEntry;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.lib.impl.JoinCondition;
 import com.hubspot.httpql.lib.impl.JoinDescriptorImpl;
 import org.jooq.Condition;
@@ -17,7 +17,7 @@ public class EntityComplexJoinDescriptor implements JoinDescriptorImpl {
   }
 
   @Override
-  public JoinCondition getJoinCondition(QuerySpec querySpec) {
+  public JoinCondition getJoinCondition(HasTableName querySpec) {
     Condition joinCondition1 = DSL.field(DSL.name(querySpec.tableName(), "group_id"))
         .eq(DSL.field(DSL.name(JOIN_TABLE_NAME, "id")));
     Condition joinCondition2 = DSL.field(DSL.name(querySpec.tableName(), "tag"))

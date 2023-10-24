@@ -1,10 +1,10 @@
 package com.hubspot.httpql.lib.internal;
 
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.lib.FieldFactory;
 import org.jooq.Condition;
 
-public class OverridableBoundFilterEntry<T extends QuerySpec> extends BoundFilterEntry<T> {
+public class OverridableBoundFilterEntry<T extends HasTableName> extends BoundFilterEntry<T> {
 
   private final Object value;
 
@@ -14,7 +14,7 @@ public class OverridableBoundFilterEntry<T extends QuerySpec> extends BoundFilte
   }
 
   @Override
-  public Condition getCondition(QuerySpec value, FieldFactory fieldFactory) {
+  public Condition getCondition(HasTableName value, FieldFactory fieldFactory) {
     return getConditionProvider(fieldFactory).getCondition(this.value, getProperty().getName());
   }
 

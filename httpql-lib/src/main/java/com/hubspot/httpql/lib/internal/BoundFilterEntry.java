@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.hubspot.httpql.core.FilterEntry;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.ann.FilterBy;
 import com.hubspot.httpql.core.ann.FilterJoin;
 import com.hubspot.httpql.core.filter.Filter;
@@ -21,7 +21,7 @@ import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
-public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry implements FilterEntryConditionCreator<T> {
+public class BoundFilterEntry<T extends HasTableName> extends FilterEntry implements FilterEntryConditionCreator<T> {
 
   private final BeanPropertyDefinition prop;
   private final MetaQuerySpec<T> meta;
@@ -89,7 +89,7 @@ public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry implement
   }
 
   @Override
-  public Condition getCondition(QuerySpec value, FieldFactory fieldFactory) {
+  public Condition getCondition(HasTableName value, FieldFactory fieldFactory) {
     return getConditionProvider(fieldFactory).getCondition(getProperty().getGetter().getValue(value), getProperty().getName());
   }
 
