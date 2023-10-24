@@ -1,11 +1,11 @@
 package com.hubspot.httpql.lib.impl;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import com.hubspot.httpql.core.QuerySpec;
 import com.hubspot.httpql.core.ann.OrderBy;
 import com.hubspot.httpql.lib.FieldFactory;
 import com.hubspot.httpql.lib.MetaQuerySpec;
 import com.hubspot.httpql.lib.ParsedQuery;
-import com.hubspot.httpql.lib.QuerySpec;
 import com.hubspot.httpql.lib.internal.BoundFilterEntry;
 import com.hubspot.httpql.lib.internal.JoinFilter;
 import java.util.ArrayList;

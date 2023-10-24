@@ -1,4 +1,4 @@
-package com.hubspot.httpql.lib;
+package com.hubspot.httpql.core;
 
 
 import com.hubspot.httpql.core.ann.FilterBy;

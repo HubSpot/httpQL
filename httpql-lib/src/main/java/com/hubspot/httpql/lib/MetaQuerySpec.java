@@ -2,6 +2,7 @@ package com.hubspot.httpql.lib;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.collect.Table;
+import com.hubspot.httpql.core.QuerySpec;
 import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.httpql.lib.internal.BoundFilterEntry;
 import java.util.Map;

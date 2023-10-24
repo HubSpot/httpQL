@@ -1,7 +1,7 @@
 package com.hubspot.httpql.lib.model;
 
 import com.hubspot.httpql.core.FilterEntry;
-import com.hubspot.httpql.lib.QuerySpec;
+import com.hubspot.httpql.core.QuerySpec;
 import com.hubspot.httpql.lib.impl.JoinCondition;
 import com.hubspot.httpql.lib.impl.JoinDescriptorImpl;
 import org.jooq.Condition;

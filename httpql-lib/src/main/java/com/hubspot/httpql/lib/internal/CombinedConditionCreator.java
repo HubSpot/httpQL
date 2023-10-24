@@ -2,8 +2,8 @@ package com.hubspot.httpql.lib.internal;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.hubspot.httpql.core.QuerySpec;
 import com.hubspot.httpql.lib.FieldFactory;
-import com.hubspot.httpql.lib.QuerySpec;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,7 +1,7 @@
 package com.hubspot.httpql.lib.internal;
 
+import com.hubspot.httpql.core.QuerySpec;
 import com.hubspot.httpql.lib.FieldFactory;
-import com.hubspot.httpql.lib.QuerySpec;
 import org.jooq.Condition;
 
 public class OverridableBoundFilterEntry<T extends QuerySpec> extends BoundFilterEntry<T> {

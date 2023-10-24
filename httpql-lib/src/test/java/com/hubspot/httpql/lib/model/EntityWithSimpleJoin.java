@@ -1,12 +1,12 @@
 package com.hubspot.httpql.lib.model;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
+import com.hubspot.httpql.core.QuerySpec;
 import com.hubspot.httpql.core.ann.FilterBy;
 import com.hubspot.httpql.core.ann.FilterJoin;
 import com.hubspot.httpql.core.ann.QueryConstraints;
 import com.hubspot.httpql.core.filter.Equal;
 import com.hubspot.httpql.core.filter.In;
-import com.hubspot.httpql.lib.QuerySpec;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
 @RosettaNaming(SnakeCaseStrategy.class)
