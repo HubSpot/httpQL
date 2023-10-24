@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.ann.FilterBy;
 import com.hubspot.httpql.core.ann.QueryConstraints;
 import com.hubspot.httpql.core.filter.Equal;
@@ -155,7 +155,7 @@ public class QueryParserTest {
 
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
   @RosettaNaming(SnakeCaseStrategy.class)
-  public static class Spec implements QuerySpec {
+  public static class Spec implements HasTableName {
 
     @FilterBy({
         Equal.class, In.class, Null.class, NotNull.class

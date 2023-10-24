@@ -2,7 +2,7 @@ package com.hubspot.httpql.lib.internal;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.lib.FieldFactory;
 import java.util.Collection;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.jooq.Condition;
 import org.jooq.Operator;
 import org.jooq.impl.DSL;
 
-public class CombinedConditionCreator<T extends QuerySpec> implements FilterEntryConditionCreator<T> {
+public class CombinedConditionCreator<T extends HasTableName> implements FilterEntryConditionCreator<T> {
 
   private final Operator operator;
 
@@ -23,7 +23,7 @@ public class CombinedConditionCreator<T extends QuerySpec> implements FilterEntr
   }
 
   @Override
-  public Condition getCondition(QuerySpec value, FieldFactory fieldFactory) {
+  public Condition getCondition(HasTableName value, FieldFactory fieldFactory) {
     return DSL.condition(operator, conditionCreators.stream()
         .map(cc -> cc.getCondition(value, fieldFactory))
         .collect(Collectors.toList()));

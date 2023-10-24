@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.hubspot.httpql.core.FilterEntry;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.ann.FilterBy;
 import com.hubspot.httpql.core.ann.OrderBy;
 import com.hubspot.httpql.core.ann.QueryConstraints;
@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class QueryParser<T extends QuerySpec> {
+public class QueryParser<T extends HasTableName> {
   private static final Logger LOG = LoggerFactory.getLogger(QueryParser.class);
 
   private static final Function<String, String> SNAKE_CASE_TRANSFORMER = input -> CaseFormat.LOWER_CAMEL.to(
@@ -101,7 +101,7 @@ public class QueryParser<T extends QuerySpec> {
     }
   }
 
-  public static <T extends QuerySpec> Builder<T> newBuilder(Class<T> spec) {
+  public static <T extends HasTableName> Builder<T> newBuilder(Class<T> spec) {
     return new Builder<>(spec);
   }
 
@@ -293,7 +293,7 @@ public class QueryParser<T extends QuerySpec> {
     return orderableFields;
   }
 
-  public static class Builder<T extends QuerySpec> {
+  public static class Builder<T extends HasTableName> {
     private static final Table<Class<?>, Boolean, QueryParser<?>> CACHED_PARSERS = HashBasedTable.create();
 
     protected Class<T> spec;

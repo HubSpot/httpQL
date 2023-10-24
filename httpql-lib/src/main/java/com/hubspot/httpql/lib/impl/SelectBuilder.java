@@ -1,7 +1,7 @@
 package com.hubspot.httpql.lib.impl;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.ann.OrderBy;
 import com.hubspot.httpql.lib.FieldFactory;
 import com.hubspot.httpql.lib.MetaQuerySpec;
@@ -39,7 +39,7 @@ import org.jooq.impl.DSL;
  * @author tdavis
  */
 @SuppressWarnings("ErrorProne")
-public class SelectBuilder<T extends QuerySpec> {
+public class SelectBuilder<T extends HasTableName> {
 
   private final List<String> includedFieldNames = new ArrayList<>();
   private final List<Field<?>> additionalFields = new ArrayList<>();
@@ -316,11 +316,11 @@ public class SelectBuilder<T extends QuerySpec> {
     return sourceQuery;
   }
 
-  public static <T extends QuerySpec> SelectBuilder<T> forParsedQuery(ParsedQuery<T> parsed, MetaQuerySpec<T> context) {
+  public static <T extends HasTableName> SelectBuilder<T> forParsedQuery(ParsedQuery<T> parsed, MetaQuerySpec<T> context) {
     return new SelectBuilder<>(parsed, context);
   }
 
-  public static <T extends QuerySpec> SelectBuilder<T> forParsedQuery(ParsedQuery<T> parsed) {
+  public static <T extends HasTableName> SelectBuilder<T> forParsedQuery(ParsedQuery<T> parsed) {
     return new SelectBuilder<>(parsed, new DefaultMetaQuerySpec<>(parsed.getQueryType()));
   }
 

@@ -2,20 +2,20 @@ package com.hubspot.httpql.lib;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.collect.Table;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.httpql.lib.internal.BoundFilterEntry;
 import java.util.Map;
 import org.jooq.Field;
 
 /**
- * MetaQuerySpec provides implementations of metadata-related methods related to a given {@link QuerySpec}.
+ * MetaQuerySpec provides implementations of metadata-related methods related to a given {@link HasTableName}.
  * <p>
  * Instances of this interface are primarily used internally and instantiating it is expensive; if you need it, an instance is available via {@link ParsedQuery#getMetaData()}
  *
  * @author tdavis
  */
-public interface MetaQuerySpec<T extends QuerySpec> {
+public interface MetaQuerySpec<T extends HasTableName> {
   /**
    * Returns the type for a field as found on {@code T}.
    */

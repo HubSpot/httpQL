@@ -1,7 +1,7 @@
 package com.hubspot.httpql.lib.model;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
-import com.hubspot.httpql.core.QuerySpec;
+import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.ann.FilterBy;
 import com.hubspot.httpql.core.ann.FilterJoinByDescriptor;
 import com.hubspot.httpql.core.ann.QueryConstraints;
@@ -11,7 +11,7 @@ import com.hubspot.rosetta.annotations.RosettaNaming;
 
 @RosettaNaming(SnakeCaseStrategy.class)
 @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 1000)
-public class EntityWithComplexJoinDescriptor implements QuerySpec {
+public class EntityWithComplexJoinDescriptor implements HasTableName {
 
   @FilterBy(Equal.class)
   private Long id;
