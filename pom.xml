@@ -43,6 +43,16 @@
         <artifactId>httpql-jersey1</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.hubspot.httpql</groupId>
+        <artifactId>httpql-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.hubspot.httpql</groupId>
+        <artifactId>httpql-lib</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>com.hubspot.rosetta</groupId>
