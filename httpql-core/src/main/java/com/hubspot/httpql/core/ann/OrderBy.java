@@ -1,4 +1,4 @@
-package com.hubspot.httpql.ann;
+package com.hubspot.httpql.core.ann;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -18,6 +18,7 @@
   <modules>
     <module>httpql</module>
     <module>httpql-jersey1</module>
+    <module>httpql/httpql-core</module>
   </modules>
 
   <properties>
