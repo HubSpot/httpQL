@@ -18,8 +18,6 @@
   <modules>
     <module>httpql</module>
     <module>httpql-jersey1</module>
-    <module>httpql-core</module>
-    <module>httpql-lib</module>
   </modules>
 
   <properties>
@@ -41,6 +39,16 @@
       <dependency>
         <groupId>com.hubspot.httpql</groupId>
         <artifactId>httpql-jersey1</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.hubspot.httpql</groupId>
+        <artifactId>httpql-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.hubspot.httpql</groupId>
+        <artifactId>httpql-lib</artifactId>
         <version>${project.version}</version>
       </dependency>
 
