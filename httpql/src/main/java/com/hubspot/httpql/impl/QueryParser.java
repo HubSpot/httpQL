@@ -1,11 +1,28 @@
 package com.hubspot.httpql.impl;
 
+import com.google.common.base.Defaults;
+import com.hubspot.httpql.filter.NotNull;
+import com.hubspot.httpql.filter.Null;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.jooq.Operator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CaseFormat;
-import com.google.common.base.Defaults;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
@@ -23,28 +40,12 @@ import com.hubspot.httpql.error.ConstraintType;
 import com.hubspot.httpql.error.ConstraintViolation;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.error.LimitViolationType;
-import com.hubspot.httpql.filter.NotNull;
-import com.hubspot.httpql.filter.Null;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
 import com.hubspot.rosetta.Rosetta;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.jooq.Operator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Primary entry point into httpQL.
@@ -92,12 +93,9 @@ public class QueryParser<T extends QuerySpec> {
   }
 
   protected void buildOrderableFields(final Map<String, BeanPropertyDefinition> fields) {
-    Annotation ann;
+    OrderBy ann;
     for (Map.Entry<String, BeanPropertyDefinition> entry : fields.entrySet()) {
-      ann = DefaultMetaUtils.findAnnotation(entry.getValue(), com.hubspot.httpql.core.ann.OrderBy.class);
-      if (ann == null) {
-        ann = DefaultMetaUtils.findAnnotation(entry.getValue(), OrderBy.class);
-      }
+      ann = DefaultMetaUtils.findOrderBy(entry.getValue());
       if (ann != null) {
         orderableFields.add(entry.getKey());
       }
