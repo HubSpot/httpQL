@@ -1,21 +1,19 @@
-package com.hubspot.httpql.lib.filter;
+package com.hubspot.httpql.impl.filter;
 
+import com.hubspot.httpql.ConditionProvider;
+import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.core.filter.FilterIF;
-import com.hubspot.httpql.core.filter.IsDistinctFrom;
-import com.hubspot.httpql.lib.ConditionProvider;
-import com.hubspot.httpql.lib.MultiParamConditionProvider;
+import com.hubspot.httpql.core.filter.In;
 import java.util.Collection;
-import java.util.stream.Collectors;
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.impl.DSL;
 
-public class IsDistinctFromImpl extends FilterBase implements FilterImpl {
+public class InImpl extends FilterBase implements FilterImpl {
 
   @Override
   public String[] names() {
     return new String[] {
-        "distinct"
+        "in"
     };
   }
 
@@ -25,15 +23,15 @@ public class IsDistinctFromImpl extends FilterBase implements FilterImpl {
 
       @Override
       public Condition getCondition(Collection<T> values) {
-        return DSL.and(values.stream()
-            .map(field::isDistinctFrom)
-            .collect(Collectors.toList()));
+        return field.in(values);
       }
+
     };
   }
 
   @Override
   public Class<? extends FilterIF> getAnnotationClass() {
-    return IsDistinctFrom.class;
+    return In.class;
   }
+
 }

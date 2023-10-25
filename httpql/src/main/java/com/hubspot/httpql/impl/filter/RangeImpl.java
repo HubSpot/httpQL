@@ -1,10 +1,10 @@
-package com.hubspot.httpql.lib.filter;
+package com.hubspot.httpql.impl.filter;
 
 import com.google.common.base.Preconditions;
+import com.hubspot.httpql.ConditionProvider;
+import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.core.filter.Range;
-import com.hubspot.httpql.lib.ConditionProvider;
-import com.hubspot.httpql.lib.MultiParamConditionProvider;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;

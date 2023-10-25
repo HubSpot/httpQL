@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.collect.Lists;
 import com.hubspot.httpql.core.FilterEntry;
 import com.hubspot.httpql.core.HasTableName;
-import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.lib.error.UnknownFieldException;
 import com.hubspot.httpql.lib.impl.Ordering;
 import com.hubspot.httpql.lib.impl.TableQualifiedFieldFactory;
@@ -105,7 +105,7 @@ public class ParsedQuery<T extends HasTableName> {
    * @param fieldName
    *          Name as seen in the query; not multi-value proxies ("id", not "ids")
    */
-  public boolean hasFilter(String fieldName, Class<? extends Filter> filterType) {
+  public boolean hasFilter(String fieldName, Class<? extends FilterIF> filterType) {
     for (BoundFilterEntry<T> bfe : getBoundFilterEntries()) {
       if (bfe.getQueryName().equals(fieldName) && bfe.getFilter().getClass().equals(filterType)) {
         return true;
@@ -124,7 +124,7 @@ public class ParsedQuery<T extends HasTableName> {
    * @throws IllegalArgumentException
    *           When {@code value} is of the wrong type
    */
-  public void addFilter(String fieldName, Class<? extends Filter> filterType, Object value) {
+  public void addFilter(String fieldName, Class<? extends FilterIF> filterType, Object value) {
     BeanPropertyDefinition filterProperty = meta.getFilterProperty(fieldName, filterType);
     BoundFilterEntry<T> boundColumn = meta.getNewBoundFilterEntry(fieldName, filterType);
 
@@ -163,7 +163,7 @@ public class ParsedQuery<T extends HasTableName> {
    * @param fieldName
    *          Name as seen in the query; not multi-value proxies ("id", not "ids")
    */
-  public void addFilterExclusively(String fieldName, Class<? extends Filter> filterType, Object value) {
+  public void addFilterExclusively(String fieldName, Class<? extends FilterIF> filterType, Object value) {
     removeFiltersFor(fieldName);
     addFilter(fieldName, filterType, value);
   }

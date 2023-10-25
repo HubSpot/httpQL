@@ -7,7 +7,7 @@ import com.hubspot.httpql.core.FilterEntry;
 import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.ann.FilterBy;
 import com.hubspot.httpql.core.ann.FilterJoin;
-import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.lib.ConditionProvider;
 import com.hubspot.httpql.lib.DefaultMetaUtils;
 import com.hubspot.httpql.lib.FieldFactory;
@@ -29,14 +29,14 @@ public class BoundFilterEntry<T extends HasTableName> extends FilterEntry implem
 
   private final FilterImpl filterImpl;
 
-  public BoundFilterEntry(Filter filter, FilterImpl filterImpl, String fieldName, String queryName, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
+  public BoundFilterEntry(FilterIF filter, FilterImpl filterImpl, String fieldName, String queryName, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
     super(filter, fieldName, queryName, meta.getQueryType());
     this.prop = prop;
     this.meta = meta;
     this.filterImpl = filterImpl;
   }
 
-  public BoundFilterEntry(Filter filter, FilterImpl filterImpl, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
+  public BoundFilterEntry(FilterIF filter, FilterImpl filterImpl, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
     super(filter, prop.getName(), getBestQueryName(prop), meta.getQueryType());
     this.prop = prop;
     this.meta = meta;

@@ -1,7 +1,7 @@
 package com.hubspot.httpql.lib.filter;
 
 import com.hubspot.httpql.core.filter.Equal;
-import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.lib.ConditionProvider;
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -29,7 +29,7 @@ public class EqualImpl extends FilterBase implements FilterImpl {
   }
 
   @Override
-  public Class<? extends Filter> getAnnotationClass() {
+  public Class<? extends FilterIF> getAnnotationClass() {
     return Equal.class;
   }
 

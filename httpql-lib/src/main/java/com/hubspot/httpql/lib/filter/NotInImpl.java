@@ -1,6 +1,6 @@
 package com.hubspot.httpql.lib.filter;
 
-import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.core.filter.NotIn;
 import com.hubspot.httpql.lib.ConditionProvider;
 import com.hubspot.httpql.lib.MultiParamConditionProvider;
@@ -30,7 +30,7 @@ public class NotInImpl extends FilterBase implements FilterImpl {
   }
 
   @Override
-  public Class<? extends Filter> getAnnotationClass() {
+  public Class<? extends FilterIF> getAnnotationClass() {
     return NotIn.class;
   }
 

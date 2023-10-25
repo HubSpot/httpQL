@@ -1,18 +1,17 @@
-package com.hubspot.httpql.lib.filter;
+package com.hubspot.httpql.impl.filter;
 
+import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.core.filter.FilterIF;
-import com.hubspot.httpql.core.filter.StartsWith;
-import com.hubspot.httpql.lib.ConditionProvider;
+import com.hubspot.httpql.core.filter.Null;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Param;
 
-public class StartsWithImpl extends FilterBase implements FilterImpl {
-
+public class NullImpl extends FilterBase implements FilterImpl {
   @Override
   public String[] names() {
     return new String[] {
-        "startswith"
+        "is_null"
     };
   }
 
@@ -22,15 +21,13 @@ public class StartsWithImpl extends FilterBase implements FilterImpl {
 
       @Override
       public Condition getCondition(Param<T> value) {
-        return field.startsWith(value);
+        return field.isNull();
       }
-
     };
   }
 
   @Override
   public Class<? extends FilterIF> getAnnotationClass() {
-    return StartsWith.class;
+    return Null.class;
   }
-
 }

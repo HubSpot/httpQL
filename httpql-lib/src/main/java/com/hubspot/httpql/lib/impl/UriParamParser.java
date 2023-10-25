@@ -4,7 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.lib.ConditionProvider;
 import com.hubspot.httpql.lib.MultiParamConditionProvider;
 import com.hubspot.httpql.lib.error.FilterViolation;
@@ -25,7 +25,7 @@ import org.jooq.impl.DSL;
 public class UriParamParser {
 
   public static final Map<String, FilterImpl> BY_NAME = new HashMap<>();
-  public static final Map<Class<? extends Filter>, FilterImpl> FILTER_IMPLS = new HashMap<>();
+  public static final Map<Class<? extends FilterIF>, FilterImpl> FILTER_IMPLS = new HashMap<>();
   private static final ServiceLoader<FilterImpl> LOADER = ServiceLoader.load(FilterImpl.class);
 
   private static final String FILTER_PARAM_DELIMITER = "__";
@@ -48,11 +48,11 @@ public class UriParamParser {
     this.ignoredParams = ignoredParams;
   }
 
-  public static FilterImpl getFilterImpl(Class<? extends Filter> filter) {
+  public static FilterImpl getFilterImpl(Class<? extends FilterIF> filter) {
     return FILTER_IMPLS.get(filter);
   }
 
-  public static Optional<Class<? extends Filter>> getFilterByName(String name) {
+  public static Optional<Class<? extends FilterIF>> getFilterByName(String name) {
     if (!BY_NAME.containsKey(name)) {
       return Optional.empty();
     }

@@ -1,6 +1,6 @@
 package com.hubspot.httpql.core.ann;
 
-import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.core.filter.FilterIF;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
     ElementType.FIELD, ElementType.METHOD
 })
 public @interface FilterBy {
-  Class<? extends Filter>[] value();
+  Class<? extends FilterIF>[] value();
 
   String as() default "";
 

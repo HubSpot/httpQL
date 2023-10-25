@@ -1,6 +1,6 @@
 package com.hubspot.httpql.lib.internal;
 
-import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.lib.ConditionProvider;
 import com.hubspot.httpql.lib.filter.FilterImpl;
 import com.hubspot.httpql.lib.impl.JoinCondition;
@@ -30,7 +30,7 @@ public class JoinFilter implements FilterImpl {
   }
 
   @Override
-  public Class<? extends Filter> getAnnotationClass() {
+  public Class<? extends FilterIF> getAnnotationClass() {
     return null;
   }
 

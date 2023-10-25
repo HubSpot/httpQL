@@ -1,9 +1,9 @@
-package com.hubspot.httpql.lib.filter;
+package com.hubspot.httpql.impl.filter;
 
+import com.hubspot.httpql.ConditionProvider;
+import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.core.filter.NotLike;
-import com.hubspot.httpql.lib.ConditionProvider;
-import com.hubspot.httpql.lib.MultiParamConditionProvider;
 import java.util.Collection;
 import java.util.Iterator;
 import org.jooq.Condition;

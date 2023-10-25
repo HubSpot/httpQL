@@ -10,7 +10,7 @@ import com.hubspot.httpql.core.ann.FilterBy;
 import com.hubspot.httpql.core.ann.FilterJoin;
 import com.hubspot.httpql.core.ann.FilterJoinByDescriptor;
 import com.hubspot.httpql.core.ann.OrderBy;
-import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.lib.impl.JoinDescriptorImpl;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 import java.lang.annotation.Annotation;
@@ -92,7 +92,7 @@ public class DefaultMetaUtils {
     return name;
   }
 
-  public static Filter getFilterInstance(Class<? extends Filter> filterType) {
+  public static FilterIF getFilterInstance(Class<? extends FilterIF> filterType) {
     try {
       return filterType.getDeclaredConstructor().newInstance();
     } catch (ReflectiveOperationException e) {

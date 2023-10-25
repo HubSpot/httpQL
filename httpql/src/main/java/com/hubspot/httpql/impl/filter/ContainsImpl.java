@@ -1,28 +1,28 @@
-package com.hubspot.httpql.lib.filter;
+package com.hubspot.httpql.impl.filter;
 
+import com.hubspot.httpql.ConditionProvider;
+import com.hubspot.httpql.core.filter.Contains;
 import com.hubspot.httpql.core.filter.FilterIF;
-import com.hubspot.httpql.core.filter.StartsWith;
-import com.hubspot.httpql.lib.ConditionProvider;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Param;
 
-public class StartsWithImpl extends FilterBase implements FilterImpl {
+public class ContainsImpl extends FilterBase implements FilterImpl {
 
   @Override
   public String[] names() {
     return new String[] {
-        "startswith"
+        "contains", "like"
     };
   }
 
   @Override
-  public <T> ConditionProvider<T> getConditionProvider(Field<T> field) {
+  public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
     return new ConditionProvider<T>(field) {
 
       @Override
       public Condition getCondition(Param<T> value) {
-        return field.startsWith(value);
+        return field.contains(value);
       }
 
     };
@@ -30,7 +30,7 @@ public class StartsWithImpl extends FilterBase implements FilterImpl {
 
   @Override
   public Class<? extends FilterIF> getAnnotationClass() {
-    return StartsWith.class;
+    return Contains.class;
   }
 
 }

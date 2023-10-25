@@ -8,7 +8,7 @@ import com.hubspot.httpql.core.FilterEntry;
 import com.hubspot.httpql.core.HasTableName;
 import com.hubspot.httpql.core.ann.FilterBy;
 import com.hubspot.httpql.core.ann.FilterJoin;
-import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.lib.DefaultMetaUtils;
 import com.hubspot.httpql.lib.FieldFactory;
 import com.hubspot.httpql.lib.MetaQuerySpec;
@@ -73,7 +73,7 @@ public class DefaultMetaQuerySpec<T extends HasTableName> implements MetaQuerySp
   @Override
   @SuppressWarnings("unchecked")
   // Unchecked is an empty array.
-  public Class<? extends Filter>[] getFiltersForField(String name) {
+  public Class<? extends FilterIF>[] getFiltersForField(String name) {
     BeanPropertyDefinition prop = fieldMap.get(name);
     if (prop != null) {
       FilterBy ann = DefaultMetaUtils.findFilterBy(prop);
@@ -96,7 +96,7 @@ public class DefaultMetaQuerySpec<T extends HasTableName> implements MetaQuerySp
   @Override
   @SafeVarargs
   public final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> tableFor(BeanPropertyDefinition field,
-                                                                                   Class<? extends Filter>... filters) {
+                                                                                   Class<? extends FilterIF>... filters) {
 
     final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> table = HashBasedTable.create();
 
@@ -114,9 +114,9 @@ public class DefaultMetaQuerySpec<T extends HasTableName> implements MetaQuerySp
       }
     }
 
-    for (Class<? extends Filter> filterType : filters) {
+    for (Class<? extends FilterIF> filterType : filters) {
 
-      Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
+      FilterIF filter = DefaultMetaUtils.getFilterInstance(filterType);
       FilterImpl filterImpl = UriParamParser.getFilterImpl(filterType);
       if (join != null) {
         filterImpl = new JoinFilter(filterImpl, join);
@@ -132,10 +132,10 @@ public class DefaultMetaQuerySpec<T extends HasTableName> implements MetaQuerySp
   }
 
   @Override
-  public BoundFilterEntry<T> getNewBoundFilterEntry(String fieldName, Class<? extends Filter> filterType) {
+  public BoundFilterEntry<T> getNewBoundFilterEntry(String fieldName, Class<? extends FilterIF> filterType) {
     // Filter can be null; we only want FilterEntry for name normalization
     FilterImpl filterImpl = UriParamParser.getFilterImpl(filterType);
-    Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
+    FilterIF filter = DefaultMetaUtils.getFilterInstance(filterType);
     FilterEntry filterEntry = new FilterEntry(filter, fieldName, getQueryType());
     BeanPropertyDefinition filterProperty = getFilterProperty(fieldName, filterType);
     if (filterProperty == null) {
@@ -152,9 +152,9 @@ public class DefaultMetaQuerySpec<T extends HasTableName> implements MetaQuerySp
   }
 
   @Override
-  public BeanPropertyDefinition getFilterProperty(String fieldName, Class<? extends Filter> filterType) {
+  public BeanPropertyDefinition getFilterProperty(String fieldName, Class<? extends FilterIF> filterType) {
     // Filter can be null; we only want FilterEntry for name normalization
-    Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
+    FilterIF filter = DefaultMetaUtils.getFilterInstance(filterType);
     FilterEntry filterEntry = new FilterEntry(filter, fieldName, getQueryType());
     FilterImpl filterImpl = UriParamParser.getFilterImpl(filterType);
     final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable = getFilterTable();

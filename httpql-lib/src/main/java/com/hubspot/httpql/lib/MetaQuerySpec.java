@@ -3,7 +3,7 @@ package com.hubspot.httpql.lib;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.collect.Table;
 import com.hubspot.httpql.core.HasTableName;
-import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.lib.internal.BoundFilterEntry;
 import java.util.Map;
 import org.jooq.Field;
@@ -44,21 +44,21 @@ public interface MetaQuerySpec<T extends HasTableName> {
   /**
    * Returns an array of filter types for a field based on its annotations.
    */
-  Class<? extends Filter>[] getFiltersForField(String name);
+  Class<? extends FilterIF>[] getFiltersForField(String name);
 
   /**
    * Provides a narrowed view of the table provided by {@link #getFilterTable()} by looking at only a specific field and set of filters.
    * <p>
    * This method should *not* perform validation on the entries in {@code filters} to, e.g., check for existence of the filter on the field.
    */
-  Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> tableFor(BeanPropertyDefinition field, Class<? extends Filter>... filters);
+  Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> tableFor(BeanPropertyDefinition field, Class<? extends FilterIF>... filters);
 
   /**
    * Returns a new BoundFilterEntry<T> based on the query spec.
    */
-  BoundFilterEntry<T> getNewBoundFilterEntry(String fieldName, Class<? extends Filter> filterType);
+  BoundFilterEntry<T> getNewBoundFilterEntry(String fieldName, Class<? extends FilterIF> filterType);
 
-  BeanPropertyDefinition getFilterProperty(String fieldName, Class<? extends Filter> filterType);
+  BeanPropertyDefinition getFilterProperty(String fieldName, Class<? extends FilterIF> filterType);
 
   Class<T> getQueryType();
 }

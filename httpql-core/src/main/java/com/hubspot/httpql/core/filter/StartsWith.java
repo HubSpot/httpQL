@@ -1,6 +1,6 @@
 package com.hubspot.httpql.core.filter;
 
-public class StartsWith implements Filter {
+public class StartsWith implements FilterIF {
 
 
 }
