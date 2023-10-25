@@ -1,28 +1,11 @@
 package com.hubspot.httpql.impl;
 
-import com.google.common.base.Defaults;
-import com.hubspot.httpql.filter.NotNull;
-import com.hubspot.httpql.filter.Null;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.jooq.Operator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CaseFormat;
+import com.google.common.base.Defaults;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
@@ -30,6 +13,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.hubspot.httpql.DefaultMetaUtils;
+import com.hubspot.httpql.Filters;
 import com.hubspot.httpql.MetaQuerySpec;
 import com.hubspot.httpql.ParsedQuery;
 import com.hubspot.httpql.QueryConstraints;
@@ -40,12 +24,28 @@ import com.hubspot.httpql.error.ConstraintType;
 import com.hubspot.httpql.error.ConstraintViolation;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.error.LimitViolationType;
+import com.hubspot.httpql.filter.NotNull;
+import com.hubspot.httpql.filter.Null;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
 import com.hubspot.rosetta.Rosetta;
+import org.jooq.Operator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Primary entry point into httpQL.
@@ -146,7 +146,7 @@ public class QueryParser<T extends QuerySpec> {
       String finalFieldName = fieldName;
       Optional<BoundFilterEntry<T>> filterEntryOptional = filterTable.rowKeySet().stream()
           .filter(f -> Objects.equals(f.getFieldName(), finalFieldName)
-              && Objects.equals(f.getFilter(), UriParamParser.BY_NAME.get(filterName)))
+              && Objects.equals(Optional.of(f.getFilter()), Filters.getFilterByName(filterName)))
           .findFirst();
 
       // Use reserved words instead of simple look-up to throw exception on disallowed fields

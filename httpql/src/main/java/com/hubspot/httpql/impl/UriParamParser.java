@@ -1,46 +1,34 @@
 package com.hubspot.httpql.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.jooq.impl.DSL;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.Filter;
+import com.hubspot.httpql.Filters;
 import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.filter.Equal;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.jooq.impl.DSL;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class UriParamParser {
 
-  public static final Map<String, Filter> BY_NAME = new HashMap<>();
-  private static final ServiceLoader<Filter> LOADER = ServiceLoader.load(Filter.class);
 
   private static final String FILTER_PARAM_DELIMITER = "__";
   private static final Splitter FILTER_PARAM_SPLITTER = Splitter.on(FILTER_PARAM_DELIMITER).trimResults();
   private static final Joiner FILTER_PARAM_JOINER = Joiner.on(FILTER_PARAM_DELIMITER);
   private static final Splitter MULTIVALUE_PARAM_SPLITTER = Splitter.on(",").omitEmptyStrings().trimResults();
-
-  static {
-    for (Filter filter : LOADER) {
-      for (String name : filter.names()) {
-        BY_NAME.put(name, filter);
-      }
-    }
-  }
 
   private final Set<String> ignoredParams;
 
@@ -107,20 +95,20 @@ public class UriParamParser {
 
       final String fieldName = fieldNameFromParts(parts, allowDoubleUnderscoreInFieldName);
       final String filterName = filterNameFromParts(parts);
-      final Filter filter = BY_NAME.get(filterName);
+      final Optional<Filter> filter = Filters.getFilterByName(filterName);
 
-      if (filter == null) {
+      if (filter.isEmpty()) {
         throw new FilterViolation(String.format("Unknown filter type `%s`", filterName));
       }
 
       List<String> values = entry.getValue();
-      ConditionProvider conditionProvider = filter.getConditionProvider(DSL.field(fieldName));
+      ConditionProvider conditionProvider = filter.get().getConditionProvider(DSL.field(fieldName));
 
       if (conditionProvider instanceof MultiParamConditionProvider && values.size() == 1 && values.get(0).contains(",")) {
         values = MULTIVALUE_PARAM_SPLITTER.splitToList(values.get(0));
       }
 
-      result.addFieldFilter(new FieldFilter(filter, filterName, fieldName, values));
+      result.addFieldFilter(new FieldFilter(filter.get(), filterName, fieldName, values));
     }
 
     return result;
@@ -139,7 +127,7 @@ public class UriParamParser {
       return parts.get(0);
     }
 
-    if (BY_NAME.keySet().contains(parts.get(parts.size() - 1))) {
+    if (Filters.getFilterImplByName(parts.get(parts.size() - 1)).isPresent()) {
       List<String> partsCopy = new ArrayList<>(parts);
       partsCopy.remove(parts.size() - 1);
       return FILTER_PARAM_JOINER.join(partsCopy);
