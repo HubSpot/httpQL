@@ -1,11 +1,14 @@
 package com.hubspot.httpql.impl.filter;
 
+import com.google.common.collect.ImmutableSet;
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.core.filter.NotEqual;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Param;
+
+import java.util.Set;
 
 public class NotEqualImpl extends FilterBase implements FilterImpl {
 
@@ -29,8 +32,8 @@ public class NotEqualImpl extends FilterBase implements FilterImpl {
   }
 
   @Override
-  public Class<? extends FilterIF> getAnnotationClass() {
-    return NotEqual.class;
+  public Set<Class<? extends FilterIF>> getAnnotationClasses() {
+    return ImmutableSet.of(NotEqual.class, com.hubspot.httpql.filter.NotEqual.class);
   }
 
 }

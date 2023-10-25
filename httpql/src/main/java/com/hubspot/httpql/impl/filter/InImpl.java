@@ -1,12 +1,15 @@
 package com.hubspot.httpql.impl.filter;
 
+import com.google.common.collect.ImmutableSet;
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.core.filter.In;
-import java.util.Collection;
 import org.jooq.Condition;
 import org.jooq.Field;
+
+import java.util.Collection;
+import java.util.Set;
 
 public class InImpl extends FilterBase implements FilterImpl {
 
@@ -30,8 +33,8 @@ public class InImpl extends FilterBase implements FilterImpl {
   }
 
   @Override
-  public Class<? extends FilterIF> getAnnotationClass() {
-    return In.class;
+  public Set<Class<? extends FilterIF>> getAnnotationClasses() {
+    return ImmutableSet.of(In.class, com.hubspot.httpql.filter.In.class);
   }
 
 }

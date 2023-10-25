@@ -1,5 +1,6 @@
 package com.hubspot.httpql;
 
+import com.hubspot.httpql.core.filter.FilterIF;
 import org.jooq.Field;
 
 /**
@@ -7,7 +8,7 @@ import org.jooq.Field;
  *
  * @author tdavis
  */
-public interface Filter {
+public interface Filter extends FilterIF {
   /**
    * List of names the operator goes by in queries; the {@code gt} in {@code foo_gt=1}
    */
