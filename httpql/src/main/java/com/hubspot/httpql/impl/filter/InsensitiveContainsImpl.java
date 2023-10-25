@@ -1,5 +1,6 @@
 package com.hubspot.httpql.impl.filter;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.hubspot.httpql.ConditionProvider;
@@ -8,6 +9,8 @@ import com.hubspot.httpql.core.filter.InsensitiveContains;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Param;
+
+import java.util.Set;
 
 public class InsensitiveContainsImpl extends FilterBase implements FilterImpl {
   private static final Escaper ESCAPER = Escapers.builder()
@@ -39,8 +42,8 @@ public class InsensitiveContainsImpl extends FilterBase implements FilterImpl {
   }
 
   @Override
-  public Class<? extends FilterIF> getAnnotationClass() {
-    return InsensitiveContains.class;
+  public Set<Class<? extends FilterIF>> getAnnotationClasses() {
+    return ImmutableSet.of(InsensitiveContains.class, com.hubspot.httpql.filter.InsensitiveContains.class);
   }
 
 }

@@ -1,14 +1,17 @@
 package com.hubspot.httpql.impl.filter;
 
+import com.google.common.collect.ImmutableSet;
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.core.filter.FilterIF;
 import com.hubspot.httpql.core.filter.IsDistinctFrom;
-import java.util.Collection;
-import java.util.stream.Collectors;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class IsDistinctFromImpl extends FilterBase implements FilterImpl {
 
@@ -33,7 +36,7 @@ public class IsDistinctFromImpl extends FilterBase implements FilterImpl {
   }
 
   @Override
-  public Class<? extends FilterIF> getAnnotationClass() {
-    return IsDistinctFrom.class;
+  public Set<Class<? extends FilterIF>> getAnnotationClasses() {
+    return ImmutableSet.of(IsDistinctFrom.class, com.hubspot.httpql.filter.IsDistinctFrom.class);
   }
 }

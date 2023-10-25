@@ -4,6 +4,8 @@ import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.core.filter.FilterIF;
 import org.jooq.Field;
 
+import java.util.Set;
+
 /**
  * Effectively the operator in a WHERE clause condition.
  *
@@ -17,6 +19,6 @@ public interface FilterImpl {
 
   <T> ConditionProvider<T> getConditionProvider(Field<T> field);
 
-  Class<? extends FilterIF> getAnnotationClass();
+  Set<Class<? extends FilterIF>> getAnnotationClasses();
 
 }

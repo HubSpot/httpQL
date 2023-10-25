@@ -23,11 +23,11 @@ public class Filters {
             }
         }
 
-        for (FilterImpl filter : FILTER_IMPL_LOADER) {
-            for (String name : filter.names()) {
-                FILTER_IMPLS_BY_NAME.put(name, filter);
+        for (FilterImpl filterImpl : FILTER_IMPL_LOADER) {
+            for (String name : filterImpl.names()) {
+                FILTER_IMPLS_BY_NAME.put(name, filterImpl);
             }
-            FILTER_IMPLS.put(filter.getAnnotationClass(), filter);
+            filterImpl.getAnnotationClasses().forEach(f -> FILTER_IMPLS.put(f, filterImpl));
         }
     }
 
