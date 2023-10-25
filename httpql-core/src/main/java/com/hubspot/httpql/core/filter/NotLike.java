@@ -1,4 +1,4 @@
 package com.hubspot.httpql.core.filter;
 
-public class NotLike implements Filter {
+public class NotLike implements FilterIF {
 }

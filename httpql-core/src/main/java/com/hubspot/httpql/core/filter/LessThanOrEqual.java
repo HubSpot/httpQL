@@ -1,6 +1,6 @@
 package com.hubspot.httpql.core.filter;
 
-public class LessThanOrEqual implements Filter {
+public class LessThanOrEqual implements FilterIF {
 
 
 }

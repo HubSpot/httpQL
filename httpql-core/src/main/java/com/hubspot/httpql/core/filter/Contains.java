@@ -1,5 +1,5 @@
 package com.hubspot.httpql.core.filter;
 
-public class Contains implements Filter {
+public class Contains implements FilterIF {
 
 }

@@ -1,5 +1,5 @@
 package com.hubspot.httpql.core.filter;
 
-public class GreaterThan  implements Filter {
+public class GreaterThan  implements FilterIF {
 
 }
