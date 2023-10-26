@@ -1,5 +1,6 @@
 package com.hubspot.httpql.core;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Splitter;
 
@@ -27,6 +28,7 @@ public class Ordering implements OrderingIF {
     this.queryName = queryName;
   }
 
+  @JsonCreator
   public static Ordering fromString(String ordering) {
     SortOrder order;
     if (ordering.startsWith("-")) {
