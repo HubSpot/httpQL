@@ -1,19 +1,18 @@
 package com.hubspot.httpql.filter;
 
+import com.google.common.base.Preconditions;
+import com.hubspot.httpql.ConditionProvider;
+import com.hubspot.httpql.Filter;
+import com.hubspot.httpql.MultiParamConditionProvider;
+import org.jooq.Condition;
+import org.jooq.Field;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import org.jooq.Condition;
-import org.jooq.Field;
-
-import com.google.common.base.Preconditions;
-import com.hubspot.httpql.ConditionProvider;
-import com.hubspot.httpql.Filter;
-import com.hubspot.httpql.MultiParamConditionProvider;
 
 public class Range extends FilterBase implements Filter {
 
@@ -30,6 +29,12 @@ public class Range extends FilterBase implements Filter {
         "range"
     };
   }
+
+  @Override
+  public boolean takesMultiParameters() {
+    return true;
+  }
+
 
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {

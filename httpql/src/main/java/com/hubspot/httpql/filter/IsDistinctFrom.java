@@ -1,15 +1,14 @@
 package com.hubspot.httpql.filter;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
+import com.hubspot.httpql.ConditionProvider;
+import com.hubspot.httpql.Filter;
+import com.hubspot.httpql.MultiParamConditionProvider;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
-import com.hubspot.httpql.ConditionProvider;
-import com.hubspot.httpql.Filter;
-import com.hubspot.httpql.MultiParamConditionProvider;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class IsDistinctFrom extends FilterBase implements Filter {
 
@@ -18,6 +17,11 @@ public class IsDistinctFrom extends FilterBase implements Filter {
     return new String[] {
         "distinct"
     };
+  }
+
+  @Override
+  public boolean takesMultiParameters() {
+    return true;
   }
 
   @Override

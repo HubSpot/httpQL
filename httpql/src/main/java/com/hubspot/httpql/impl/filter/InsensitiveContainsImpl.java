@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.hubspot.httpql.ConditionProvider;
-import com.hubspot.httpql.core.filter.FilterIF;
+import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.httpql.core.filter.InsensitiveContains;
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -21,13 +21,6 @@ public class InsensitiveContainsImpl extends FilterBase implements FilterImpl {
       .build();
 
   @Override
-  public String[] names() {
-    return new String[] {
-        "icontains", "ilike"
-    };
-  }
-
-  @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
     return new ConditionProvider<T>(field) {
 
@@ -42,7 +35,7 @@ public class InsensitiveContainsImpl extends FilterBase implements FilterImpl {
   }
 
   @Override
-  public Set<Class<? extends FilterIF>> getAnnotationClasses() {
+  public Set<Class<? extends Filter>> getAnnotationClasses() {
     return ImmutableSet.of(InsensitiveContains.class, com.hubspot.httpql.filter.InsensitiveContains.class);
   }
 

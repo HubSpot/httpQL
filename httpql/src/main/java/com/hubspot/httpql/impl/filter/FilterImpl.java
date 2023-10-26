@@ -1,7 +1,7 @@
 package com.hubspot.httpql.impl.filter;
 
 import com.hubspot.httpql.ConditionProvider;
-import com.hubspot.httpql.core.filter.FilterIF;
+import com.hubspot.httpql.core.filter.Filter;
 import org.jooq.Field;
 
 import java.util.Set;
@@ -15,10 +15,8 @@ public interface FilterImpl {
   /**
    * List of names the operator goes by in queries; the {@code gt} in {@code foo_gt=1}
    */
-  String[] names();
-
   <T> ConditionProvider<T> getConditionProvider(Field<T> field);
 
-  Set<Class<? extends FilterIF>> getAnnotationClasses();
+  Set<Class<? extends Filter>> getAnnotationClasses();
 
 }
