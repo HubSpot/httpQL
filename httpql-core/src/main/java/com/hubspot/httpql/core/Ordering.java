@@ -70,9 +70,12 @@ public class Ordering implements OrderingIF {
     return order.ordinal();
   }
 
+  /**
+    * @return either "asc" or "desc"
+   */
   @Override
   public String getOrderString() {
-    return getOrder().toString();
+    return getOrder().toSQL();
   }
 
   public SortOrder getOrder() {
