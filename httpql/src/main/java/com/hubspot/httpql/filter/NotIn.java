@@ -1,13 +1,12 @@
 package com.hubspot.httpql.filter;
 
-import java.util.Collection;
-
-import org.jooq.Condition;
-import org.jooq.Field;
-
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.Filter;
 import com.hubspot.httpql.MultiParamConditionProvider;
+import org.jooq.Condition;
+import org.jooq.Field;
+
+import java.util.Collection;
 
 public class NotIn extends FilterBase implements Filter {
 
@@ -17,6 +16,12 @@ public class NotIn extends FilterBase implements Filter {
         "nin"
     };
   }
+
+  @Override
+  public boolean takesMultiParameters() {
+    return true;
+  }
+
 
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {

@@ -1,14 +1,13 @@
 package com.hubspot.httpql.filter;
 
-import java.util.Collection;
-import java.util.Iterator;
-
-import org.jooq.Condition;
-import org.jooq.Field;
-
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.Filter;
 import com.hubspot.httpql.MultiParamConditionProvider;
+import org.jooq.Condition;
+import org.jooq.Field;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 public class NotLike extends FilterBase implements Filter {
 
@@ -17,6 +16,11 @@ public class NotLike extends FilterBase implements Filter {
     return new String[] {
         "nlike", "not_like"
     };
+  }
+
+  @Override
+  public boolean takesMultiParameters() {
+    return true;
   }
 
   @Override
