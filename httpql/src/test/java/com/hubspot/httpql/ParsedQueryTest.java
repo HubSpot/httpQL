@@ -1,14 +1,5 @@
 package com.hubspot.httpql;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.Param;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
@@ -20,6 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.OrderBy;
+import com.hubspot.httpql.core.OrderingIF;
 import com.hubspot.httpql.filter.Contains;
 import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.GreaterThan;
@@ -29,11 +21,18 @@ import com.hubspot.httpql.filter.IsNotDistinctFrom;
 import com.hubspot.httpql.filter.NotIn;
 import com.hubspot.httpql.filter.NotLike;
 import com.hubspot.httpql.impl.DefaultFieldFactory;
-import com.hubspot.httpql.impl.Ordering;
 import com.hubspot.httpql.impl.QueryParser;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.rosetta.annotations.RosettaNaming;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.Param;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParsedQueryTest {
 
@@ -204,7 +203,7 @@ public class ParsedQueryTest {
     ParsedQuery<Spec> parsed = parser.parse(query);
 
     assertThat(parsed.getOrderings()).hasSize(1);
-    for (Ordering ordering : parsed.getOrderings()) {
+    for (OrderingIF ordering : parsed.getOrderings()) {
       assertThat(ordering.getFieldName()).isEqualTo("count");
     }
   }
