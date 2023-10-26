@@ -16,6 +16,12 @@ public class OrderingTest {
   }
 
   @Test
+  public void itGetsOrderString() {
+    assertThat(new Ordering("foo", SortOrder.ASC).getOrderString()).isEqualTo(SortOrder.ASC.toSQL());
+    assertThat(new Ordering("foo", SortOrder.DESC).getOrderString()).isEqualTo(SortOrder.DESC.toSQL());
+  }
+
+  @Test
   public void testJsonWithField() throws Exception {
     Ordering o1 = new Ordering("foo", SortOrder.ASC);
     String json = mapper.writeValueAsString(o1);

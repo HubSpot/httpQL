@@ -76,6 +76,9 @@ public class Ordering implements OrderingIF {
     return getOrder().ordinal();
   }
 
+  /**
+   * @return either "asc" or "desc"
+   */
   @Override
   public String getOrderString() {
     return getOrder().toSQL();
