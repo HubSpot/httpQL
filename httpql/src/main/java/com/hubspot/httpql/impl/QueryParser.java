@@ -20,6 +20,7 @@ import com.hubspot.httpql.QueryConstraints;
 import com.hubspot.httpql.QuerySpec;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.OrderBy;
+import com.hubspot.httpql.core.OrderingIF;
 import com.hubspot.httpql.error.ConstraintType;
 import com.hubspot.httpql.error.ConstraintViolation;
 import com.hubspot.httpql.error.FilterViolation;
@@ -124,7 +125,7 @@ public class QueryParser<T extends QuerySpec> {
     final Optional<Integer> limit = getLimit(parsedUriParams.getLimit());
     final Optional<Integer> offset = getOffset(parsedUriParams.getOffset());
 
-    final Collection<Ordering> orderings = getOrderings(parsedUriParams.getOrderBys(), meta);
+    final Collection<OrderingIF> orderings = getOrderings(parsedUriParams.getOrderBys(), meta);
 
     final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable = meta.getFilterTable();
     final Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
@@ -264,18 +265,18 @@ public class QueryParser<T extends QuerySpec> {
     return Optional.empty();
   }
 
-  protected Collection<Ordering> getOrderings(List<String> orderStrings, MetaQuerySpec<T> meta) {
-    Collection<Ordering> orderings = new ArrayList<>();
+  protected Collection<OrderingIF> getOrderings(List<String> orderStrings, MetaQuerySpec<T> meta) {
+    Collection<OrderingIF> orderings = new ArrayList<>();
     if (orderStrings != null) {
       for (String order : orderStrings) {
-        Ordering ordering = Ordering.fromString(order);
+        com.hubspot.httpql.core.Ordering ordering = com.hubspot.httpql.core.Ordering.fromString(order);
         FilterEntry entry = new FilterEntry(null, ordering.getFieldName(), getQueryType());
         BeanPropertyDefinition prop = meta.getFieldMap().get(entry.getQueryName());
         if (prop == null) {
           prop = meta.getFieldMap().get(entry.getFieldName());
         }
         if (prop != null && orderableFields.contains(prop.getName())) {
-          orderings.add(new Ordering(entry.getFieldName(), entry.getQueryName(), ordering.getOrder()));
+          orderings.add(new com.hubspot.httpql.core.Ordering(entry.getFieldName(), entry.getQueryName(), ordering.getOrder()));
         }
       }
     }
