@@ -333,7 +333,7 @@ public class SelectBuilder<T extends QuerySpec> {
   public Collection<SortField<?>> orderingsToSortFields() {
     ArrayList<SortField<?>> sorts = new ArrayList<>(sourceQuery.getOrderings().size());
     for (OrderingIF order : sourceQuery.getOrderings()) {
-      sorts.add(getSortField(order).sort(SortOrder.valueOf(order.getOrderString().toUpperCase())));
+      sorts.add(getSortField(order).sort(SortOrder.valueOf(order.getOrderString())));
     }
     return sorts;
   }

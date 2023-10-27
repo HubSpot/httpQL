@@ -8,8 +8,5 @@ public interface OrderingIF {
 
     int getSortOrdinal();
 
-    /**
-     * @return either "asc" or "desc"
-     */
     String getOrderString();
 }
