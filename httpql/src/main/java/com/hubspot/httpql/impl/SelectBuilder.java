@@ -1,14 +1,11 @@
 package com.hubspot.httpql.impl;
 
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.hubspot.httpql.FieldFactory;
-import com.hubspot.httpql.MetaQuerySpec;
-import com.hubspot.httpql.ParsedQuery;
-import com.hubspot.httpql.QuerySpec;
-import com.hubspot.httpql.ann.OrderBy;
-import com.hubspot.httpql.core.OrderingIF;
-import com.hubspot.httpql.internal.BoundFilterEntry;
-import com.hubspot.httpql.internal.JoinFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -22,7 +19,6 @@ import org.jooq.SelectOffsetStep;
 import org.jooq.SelectOrderByStep;
 import org.jooq.SelectSelectStep;
 import org.jooq.SortField;
-import org.jooq.SortOrder;
 import org.jooq.Table;
 import org.jooq.TableLike;
 import org.jooq.conf.ParamType;
@@ -30,11 +26,14 @@ import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import com.hubspot.httpql.FieldFactory;
+import com.hubspot.httpql.MetaQuerySpec;
+import com.hubspot.httpql.ParsedQuery;
+import com.hubspot.httpql.QuerySpec;
+import com.hubspot.httpql.ann.OrderBy;
+import com.hubspot.httpql.internal.BoundFilterEntry;
+import com.hubspot.httpql.internal.JoinFilter;
 
 /**
  * Translates the high-level parsed query into a JOOQ Select and/or String representation.
@@ -332,14 +331,14 @@ public class SelectBuilder<T extends QuerySpec> {
 
   public Collection<SortField<?>> orderingsToSortFields() {
     ArrayList<SortField<?>> sorts = new ArrayList<>(sourceQuery.getOrderings().size());
-    for (OrderingIF order : sourceQuery.getOrderings()) {
-      sorts.add(getSortField(order).sort(SortOrder.valueOf(order.getOrderString())));
+    for (Ordering order : sourceQuery.getOrderings()) {
+      sorts.add(getSortField(order).sort(order.getOrder()));
     }
     return sorts;
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private Field getSortField(OrderingIF order) {
+  private Field getSortField(Ordering order) {
     Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
     BeanPropertyDefinition bpd = fieldMap.get(order.getQueryName());
     String fieldName = order.getQueryName();
