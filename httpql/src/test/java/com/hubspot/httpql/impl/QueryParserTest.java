@@ -1,15 +1,5 @@
 package com.hubspot.httpql.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.hubspot.httpql.filter.NotNull;
-import com.hubspot.httpql.filter.Null;
-import java.util.Optional;
-
-import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -23,7 +13,16 @@ import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.GreaterThan;
 import com.hubspot.httpql.filter.In;
+import com.hubspot.httpql.filter.NotNull;
+import com.hubspot.httpql.filter.Null;
 import com.hubspot.rosetta.annotations.RosettaNaming;
+import org.apache.commons.lang.StringUtils;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class QueryParserTest {
 
