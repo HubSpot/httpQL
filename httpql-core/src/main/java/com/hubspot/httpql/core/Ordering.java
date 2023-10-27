@@ -1,18 +1,12 @@
-package com.hubspot.httpql.impl;
+package com.hubspot.httpql.core;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Splitter;
-import com.hubspot.httpql.core.OrderingIF;
-import org.jooq.SortOrder;
 
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @deprecated Use {@link com.hubspot.httpql.core.Ordering}
- */
-@Deprecated
 public class Ordering implements OrderingIF {
   private static final Splitter FIELD_SPLITTER = Splitter.on(',');
 
@@ -63,21 +57,23 @@ public class Ordering implements OrderingIF {
     return json.toString();
   }
 
+  @Override
   public String getQueryName() {
     return queryName;
   }
 
+  @Override
   public String getFieldName() {
     return fieldName;
   }
 
   @Override
   public int getSortOrdinal() {
-    return getOrder().ordinal();
+    return order.ordinal();
   }
 
   /**
-   * @return either "asc" or "desc"
+    * @return either "asc" or "desc"
    */
   @Override
   public String getOrderString() {

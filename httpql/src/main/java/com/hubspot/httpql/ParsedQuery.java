@@ -1,14 +1,5 @@
 package com.hubspot.httpql;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.Operator;
-import org.jooq.SortOrder;
-
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.collect.Lists;
 import com.hubspot.httpql.error.UnknownFieldException;
@@ -19,6 +10,14 @@ import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.FilterEntryConditionCreator;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.Operator;
+import org.jooq.SortOrder;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * The result of parsing query arguments.
@@ -40,7 +39,7 @@ public class ParsedQuery<T extends QuerySpec> {
   private Optional<Integer> limit;
   private Optional<Integer> offset;
 
-  private boolean includeDeleted;
+  private final boolean includeDeleted;
 
   public ParsedQuery(
                      T boundQuerySpec,
@@ -155,6 +154,7 @@ public class ParsedQuery<T extends QuerySpec> {
       orderings.add(new Ordering(entry.getFieldName(), entry.getQueryName(), order));
     }
   }
+
 
   /**
    * Similar to {@link #addFilter} but removes all existing filters for {@code fieldName} first.
