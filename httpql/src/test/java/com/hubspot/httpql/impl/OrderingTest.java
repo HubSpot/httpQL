@@ -1,12 +1,11 @@
 package com.hubspot.httpql.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.SortOrder;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OrderingTest {
 
@@ -15,6 +14,12 @@ public class OrderingTest {
   @Before
   public void setup() {
     mapper = new ObjectMapper();
+  }
+
+  @Test
+  public void itGetsOrderString() {
+    assertThat(new Ordering("foo", SortOrder.ASC).getOrderString()).isEqualTo(SortOrder.ASC.toSQL());
+    assertThat(new Ordering("foo", SortOrder.DESC).getOrderString()).isEqualTo(SortOrder.DESC.toSQL());
   }
 
   @Test
