@@ -32,5 +32,4 @@ public enum SortOrder {
     public static SortOrder fromOrderString(String orderString) {
         return Arrays.stream(values()).filter(o -> o.toSQL().equals(orderString.toLowerCase())).findAny().orElse(DEFAULT);
     }
-
 }
