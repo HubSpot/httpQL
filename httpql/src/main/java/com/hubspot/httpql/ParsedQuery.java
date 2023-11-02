@@ -2,6 +2,7 @@ package com.hubspot.httpql;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.collect.Lists;
+import com.hubspot.httpql.core.OrderingIF;
 import com.hubspot.httpql.error.UnknownFieldException;
 import com.hubspot.httpql.impl.Ordering;
 import com.hubspot.httpql.impl.TableQualifiedFieldFactory;
@@ -12,7 +13,6 @@ import com.hubspot.httpql.internal.FilterEntryConditionCreator;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Operator;
-import org.jooq.SortOrder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +34,7 @@ public class ParsedQuery<T extends QuerySpec> {
 
   private final MetaQuerySpec<T> meta;
 
-  private Collection<Ordering> orderings;
+  private Collection<OrderingIF> orderings;
 
   private Optional<Integer> limit;
   private Optional<Integer> offset;
@@ -48,7 +48,7 @@ public class ParsedQuery<T extends QuerySpec> {
                      MetaQuerySpec<T> meta,
                      Optional<Integer> limit,
                      Optional<Integer> offset,
-                     Collection<Ordering> orderings,
+                     Collection<OrderingIF> orderings,
                      boolean includeDeleted) {
     this(boundQuerySpec,
         queryType,
@@ -67,7 +67,7 @@ public class ParsedQuery<T extends QuerySpec> {
                      MetaQuerySpec<T> meta,
                      Optional<Integer> limit,
                      Optional<Integer> offset,
-                     Collection<Ordering> orderings,
+                     Collection<OrderingIF> orderings,
                      boolean includeDeleted) {
 
     this.boundQuerySpec = boundQuerySpec;
@@ -139,12 +139,10 @@ public class ParsedQuery<T extends QuerySpec> {
   }
 
   /**
-   * Add the given order-by clause. The operation is not checked against allowed order-bys.
-   *
-   * @param fieldName
-   *          Name as seen in the query; not multi-value proxies ("id", not "ids")
+   * Use {@link #addOrdering(String, com.hubspot.httpql.core.SortOrder)}
    */
-  public void addOrdering(String fieldName, SortOrder order) {
+  @Deprecated
+  public void addOrdering(String fieldName, org.jooq.SortOrder order) {
     FilterEntry entry = new FilterEntry(null, fieldName, getQueryType());
     BeanPropertyDefinition prop = getMetaData().getFieldMap().get(entry.getQueryName());
     if (prop == null) {
@@ -152,6 +150,23 @@ public class ParsedQuery<T extends QuerySpec> {
     }
     if (prop != null) {
       orderings.add(new Ordering(entry.getFieldName(), entry.getQueryName(), order));
+    }
+  }
+
+  /**
+   * Add the given order-by clause. The operation is not checked against allowed order-bys.
+   *
+   * @param fieldName
+   *          Name as seen in the query; not multi-value proxies ("id", not "ids")
+   */
+  public void addOrdering(String fieldName, com.hubspot.httpql.core.SortOrder order) {
+    FilterEntry entry = new FilterEntry(null, fieldName, getQueryType());
+    BeanPropertyDefinition prop = getMetaData().getFieldMap().get(entry.getQueryName());
+    if (prop == null) {
+      prop = getMetaData().getFieldMap().get(entry.getFieldName());
+    }
+    if (prop != null) {
+      orderings.add(new com.hubspot.httpql.core.Ordering(entry.getFieldName(), entry.getQueryName(), order));
     }
   }
 
@@ -203,9 +218,9 @@ public class ParsedQuery<T extends QuerySpec> {
 
     cacheKeyParts.add(combinedConditionCreator.getCondition(boundQuerySpec, new TableQualifiedFieldFactory()));
 
-    for (Ordering o : orderings) {
+    for (OrderingIF o : orderings) {
       cacheKeyParts.add(o.getFieldName());
-      cacheKeyParts.add(o.getOrder().ordinal());
+      cacheKeyParts.add(o.getSortOrdinal());
     }
 
     cacheKeyParts.add(offset.orElse(0));
@@ -223,7 +238,7 @@ public class ParsedQuery<T extends QuerySpec> {
     this.offset = offset;
   }
 
-  public void setOrderings(Collection<Ordering> orderings) {
+  public void setOrderings(Collection<OrderingIF> orderings) {
     this.orderings = orderings;
   }
 
@@ -235,7 +250,7 @@ public class ParsedQuery<T extends QuerySpec> {
     return offset;
   }
 
-  public Collection<Ordering> getOrderings() {
+  public Collection<? extends OrderingIF> getOrderings() {
     return orderings;
   }
 
