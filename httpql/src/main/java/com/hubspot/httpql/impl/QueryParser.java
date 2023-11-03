@@ -83,6 +83,15 @@ public class QueryParser<T extends QuerySpec> {
   }
 
   protected void setConstraints(final Class<T> spec) {
+
+    com.hubspot.httpql.core.ann.QueryConstraints qc = spec.getAnnotation(com.hubspot.httpql.core.ann.QueryConstraints.class);
+    if (qc != null) {
+      this.defaultLimit = qc.defaultLimit();
+      this.maxLimit = qc.maxLimit();
+      this.maxOffset = qc.maxOffset();
+      return;
+    }
+
     QueryConstraints ann = spec.getAnnotation(QueryConstraints.class);
     if (ann != null) {
       this.defaultLimit = ann.defaultLimit();

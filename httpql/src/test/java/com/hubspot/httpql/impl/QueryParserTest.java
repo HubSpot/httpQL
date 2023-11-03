@@ -53,7 +53,7 @@ public class QueryParserTest {
     ParsedQuery<Spec> parsedQuery = parser.parse(query);
 
     assertThat(StringUtils.normalizeSpace(SelectBuilder.forParsedQuery(parsedQuery).build().getRawSelect().toString()))
-        .isEqualTo("select * from where `id` in ( 1, 2, 3 ) limit 10");
+        .isEqualTo("select * from where `id` in ( 1, 2, 3 ) limit 20");
   }
 
   @Test
@@ -63,7 +63,7 @@ public class QueryParserTest {
     ParsedQuery<Spec> parsedQuery = parser.parse(query);
 
     assertThat(StringUtils.normalizeSpace(SelectBuilder.forParsedQuery(parsedQuery).build().getRawSelect().toString()))
-        .isEqualTo("select * from where `id` in ( 1, 2, 3 ) limit 10");
+        .isEqualTo("select * from where `id` in ( 1, 2, 3 ) limit 20");
   }
 
   @Test
@@ -135,9 +135,9 @@ public class QueryParserTest {
   @Test
   public void itUsesDefaultsWhenHigherThanMaxValues() {
     Optional<Integer> limit = parser.getLimit(Optional.of(1000));
-    assertThat(limit.get()).isEqualTo(100);
-    Optional<Integer> offset = parser.getOffset(Optional.of(200));
-    assertThat(offset.get()).isEqualTo(100);
+    assertThat(limit.get()).isEqualTo(200);
+    Optional<Integer> offset = parser.getOffset(Optional.of(300));
+    assertThat(offset.get()).isEqualTo(200);
   }
 
   @Test
@@ -154,6 +154,7 @@ public class QueryParserTest {
     assertThat(spec.getId()).isNull();
   }
 
+  @com.hubspot.httpql.core.ann.QueryConstraints(defaultLimit = 20, maxLimit = 200, maxOffset = 200)
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
   @RosettaNaming(SnakeCaseStrategy.class)
   public static class Spec implements QuerySpec {
