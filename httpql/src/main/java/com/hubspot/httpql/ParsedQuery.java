@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.collect.Lists;
 import com.hubspot.httpql.core.OrderingIF;
 import com.hubspot.httpql.error.UnknownFieldException;
-import com.hubspot.httpql.impl.Ordering;
 import com.hubspot.httpql.impl.TableQualifiedFieldFactory;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.CombinedConditionCreator;
@@ -135,21 +134,6 @@ public class ParsedQuery<T extends QuerySpec> {
 
     if (!combinedConditionCreator.getFlattenedBoundFilterEntries().contains(boundColumn)) {
       combinedConditionCreator.getConditionCreators().add(boundColumn);
-    }
-  }
-
-  /**
-   * Use {@link #addOrdering(String, com.hubspot.httpql.core.SortOrder)}
-   */
-  @Deprecated
-  public void addOrdering(String fieldName, org.jooq.SortOrder order) {
-    FilterEntry entry = new FilterEntry(null, fieldName, getQueryType());
-    BeanPropertyDefinition prop = getMetaData().getFieldMap().get(entry.getQueryName());
-    if (prop == null) {
-      prop = getMetaData().getFieldMap().get(entry.getFieldName());
-    }
-    if (prop != null) {
-      orderings.add(new Ordering(entry.getFieldName(), entry.getQueryName(), order));
     }
   }
 
