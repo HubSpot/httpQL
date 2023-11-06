@@ -1,29 +1,28 @@
 package com.hubspot.httpql.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jooq.Field;
-import org.jooq.impl.DSL;
-
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.hubspot.httpql.DefaultMetaUtils;
 import com.hubspot.httpql.FieldFactory;
-import com.hubspot.httpql.Filter;
+import com.hubspot.httpql.Filters;
 import com.hubspot.httpql.MetaQuerySpec;
 import com.hubspot.httpql.QuerySpec;
-import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
+import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.error.UnknownFieldException;
+import com.hubspot.httpql.impl.filter.FilterImpl;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.JoinFilter;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
+import org.jooq.Field;
+import org.jooq.impl.DSL;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<T> {
   private final Map<String, BeanPropertyDefinition> fieldMap;
@@ -74,14 +73,10 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
 
   @Override
   @SuppressWarnings("unchecked")
-  // Unchecked is an empty array.
   public Class<? extends Filter>[] getFiltersForField(String name) {
     BeanPropertyDefinition prop = fieldMap.get(name);
     if (prop != null) {
-      FilterBy ann = DefaultMetaUtils.findFilterBy(prop);
-      if (ann != null) {
-        return ann.value();
-      }
+      return DefaultMetaUtils.getFilterByClasses(prop);
     }
     return new Class[] {};
   }
@@ -117,16 +112,16 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
     }
 
     for (Class<? extends Filter> filterType : filters) {
-      assert Filter.class.isAssignableFrom(filterType);
 
-      Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
+      FilterImpl filter = DefaultMetaUtils.getFilterInstance(filterType);
+      String[] filterNames = Filters.getFilterNames(filter);
       if (join != null) {
         filter = new JoinFilter(filter, join);
       }
 
       BoundFilterEntry<T> fe = new BoundFilterEntry<>(filter, field, this);
 
-      for (String filterName : filter.names()) {
+      for (String filterName : filterNames) {
         table.put(fe, filterName, field);
       }
     }
@@ -136,18 +131,18 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
   @Override
   public BoundFilterEntry<T> getNewBoundFilterEntry(String fieldName, Class<? extends Filter> filterType) {
     // Filter can be null; we only want FilterEntry for name normalization
-    Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
+    FilterImpl filter = DefaultMetaUtils.getFilterInstance(filterType);
     FilterEntry filterEntry = new FilterEntry(filter, fieldName, getQueryType());
     BeanPropertyDefinition filterProperty = getFilterProperty(fieldName, filterType);
     if (filterProperty == null) {
-      throw new UnknownFieldException(String.format("No filter %s on field named '%s' exists.", filter.names()[0], fieldName));
+      throw new UnknownFieldException(String.format("No filter %s on field named '%s' exists.", Filters.getFilterNames(filter)[0], fieldName));
     }
     BoundFilterEntry<T> boundColumn = filterTable.rowKeySet().stream()
         .filter(bfe -> bfe.equals(filterEntry)).findFirst()
         .orElseThrow(() -> new FilterViolation("Filter column " + filterEntry + " not found"));
-    FilterBy ann = filterProperty.getPrimaryMember().getAnnotation(FilterBy.class);
-    if (Strings.emptyToNull(ann.as()) != null) {
-      boundColumn.setActualField(getFieldMap().get(ann.as()));
+    String as = DefaultMetaUtils.getFilterByAs(filterProperty.getPrimaryMember());
+    if (as != null) {
+      boundColumn.setActualField(getFieldMap().get(as));
     }
     return boundColumn;
   }
@@ -155,12 +150,12 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
   @Override
   public BeanPropertyDefinition getFilterProperty(String fieldName, Class<? extends Filter> filterType) {
     // Filter can be null; we only want FilterEntry for name normalization
-    Filter filter = DefaultMetaUtils.getFilterInstance(filterType);
+    FilterImpl filter = DefaultMetaUtils.getFilterInstance(filterType);
     FilterEntry filterEntry = new FilterEntry(filter, fieldName, getQueryType());
     final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable = getFilterTable();
-    BeanPropertyDefinition filterProperty = filterTable.get(filterEntry, filter.names()[0]);
+    BeanPropertyDefinition filterProperty = filterTable.get(filterEntry, Filters.getFilterNames(filter)[0]);
     if (filterProperty == null) {
-      throw new UnknownFieldException(String.format("No filter %s on field named '%s' exists.", filter.names()[0], fieldName));
+      throw new UnknownFieldException(String.format("No filter %s on field named '%s' exists.", Filters.getFilterNames(filter)[0], fieldName));
     }
     return filterProperty;
   }

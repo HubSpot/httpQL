@@ -6,7 +6,7 @@ import org.jooq.Param;
 import org.jooq.impl.DSL;
 
 /**
- * Used by {@link Filter} implementations to create appropriately-typed {@link Condition} instances.
+ * Used by Filter implementations to create appropriately-typed {@link Condition} instances.
  * <p>
  * Because Filters are (necessarily) un-typed and {@link Field} and {@link Param} instances must share the same type parameter, this class acts as a closure of sorts to make sure that's possible.
  *

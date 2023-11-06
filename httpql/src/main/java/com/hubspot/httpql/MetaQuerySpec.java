@@ -1,12 +1,12 @@
 package com.hubspot.httpql;
 
-import java.util.Map;
-
-import org.jooq.Field;
-
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.collect.Table;
+import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.httpql.internal.BoundFilterEntry;
+import org.jooq.Field;
+
+import java.util.Map;
 
 /**
  * MetaQuerySpec provides implementations of metadata-related methods related to a given {@link QuerySpec}.
@@ -36,7 +36,6 @@ public interface MetaQuerySpec<T extends QuerySpec> {
    * Construct a {@link Field} instance for a named field on {@code T}.
    *
    * @param name
-   * @param fieldType
    * @param fieldFactory
    * @return
    */
@@ -53,7 +52,7 @@ public interface MetaQuerySpec<T extends QuerySpec> {
    * This method should *not* perform validation on the entries in {@code filters} to, e.g., check for existence of the filter on the field.
    */
   Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> tableFor(BeanPropertyDefinition field,
-                                                                      @SuppressWarnings("unchecked") Class<? extends Filter>... filters);
+                                                                      Class<? extends Filter>... filters);
 
   /**
    * Returns a new BoundFilterEntry<T> based on the query spec.
