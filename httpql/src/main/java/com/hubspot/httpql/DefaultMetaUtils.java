@@ -1,9 +1,5 @@
 package com.hubspot.httpql;
 
-import java.lang.annotation.Annotation;
-
-import javax.annotation.Nullable;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
@@ -17,11 +13,14 @@ import com.hubspot.httpql.ann.OrderBy;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
+
 @SuppressWarnings("deprecation")
 public class DefaultMetaUtils {
-  @Nullable
-  public static OrderBy findOrderBy(BeanPropertyDefinition prop) {
-    return findAnnotation(prop, OrderBy.class);
+
+  public static boolean hasOrderBy(BeanPropertyDefinition prop) {
+    return findAnnotation(prop, com.hubspot.httpql.core.ann.OrderBy.class) != null || findAnnotation(prop, OrderBy.class) != null;
   }
 
   @Nullable

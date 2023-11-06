@@ -8,6 +8,7 @@ import com.hubspot.httpql.ParsedQuery;
 import com.hubspot.httpql.QueryConstraints;
 import com.hubspot.httpql.QuerySpec;
 import com.hubspot.httpql.ann.FilterBy;
+import com.hubspot.httpql.ann.OrderBy;
 import com.hubspot.httpql.error.ConstraintViolation;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.filter.Equal;
@@ -125,6 +126,11 @@ public class QueryParserTest {
   }
 
   @Test
+  public void itGetsOrderBys() {
+    assertThat(parser.getOrderableFields()).containsExactly("count", "id");
+  }
+
+  @Test
   public void itGetsLimitAndOffset() {
     Optional<Integer> limit = parser.getLimit(Optional.of(20));
     assertThat(limit.get()).isEqualTo(20);
@@ -162,8 +168,10 @@ public class QueryParserTest {
     @FilterBy({
         Equal.class, In.class, Null.class, NotNull.class
     })
+    @OrderBy
     Integer id;
 
+    @com.hubspot.httpql.core.ann.OrderBy
     @FilterBy({GreaterThan.class, Null.class})
     Long count;
 
@@ -183,8 +191,8 @@ public class QueryParserTest {
     }
 
     public void setId(Integer id) {
-      this.id = id;
-    }
+          this.id = id;
+        }
 
     public Long getCount() {
       return count;

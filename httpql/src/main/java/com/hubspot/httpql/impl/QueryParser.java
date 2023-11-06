@@ -103,10 +103,8 @@ public class QueryParser<T extends QuerySpec> {
   }
 
   protected void buildOrderableFields(final Map<String, BeanPropertyDefinition> fields) {
-    OrderBy ann;
     for (Map.Entry<String, BeanPropertyDefinition> entry : fields.entrySet()) {
-      ann = DefaultMetaUtils.findOrderBy(entry.getValue());
-      if (ann != null) {
+      if (DefaultMetaUtils.hasOrderBy(entry.getValue())) {
         orderableFields.add(entry.getKey());
       }
     }
