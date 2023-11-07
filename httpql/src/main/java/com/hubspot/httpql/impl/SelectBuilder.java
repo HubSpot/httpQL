@@ -1,5 +1,6 @@
 package com.hubspot.httpql.impl;
 
+import com.fasterxml.jackson.databind.introspect.AnnotatedField;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.hubspot.httpql.FieldFactory;
 import com.hubspot.httpql.MetaQuerySpec;
@@ -250,7 +251,7 @@ public class SelectBuilder<T extends QuerySpec> {
     Table<?> table = getTable();
 
     if (asCount) {
-      if (includedFieldNames.size() > 0) {
+      if (!includedFieldNames.isEmpty()) {
         List<Field<?>> distinctFields = fieldNamesToFields();
         selectFrom = ctx.select(DSL.countDistinct(distinctFields.toArray(new Field[distinctFields.size()])));
       } else {
@@ -258,18 +259,18 @@ public class SelectBuilder<T extends QuerySpec> {
       }
     } else {
       SelectSelectStep<?> selectStep;
-      if (includedFieldNames.size() > 0) {
+      if (!includedFieldNames.isEmpty()) {
         selectStep = ctx.select(fieldNamesToFields());
       } else {
         String tableName = sourceQuery.getBoundQuery().tableName();
 
-        if (joinConditions.size() > 0) {
+        if (!joinConditions.isEmpty()) {
           selectStep = ctx.selectDistinct(DSL.field(tableName + ".*"));
         } else {
           selectStep = ctx.select(DSL.field("*"));
         }
       }
-      if (additionalFields.size() > 0) {
+      if (!additionalFields.isEmpty()) {
         selectFrom = selectStep.select(additionalFields);
       } else {
         selectFrom = selectStep;
@@ -285,7 +286,7 @@ public class SelectBuilder<T extends QuerySpec> {
     }
     select = ((SelectJoinStep<?>) select).where(getConditions());
 
-    if (groupByFields.size() > 0) {
+    if (!groupByFields.isEmpty()) {
       select = ((SelectJoinStep<?>) select).groupBy(groupByFields);
     }
 
@@ -338,13 +339,24 @@ public class SelectBuilder<T extends QuerySpec> {
     return sorts;
   }
 
+  private boolean isOrderByGenerated(AnnotatedField field) {
+    OrderBy ann = field.getAnnotation(OrderBy.class);
+    if (ann != null && ann.isGenerated()) {
+      return true;
+    }
+
+    com.hubspot.httpql.core.ann.OrderBy newAnn = field.getAnnotation(com.hubspot.httpql.core.ann.OrderBy.class);
+
+    return (newAnn != null && newAnn.isGenerated());
+  }
+
   @SuppressWarnings({"rawtypes", "unchecked"})
   private Field getSortField(OrderingIF order) {
     Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
     BeanPropertyDefinition bpd = fieldMap.get(order.getQueryName());
     String fieldName = order.getQueryName();
     Class fieldType = meta.getFieldType(order.getFieldName());
-    if (bpd.getField().getAnnotation(OrderBy.class).isGenerated()) {
+    if (isOrderByGenerated(bpd.getField())) {
       // it's possible to sort by generated fields
       // but we shouldn't qualify them with table name in the ORDER BY clause
       return DSL.field(DSL.name(fieldName), fieldType);
