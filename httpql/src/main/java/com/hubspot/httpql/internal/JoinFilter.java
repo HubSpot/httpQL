@@ -1,27 +1,30 @@
 package com.hubspot.httpql.internal;
 
+import com.hubspot.httpql.ConditionProvider;
+import com.hubspot.httpql.core.filter.Filter;
+import com.hubspot.httpql.impl.JoinCondition;
+import com.hubspot.httpql.impl.filter.FilterImpl;
 import org.jooq.Field;
 
-import com.hubspot.httpql.ConditionProvider;
-import com.hubspot.httpql.Filter;
-import com.hubspot.httpql.impl.JoinCondition;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * A special type of filter which brings a join condition into the query
  */
-public class JoinFilter implements Filter {
+public class JoinFilter implements FilterImpl {
 
-  private final Filter filter;
+  private final FilterImpl filter;
   private final JoinCondition join;
 
-  public JoinFilter(Filter filter, JoinCondition join) {
+  public JoinFilter(FilterImpl filter, JoinCondition join) {
     this.filter = filter;
     this.join = join;
   }
 
   @Override
-  public String[] names() {
-    return filter.names();
+  public Set<Class<? extends Filter>> getAnnotationClasses() {
+    return Collections.emptySet();
   }
 
   @Override
@@ -29,7 +32,7 @@ public class JoinFilter implements Filter {
     return filter.getConditionProvider(field);
   }
 
-  public Filter getFilter() {
+  public FilterImpl getFilter() {
     return filter;
   }
 

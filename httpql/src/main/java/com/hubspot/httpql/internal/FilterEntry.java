@@ -2,19 +2,19 @@ package com.hubspot.httpql.internal;
 
 import com.google.common.base.Objects;
 import com.hubspot.httpql.DefaultMetaUtils;
-import com.hubspot.httpql.Filter;
+import com.hubspot.httpql.impl.filter.FilterImpl;
 
 public class FilterEntry {
 
   private final String queryName;
   private final String fieldName;
-  private final Filter filter;
+  private final FilterImpl filter;
 
-  public FilterEntry(Filter filter, String queryName, Class<?> queryType) { // Only valid for comparison
+  public FilterEntry(FilterImpl filter, String queryName, Class<?> queryType) { // Only valid for comparison
     this(filter, queryName, queryName, queryType);
   }
 
-  public FilterEntry(Filter filter, String fieldName, String queryName, Class<?> queryType) {
+  public FilterEntry(FilterImpl filter, String fieldName, String queryName, Class<?> queryType) {
     this.filter = filter;
     this.fieldName = fieldName;
     this.queryName = normalizeQueryName(queryName, queryType);
@@ -32,7 +32,7 @@ public class FilterEntry {
     return fieldName;
   }
 
-  public Filter getFilter() {
+  public FilterImpl getFilter() {
     return filter;
   }
 

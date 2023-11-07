@@ -3,14 +3,16 @@ package com.hubspot.httpql;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.base.CaseFormat;
-import com.google.common.base.Throwables;
+import com.google.common.base.Strings;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.FilterJoinByDescriptor;
 import com.hubspot.httpql.ann.OrderBy;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
+import com.hubspot.httpql.impl.filter.FilterImpl;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
 import javax.annotation.Nullable;
@@ -23,9 +25,18 @@ public class DefaultMetaUtils {
     return findAnnotation(prop, com.hubspot.httpql.core.ann.OrderBy.class) != null || findAnnotation(prop, OrderBy.class) != null;
   }
 
-  @Nullable
-  public static FilterBy findFilterBy(BeanPropertyDefinition prop) {
-    return findAnnotation(prop, FilterBy.class);
+  public static Class<? extends com.hubspot.httpql.core.filter.Filter>[] getFilterByClasses(BeanPropertyDefinition prop) {
+    com.hubspot.httpql.core.ann.FilterBy annotation = findAnnotation(prop, com.hubspot.httpql.core.ann.FilterBy.class);
+    if (annotation != null) {
+      return annotation.value();
+    }
+
+    FilterBy ann = findAnnotation(prop, FilterBy.class);
+    if (ann != null) {
+      return ann.value();
+    }
+
+    return new Class[] {};
   }
 
   @Nullable
@@ -90,11 +101,48 @@ public class DefaultMetaUtils {
     return name;
   }
 
-  public static Filter getFilterInstance(Class<? extends Filter> filterType) {
-    try {
-      return filterType.newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
-      throw Throwables.propagate(e);
+  public static FilterImpl getFilterInstance(Class<? extends com.hubspot.httpql.core.filter.Filter> filterType) {
+      return Filters.getFilterImpl(filterType).orElse(null);
+  }
+
+  public static String getFilterByAs(AnnotatedMember member) {
+    com.hubspot.httpql.core.ann.FilterBy coreAnn = member.getAnnotation(com.hubspot.httpql.core.ann.FilterBy.class);
+    if (coreAnn != null) {
+      return Strings.emptyToNull(coreAnn.as());
     }
+
+    FilterBy ann = member.getAnnotation(FilterBy.class);
+    if (ann != null) {
+      return Strings.emptyToNull(ann.as());
+    }
+
+    return null;
+  }
+
+  public static Class<?> getFilterByTypeOverride(AnnotatedMember member) {
+    com.hubspot.httpql.core.ann.FilterBy coreAnn = member.getAnnotation(com.hubspot.httpql.core.ann.FilterBy.class);
+    if (coreAnn != null) {
+      return coreAnn.typeOverride();
+    }
+
+    FilterBy ann = member.getAnnotation(FilterBy.class);
+    if (ann != null) {
+      return ann.typeOverride();
+    }
+
+    return null;
+  }
+
+
+  public static String getFilterByAs(BeanPropertyDefinition prop) {
+    com.hubspot.httpql.core.ann.FilterBy coreFilterBy = findAnnotation(prop, com.hubspot.httpql.core.ann.FilterBy.class);
+    if (coreFilterBy != null) {
+      return Strings.emptyToNull(coreFilterBy.as());
+    }
+    FilterBy filterBy = findAnnotation(prop, FilterBy.class);
+    if (filterBy != null) {
+      return Strings.emptyToNull(filterBy.as());
+    }
+    return null;
   }
 }

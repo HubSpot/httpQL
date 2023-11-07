@@ -13,6 +13,8 @@ public class Filters {
 
     private static final Map<String, com.hubspot.httpql.Filter> FILTERS_BY_NAME = new HashMap<>();
     private static final Map<String, FilterImpl> FILTER_IMPLS_BY_NAME = new HashMap<>();
+
+    private static final Map<FilterImpl, String[]> FILTER_NAMES_BY_IMPL = new HashMap<>();
     private static final ServiceLoader<com.hubspot.httpql.Filter> FILTER_LOADER = ServiceLoader.load(com.hubspot.httpql.Filter.class);
     private static final ServiceLoader<FilterImpl> FILTER_IMPL_LOADER = ServiceLoader.load(FilterImpl.class);
     private static final Map<Class<? extends Filter>, FilterImpl> FILTER_IMPLS = new HashMap<>();
@@ -31,6 +33,7 @@ public class Filters {
                     for (String name : filterIF.names()) {
                         FILTER_IMPLS_BY_NAME.put(name, filterImpl);
                     }
+                    FILTER_NAMES_BY_IMPL.put(filterImpl, filterIF.names());
                 } catch (InstantiationException| IllegalAccessException  | InvocationTargetException | NoSuchMethodException e) {
                     throw new RuntimeException(e);
                 }
@@ -41,6 +44,10 @@ public class Filters {
 
     public static Optional<FilterImpl> getFilterImplByName(String name) {
         return Optional.ofNullable(FILTER_IMPLS_BY_NAME.get(name));
+    }
+
+    public static String[] getFilterNames(FilterImpl filter) {
+        return FILTER_NAMES_BY_IMPL.get(filter);
     }
 
     public static Optional<FilterImpl> getFilterImpl(Class<? extends Filter> filter) {

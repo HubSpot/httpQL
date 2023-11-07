@@ -1,14 +1,15 @@
 package com.hubspot.httpql.doc;
 
+import com.hubspot.httpql.Filters;
+import com.hubspot.httpql.impl.QueryParser;
+import com.hubspot.httpql.internal.BoundFilterEntry;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import com.hubspot.httpql.impl.QueryParser;
-import com.hubspot.httpql.internal.BoundFilterEntry;
 
 public class ApiDefinition {
 
@@ -25,7 +26,7 @@ public class ApiDefinition {
         fields.put(filterEntry.getFieldName(), f);
       }
 
-      for (String filterOp : filterEntry.getFilter().names()) {
+      for (String filterOp : Filters.getFilterNames(filterEntry.getFilter())) {
         f.addFilter(filterOp);
       }
     }

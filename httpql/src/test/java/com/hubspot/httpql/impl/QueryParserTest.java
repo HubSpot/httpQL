@@ -12,7 +12,6 @@ import com.hubspot.httpql.ann.OrderBy;
 import com.hubspot.httpql.error.ConstraintViolation;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.filter.Equal;
-import com.hubspot.httpql.filter.GreaterThan;
 import com.hubspot.httpql.filter.In;
 import com.hubspot.httpql.filter.NotNull;
 import com.hubspot.httpql.filter.Null;
@@ -172,12 +171,12 @@ public class QueryParserTest {
     Integer id;
 
     @com.hubspot.httpql.core.ann.OrderBy
-    @FilterBy({GreaterThan.class, Null.class})
+    @com.hubspot.httpql.core.ann.FilterBy({ com.hubspot.httpql.core.filter.GreaterThan.class, com.hubspot.httpql.core.filter.Null.class })
     Long count;
 
     @FilterBy(Equal.class)
     String fullName;
-    @FilterBy(Equal.class)
+    @com.hubspot.httpql.core.ann.FilterBy(com.hubspot.httpql.core.filter.Equal.class)
     String middleName;
     boolean secret;
 

@@ -1,25 +1,22 @@
 package com.hubspot.httpql.internal;
 
-import java.util.Collection;
-
-import org.jooq.Condition;
-import org.jooq.Field;
-import org.jooq.impl.DSL;
-
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.DefaultMetaUtils;
 import com.hubspot.httpql.FieldFactory;
-import com.hubspot.httpql.Filter;
 import com.hubspot.httpql.MetaQuerySpec;
 import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.QuerySpec;
-import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.httpql.impl.DefaultFieldFactory;
+import com.hubspot.httpql.impl.filter.FilterImpl;
+import org.jooq.Condition;
+import org.jooq.Field;
+import org.jooq.impl.DSL;
+
+import java.util.Collection;
 
 public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry implements FilterEntryConditionCreator<T> {
 
@@ -27,13 +24,13 @@ public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry implement
   private final MetaQuerySpec<T> meta;
   private BeanPropertyDefinition actualField;
 
-  public BoundFilterEntry(Filter filter, String fieldName, String queryName, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
+  public BoundFilterEntry(FilterImpl filter, String fieldName, String queryName, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
     super(filter, fieldName, queryName, meta.getQueryType());
     this.prop = prop;
     this.meta = meta;
   }
 
-  public BoundFilterEntry(Filter filter, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
+  public BoundFilterEntry(FilterImpl filter, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
     super(filter, prop.getName(), getBestQueryName(prop), meta.getQueryType());
     this.prop = prop;
     this.meta = meta;
@@ -48,8 +45,8 @@ public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry implement
   }
 
   private static String getBestQueryName(BeanPropertyDefinition prop) {
-    FilterBy ann = DefaultMetaUtils.findFilterBy(prop);
-    return Strings.emptyToNull(ann == null ? "" : ann.as()) != null ? ann.as() : prop.getName();
+    String as = DefaultMetaUtils.getFilterByAs(prop);
+    return as == null ? prop.getName() : as;
   }
 
   public BeanPropertyDefinition getProperty() {

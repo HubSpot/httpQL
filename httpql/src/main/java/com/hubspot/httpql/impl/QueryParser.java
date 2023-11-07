@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Defaults;
-import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -25,8 +24,8 @@ import com.hubspot.httpql.error.ConstraintType;
 import com.hubspot.httpql.error.ConstraintViolation;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.error.LimitViolationType;
-import com.hubspot.httpql.filter.NotNull;
-import com.hubspot.httpql.filter.Null;
+import com.hubspot.httpql.impl.filter.NotNullImpl;
+import com.hubspot.httpql.impl.filter.NullImpl;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.FilterEntry;
@@ -143,9 +142,9 @@ public class QueryParser<T extends QuerySpec> {
 
       // If not in "strict mode", gracefully accept completely unknown query parameters
       String fieldName = fieldFilter.getField();
-      if (!fieldMap.keySet().contains(fieldName) && !strictMode) {
+      if (!fieldMap.containsKey(fieldName) && !strictMode) {
         String fieldNameSnakeCase = SNAKE_CASE_TRANSFORMER.apply(fieldName);
-        if (!fieldMap.keySet().contains(fieldNameSnakeCase)) {
+        if (!fieldMap.containsKey(fieldNameSnakeCase)) {
           continue;
         }
         fieldName = fieldNameSnakeCase;
@@ -154,11 +153,11 @@ public class QueryParser<T extends QuerySpec> {
       String finalFieldName = fieldName;
       Optional<BoundFilterEntry<T>> filterEntryOptional = filterTable.rowKeySet().stream()
           .filter(f -> Objects.equals(f.getFieldName(), finalFieldName)
-              && Objects.equals(Optional.of(f.getFilter()), Filters.getFilterByName(filterName)))
+              && Optional.of(f.getFilter()).equals(Filters.getFilterImplByName(filterName)))
           .findFirst();
 
       // Use reserved words instead of simple look-up to throw exception on disallowed fields
-      if (!filterEntryOptional.isPresent()
+      if (filterEntryOptional.isEmpty()
           || (!RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName())
               && !filterTable.contains(filterEntryOptional.get(), filterName))) {
         throw new FilterViolation(String.format("Filtering by \"%s %s\" is not allowed",
@@ -175,33 +174,35 @@ public class QueryParser<T extends QuerySpec> {
           .filter(bfe -> bfe.equals(filterEntry)).findFirst()
           .orElseThrow(() -> new FilterViolation("Filter column " + filterEntry + " not found"));
 
-      FilterBy ann = null;
+      Class<?> convertToType = null;
 
       if (prop.getPrimaryMember() != null) {
-        ann = prop.getPrimaryMember().getAnnotation(FilterBy.class);
-        if (ann != null && Strings.emptyToNull(ann.as()) != null) {
-          boundColumn.setActualField(fieldMap.get(ann.as()));
+
+        convertToType = DefaultMetaUtils.getFilterByTypeOverride(prop.getPrimaryMember());
+
+        String as = DefaultMetaUtils.getFilterByAs(prop.getPrimaryMember());
+        if (as != null) {
+          boundColumn.setActualField(fieldMap.get(as));
         }
       }
 
-      final Class<?> convertToType;
-      if (ann != null && ann.typeOverride() != void.class) {
-        convertToType = ann.typeOverride();
-      } else {
+      if (convertToType == null || convertToType == void.class) {
         convertToType = prop.getField().getAnnotated().getType();
       }
+
+      final Class<?> finalType = convertToType;
 
       if (boundColumn.isMultiValue()) {
         List<String> paramVals = fieldFilter.getValues();
 
         List<?> boundVals = paramVals.stream()
-            .map(v -> mapper.convertValue(v, convertToType))
+            .map(v -> mapper.convertValue(v, finalType))
             .collect(Collectors.toList());
 
         boundColumn = new MultiValuedBoundFilterEntry<>(boundColumn, boundVals);
 
-      } else if (Null.class.equals(boundColumn.getFilter().getClass()) || NotNull.class.equals(boundColumn.getFilter().getClass())) {
-        fieldValues.put(prop.getName(), Defaults.defaultValue(convertToType));
+      } else if (NullImpl.class.equals(boundColumn.getFilter().getClass()) || NotNullImpl.class.equals(boundColumn.getFilter().getClass())) {
+        fieldValues.put(prop.getName(), Defaults.defaultValue(finalType));
       } else {
         fieldValues.put(prop.getName(), fieldFilter.getValue());
       }

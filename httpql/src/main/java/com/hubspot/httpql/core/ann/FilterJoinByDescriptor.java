@@ -7,6 +7,9 @@ import java.lang.annotation.Target;
 
 ;
 
+/**
+ * TODO: implement
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({
     ElementType.FIELD, ElementType.METHOD
