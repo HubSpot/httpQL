@@ -8,9 +8,9 @@ import com.hubspot.httpql.FieldFactory;
 import com.hubspot.httpql.MetaQuerySpec;
 import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.QuerySpec;
-import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.httpql.impl.DefaultFieldFactory;
+import com.hubspot.httpql.impl.FilterJoinInfo;
 import com.hubspot.httpql.impl.filter.FilterImpl;
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -64,7 +64,7 @@ public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry implement
   public ConditionProvider<?> getConditionProvider(FieldFactory fieldFactory) {
     Field<?> field;
 
-    FilterJoin join = DefaultMetaUtils.findFilterJoin(prop);
+    FilterJoinInfo join = DefaultMetaUtils.findFilterJoin(prop);
     JoinDescriptor joinDescriptor = DefaultMetaUtils.findJoinDescriptor(prop);
     if (join != null) {
       field = DSL.field(DSL.name(join.table(), getQueryName()));

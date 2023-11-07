@@ -8,7 +8,6 @@ import com.hubspot.httpql.FieldFactory;
 import com.hubspot.httpql.Filters;
 import com.hubspot.httpql.MetaQuerySpec;
 import com.hubspot.httpql.QuerySpec;
-import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.httpql.error.FilterViolation;
@@ -99,7 +98,7 @@ public class DefaultMetaQuerySpec<T extends QuerySpec> implements MetaQuerySpec<
 
     JoinCondition join = null;
 
-    FilterJoin filterJoin = DefaultMetaUtils.findFilterJoin(field);
+    FilterJoinInfo filterJoin = DefaultMetaUtils.findFilterJoin(field);
     if (filterJoin != null) {
       join = new JoinCondition(DSL.table(DSL.name(filterJoin.table())),
           DSL.field(DSL.name(instance.tableName(), filterJoin.on()))
