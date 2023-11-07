@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.hubspot.httpql.QueryConstraints;
 import com.hubspot.httpql.QuerySpec;
 import com.hubspot.httpql.ann.FilterBy;
-import com.hubspot.httpql.ann.FilterJoinByDescriptor;
+import com.hubspot.httpql.core.ann.FilterJoinByDescriptor;
 import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.In;
 import com.hubspot.rosetta.annotations.RosettaNaming;
@@ -17,7 +17,7 @@ public class EntityWithSimpleJoinDescriptor implements QuerySpec {
   private Long id;
 
   @FilterBy(value = {In.class, Equal.class})
-  @FilterJoinByDescriptor(EntitySimpleJoinDescriptor.class)
+  @FilterJoinByDescriptor("com.hubspot.httpql.model.EntitySimpleJoinDescriptor")
   private Long topicId;
 
   public Long getId() {

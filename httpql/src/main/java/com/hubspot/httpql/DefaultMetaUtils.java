@@ -12,11 +12,13 @@ import com.hubspot.httpql.ann.FilterJoin;
 import com.hubspot.httpql.ann.FilterJoinByDescriptor;
 import com.hubspot.httpql.ann.OrderBy;
 import com.hubspot.httpql.ann.desc.JoinDescriptor;
+import com.hubspot.httpql.impl.FilterJoinInfo;
 import com.hubspot.httpql.impl.filter.FilterImpl;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
+import java.util.Optional;
 
 @SuppressWarnings("deprecation")
 public class DefaultMetaUtils {
@@ -40,26 +42,37 @@ public class DefaultMetaUtils {
   }
 
   @Nullable
-  public static FilterJoin findFilterJoin(BeanPropertyDefinition prop) {
-    return findAnnotation(prop, FilterJoin.class);
+  public static FilterJoinInfo findFilterJoin(BeanPropertyDefinition prop) {
+    return Optional.ofNullable(FilterJoinInfo.of(findAnnotation(prop, FilterJoin.class)))
+            .orElse(FilterJoinInfo.of(findAnnotation(prop, com.hubspot.httpql.core.ann.FilterJoin.class)));
   }
 
   @Nullable
-  public static FilterJoinByDescriptor findFilterJoinByDescriptor(BeanPropertyDefinition prop) {
+  private static FilterJoinByDescriptor findFilterJoinByDescriptor(BeanPropertyDefinition prop) {
     return findAnnotation(prop, FilterJoinByDescriptor.class);
   }
+
+  @Nullable
+  private static com.hubspot.httpql.core.ann.FilterJoinByDescriptor findCoreFilterJoinByDescriptor(BeanPropertyDefinition prop) {
+    return findAnnotation(prop, com.hubspot.httpql.core.ann.FilterJoinByDescriptor.class);
+  }
+
 
   @Nullable
   public static JoinDescriptor findJoinDescriptor(BeanPropertyDefinition prop) {
     try {
       FilterJoinByDescriptor filterJoinByDescriptor = findFilterJoinByDescriptor(prop);
-      if (filterJoinByDescriptor == null) {
-        return null;
+      if (filterJoinByDescriptor != null) {
+        return filterJoinByDescriptor.value().newInstance();
       }
-      return findFilterJoinByDescriptor(prop).value().newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
+      com.hubspot.httpql.core.ann.FilterJoinByDescriptor desc = findCoreFilterJoinByDescriptor(prop);
+      if (desc != null) {
+        return (JoinDescriptor) Class.forName(desc.value()).newInstance();
+      }
+    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
+    return null;
   }
 
   public static <T extends Annotation> T findAnnotation(BeanPropertyDefinition prop, Class<T> type) {
