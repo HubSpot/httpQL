@@ -102,7 +102,7 @@ public class ParsedQuery<T extends QuerySpec> {
    * @param fieldName
    *          Name as seen in the query; not multi-value proxies ("id", not "ids")
    */
-  public boolean hasFilter(String fieldName, Class<? extends Filter> filterType) {
+  public boolean hasFilter(String fieldName, Class<? extends com.hubspot.httpql.core.filter.Filter> filterType) {
     for (BoundFilterEntry<T> bfe : getBoundFilterEntries()) {
       if (bfe.getQueryName().equals(fieldName) && bfe.getFilter().getClass().equals(filterType)) {
         return true;
@@ -121,7 +121,7 @@ public class ParsedQuery<T extends QuerySpec> {
    * @throws IllegalArgumentException
    *           When {@code value} is of the wrong type
    */
-  public void addFilter(String fieldName, Class<? extends Filter> filterType, Object value) {
+  public void addFilter(String fieldName, Class<? extends com.hubspot.httpql.core.filter.Filter> filterType, Object value) {
     BeanPropertyDefinition filterProperty = meta.getFilterProperty(fieldName, filterType);
     BoundFilterEntry<T> boundColumn = meta.getNewBoundFilterEntry(fieldName, filterType);
 
@@ -161,7 +161,7 @@ public class ParsedQuery<T extends QuerySpec> {
    * @param fieldName
    *          Name as seen in the query; not multi-value proxies ("id", not "ids")
    */
-  public void addFilterExclusively(String fieldName, Class<? extends Filter> filterType, Object value) {
+  public void addFilterExclusively(String fieldName, Class<? extends com.hubspot.httpql.core.filter.Filter> filterType, Object value) {
     removeFiltersFor(fieldName);
     addFilter(fieldName, filterType, value);
   }
