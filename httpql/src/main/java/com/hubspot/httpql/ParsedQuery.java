@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.hubspot.httpql.core.OrderingIF;
 import com.hubspot.httpql.error.UnknownFieldException;
 import com.hubspot.httpql.impl.TableQualifiedFieldFactory;
+import com.hubspot.httpql.impl.filter.FilterImpl;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.FilterEntry;
@@ -102,7 +103,7 @@ public class ParsedQuery<T extends QuerySpec> {
    * @param fieldName
    *          Name as seen in the query; not multi-value proxies ("id", not "ids")
    */
-  public boolean hasFilter(String fieldName, Class<? extends com.hubspot.httpql.core.filter.Filter> filterType) {
+  public boolean hasFilter(String fieldName, Class<? extends FilterImpl> filterType) {
     for (BoundFilterEntry<T> bfe : getBoundFilterEntries()) {
       if (bfe.getQueryName().equals(fieldName) && bfe.getFilter().getClass().equals(filterType)) {
         return true;
