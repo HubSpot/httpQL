@@ -1,12 +1,15 @@
 package com.hubspot.httpql.filter;
 
+import com.hubspot.httpql.ConditionProvider;
+import com.hubspot.httpql.Filter;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Param;
 
-import com.hubspot.httpql.ConditionProvider;
-import com.hubspot.httpql.Filter;
-
+/**
+ * @deprecated Use #{@link com.hubspot.httpql.core.filter.NotEqual}
+ */
+@Deprecated
 public class NotEqual extends FilterBase implements Filter {
 
   @Override

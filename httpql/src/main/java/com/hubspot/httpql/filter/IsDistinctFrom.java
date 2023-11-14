@@ -10,6 +10,10 @@ import org.jooq.impl.DSL;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+/**
+ * @deprecated Use #{@link com.hubspot.httpql.core.filter.IsDistinctFrom}
+ */
+@Deprecated
 public class IsDistinctFrom extends FilterBase implements Filter {
 
   @Override

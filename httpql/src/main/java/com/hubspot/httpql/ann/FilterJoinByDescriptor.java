@@ -1,12 +1,16 @@
 package com.hubspot.httpql.ann;
 
+import com.hubspot.httpql.ann.desc.JoinDescriptor;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.hubspot.httpql.ann.desc.JoinDescriptor;
-
+/**
+ * @deprecated Use #{@link com.hubspot.httpql.core.ann.FilterJoinByDescriptor}
+ */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({
     ElementType.FIELD, ElementType.METHOD

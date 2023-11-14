@@ -7,6 +7,7 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.Objects;
 import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.rosetta.annotations.RosettaNaming;
+
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 

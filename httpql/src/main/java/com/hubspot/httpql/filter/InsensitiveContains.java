@@ -1,14 +1,17 @@
 package com.hubspot.httpql.filter;
 
-import org.jooq.Condition;
-import org.jooq.Field;
-import org.jooq.Param;
-
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.Filter;
+import org.jooq.Condition;
+import org.jooq.Field;
+import org.jooq.Param;
 
+/**
+ * @deprecated Use #{@link com.hubspot.httpql.core.filter.InsensitiveContains}
+ */
+@Deprecated
 public class InsensitiveContains extends FilterBase implements Filter {
   private static final Escaper ESCAPER = Escapers.builder()
       .addEscape('\\', "\\\\")

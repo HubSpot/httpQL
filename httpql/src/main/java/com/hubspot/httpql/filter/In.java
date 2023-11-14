@@ -8,6 +8,10 @@ import org.jooq.Field;
 
 import java.util.Collection;
 
+/**
+ * @deprecated Use #{@link com.hubspot.httpql.core.filter.In}
+ */
+@Deprecated
 public class In extends FilterBase implements Filter {
 
   @Override

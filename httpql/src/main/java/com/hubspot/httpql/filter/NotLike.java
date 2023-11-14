@@ -9,6 +9,10 @@ import org.jooq.Field;
 import java.util.Collection;
 import java.util.Iterator;
 
+/**
+ * @deprecated Use #{@link com.hubspot.httpql.core.filter.NotLike}
+ */
+@Deprecated
 public class NotLike extends FilterBase implements Filter {
 
   @Override
