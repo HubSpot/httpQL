@@ -5,6 +5,10 @@ package com.hubspot.httpql;
  *
  * @author tdavis
  */
+/**
+ * @deprecated Use #{@link com.hubspot.httpql.core.HTTPQLView}
+ */
+@Deprecated
 public class HTTPQLView {
 
 }

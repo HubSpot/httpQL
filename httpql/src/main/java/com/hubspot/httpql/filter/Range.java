@@ -14,6 +14,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * @deprecated Use #{@link com.hubspot.httpql.core.filter.Range}
+ */
+@Deprecated
 public class Range extends FilterBase implements Filter {
 
   private static final Comparator<Number> NUMBER_COMPARATOR = new Comparator<Number>() {

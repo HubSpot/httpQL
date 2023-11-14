@@ -6,8 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for {@link QuerySpec} providers; defines constraints around query size and seek depth.
+ * @deprecated Use #{@link com.hubspot.httpql.core.ann.QueryConstraints}
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({
   ElementType.TYPE
