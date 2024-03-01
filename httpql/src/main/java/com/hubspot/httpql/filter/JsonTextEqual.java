@@ -9,7 +9,7 @@ import org.jooq.Condition;
 import org.jooq.Field;
 
 /**
- * @deprecated Use #{@link com.hubspot.httpql.core.filter.JsonEqual}
+ * @deprecated Use #{@link com.hubspot.httpql.core.filter.JsonTextEqual}
  */
 @Deprecated
 public class JsonTextEqual extends JsonFilterBase implements Filter {
