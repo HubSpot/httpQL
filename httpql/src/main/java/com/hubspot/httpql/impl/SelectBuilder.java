@@ -10,6 +10,11 @@ import com.hubspot.httpql.ann.OrderBy;
 import com.hubspot.httpql.core.OrderingIF;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.JoinFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -31,19 +36,12 @@ import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Translates the high-level parsed query into a JOOQ Select and/or String representation.
  *
  * @author tdavis
  */
 public class SelectBuilder<T extends QuerySpec> {
-
   private final List<String> includedFieldNames = new ArrayList<>();
   private final List<Field<?>> additionalFields = new ArrayList<>();
   private final List<AdditionalCondition> additionalConditions = new ArrayList<>();
@@ -163,7 +161,10 @@ public class SelectBuilder<T extends QuerySpec> {
   /**
    * Add custom JOOQ Conditions to the query.
    */
-  public SelectBuilder<T> withConditions(Collection<Condition> conditions, boolean includeInCount) {
+  public SelectBuilder<T> withConditions(
+    Collection<Condition> conditions,
+    boolean includeInCount
+  ) {
     for (Condition c : conditions) {
       additionalConditions.add(new AdditionalCondition(c, includeInCount));
     }
@@ -218,7 +219,11 @@ public class SelectBuilder<T extends QuerySpec> {
   }
 
   public BuiltSelect<T> build() {
-    return new BuiltSelect<>(buildSelect(), paramType);
+    return build(new Settings());
+  }
+
+  public BuiltSelect<T> build(Settings settings) {
+    return new BuiltSelect<>(buildSelect(settings), paramType);
   }
 
   private Table<?> getTable() {
@@ -242,10 +247,9 @@ public class SelectBuilder<T extends QuerySpec> {
     return factory.getFieldName(name, getTable());
   }
 
-  private SelectFinalStep<?> buildSelect() {
+  private SelectFinalStep<?> buildSelect(Settings settings) {
     Select<?> select;
     SelectFromStep<?> selectFrom;
-    Settings settings = new Settings();
     settings.setRenderNameStyle(renderNameStyle);
     DSLContext ctx = DSL.using(dialect, settings);
     Table<?> table = getTable();
@@ -253,7 +257,10 @@ public class SelectBuilder<T extends QuerySpec> {
     if (asCount) {
       if (!includedFieldNames.isEmpty()) {
         List<Field<?>> distinctFields = fieldNamesToFields();
-        selectFrom = ctx.select(DSL.countDistinct(distinctFields.toArray(new Field[distinctFields.size()])));
+        selectFrom =
+          ctx.select(
+            DSL.countDistinct(distinctFields.toArray(new Field[distinctFields.size()]))
+          );
       } else {
         selectFrom = ctx.selectCount();
       }
@@ -279,9 +286,11 @@ public class SelectBuilder<T extends QuerySpec> {
     select = selectFrom.from(table);
     for (JoinCondition joinCondition : joinConditions) {
       if (joinCondition.isLeftJoin()) {
-        ((SelectJoinStep<?>) select).leftJoin(joinCondition.getTable()).on(joinCondition.getCondition());
+        ((SelectJoinStep<?>) select).leftJoin(joinCondition.getTable())
+          .on(joinCondition.getCondition());
       } else {
-        ((SelectJoinStep<?>) select).join(joinCondition.getTable()).on(joinCondition.getCondition());
+        ((SelectJoinStep<?>) select).join(joinCondition.getTable())
+          .on(joinCondition.getCondition());
       }
     }
     select = ((SelectJoinStep<?>) select).where(getConditions());
@@ -309,7 +318,11 @@ public class SelectBuilder<T extends QuerySpec> {
    */
   public Collection<Condition> getConditions() {
     Collection<Condition> conditions = new ArrayList<>();
-    conditions.add(sourceQuery.getCombinedConditionCreator().getCondition(sourceQuery.getBoundQuery(), factory));
+    conditions.add(
+      sourceQuery
+        .getCombinedConditionCreator()
+        .getCondition(sourceQuery.getBoundQuery(), factory)
+    );
 
     for (AdditionalCondition c : additionalConditions) {
       if (!asCount || c.includeInCount) {
@@ -323,18 +336,25 @@ public class SelectBuilder<T extends QuerySpec> {
     return sourceQuery;
   }
 
-  public static <T extends QuerySpec> SelectBuilder<T> forParsedQuery(ParsedQuery<T> parsed, MetaQuerySpec<T> context) {
+  public static <T extends QuerySpec> SelectBuilder<T> forParsedQuery(
+    ParsedQuery<T> parsed,
+    MetaQuerySpec<T> context
+  ) {
     return new SelectBuilder<>(parsed, context);
   }
 
-  public static <T extends QuerySpec> SelectBuilder<T> forParsedQuery(ParsedQuery<T> parsed) {
+  public static <T extends QuerySpec> SelectBuilder<T> forParsedQuery(
+    ParsedQuery<T> parsed
+  ) {
     return new SelectBuilder<>(parsed, new DefaultMetaQuerySpec<>(parsed.getQueryType()));
   }
 
   public Collection<SortField<?>> orderingsToSortFields() {
     ArrayList<SortField<?>> sorts = new ArrayList<>(sourceQuery.getOrderings().size());
     for (OrderingIF order : sourceQuery.getOrderings()) {
-      sorts.add(getSortField(order).sort(SortOrder.valueOf(order.getOrderString().toUpperCase())));
+      sorts.add(
+        getSortField(order).sort(SortOrder.valueOf(order.getOrderString().toUpperCase()))
+      );
     }
     return sorts;
   }
@@ -345,12 +365,14 @@ public class SelectBuilder<T extends QuerySpec> {
       return true;
     }
 
-    com.hubspot.httpql.core.ann.OrderBy newAnn = field.getAnnotation(com.hubspot.httpql.core.ann.OrderBy.class);
+    com.hubspot.httpql.core.ann.OrderBy newAnn = field.getAnnotation(
+      com.hubspot.httpql.core.ann.OrderBy.class
+    );
 
     return (newAnn != null && newAnn.isGenerated());
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   private Field getSortField(OrderingIF order) {
     Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
     BeanPropertyDefinition bpd = fieldMap.get(order.getQueryName());

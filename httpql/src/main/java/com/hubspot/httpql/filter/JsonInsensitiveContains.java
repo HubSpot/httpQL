@@ -1,0 +1,40 @@
+package com.hubspot.httpql.filter;
+
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
+import com.hubspot.httpql.Filter;
+import com.hubspot.httpql.MultiParamConditionProvider;
+import java.util.Collection;
+import org.apache.commons.lang.NotImplementedException;
+import org.jooq.Condition;
+import org.jooq.Field;
+
+/**
+ * @deprecated Use #{@link com.hubspot.httpql.core.filter.JsonInsensitiveContains}
+ */
+@Deprecated
+public class JsonInsensitiveContains extends JsonFilterBase implements Filter {
+  private static final Escaper ESCAPER = Escapers
+    .builder()
+    .addEscape('\\', "\\\\")
+    .addEscape('%', "!%")
+    .addEscape('_', "!_")
+    .addEscape('!', "!!")
+    .build();
+
+  @Override
+  public String[] names() {
+    return new String[] { "json_icontains", "json_ilike" };
+  }
+
+  @Override
+  public <T> MultiParamConditionProvider<T> getConditionProvider(final Field<T> field) {
+    return new MultiParamConditionProvider<T>(field) {
+
+      @Override
+      public Condition getCondition(Collection<T> values) {
+        throw new NotImplementedException("Implemented in Impl class");
+      }
+    };
+  }
+}
