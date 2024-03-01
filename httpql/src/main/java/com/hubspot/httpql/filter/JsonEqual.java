@@ -19,12 +19,10 @@ public class JsonEqual extends JsonFilterBase implements Filter {
     return new String[] { "json_eq" };
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
-    return new MultiParamConditionProvider<T>(field) {
+    return new MultiParamConditionProvider<>(field) {
 
-      @SuppressWarnings("unchecked")
       @Override
       public Condition getCondition(Collection<T> values) {
         throw new NotImplementedException("Implemented in Impl class");

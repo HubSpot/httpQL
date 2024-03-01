@@ -13,12 +13,10 @@ import org.jooq.Field;
 
 public class JsonIsNotDistinctFromImpl extends JsonFilterBase implements FilterImpl {
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
-    return new MultiParamConditionProvider<T>(field) {
+    return new MultiParamConditionProvider<>(field) {
 
-      @SuppressWarnings("unchecked")
       @Override
       public Condition getCondition(Collection<T> values) {
         Preconditions.checkArgument(

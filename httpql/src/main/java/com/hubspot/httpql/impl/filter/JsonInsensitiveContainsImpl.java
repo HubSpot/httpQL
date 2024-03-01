@@ -22,12 +22,10 @@ public class JsonInsensitiveContainsImpl extends JsonFilterBase implements Filte
     .addEscape('!', "!!")
     .build();
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
-    return new MultiParamConditionProvider<T>(field) {
+    return new MultiParamConditionProvider<>(field) {
 
-      @SuppressWarnings("unchecked")
       @Override
       public Condition getCondition(Collection<T> values) {
         Preconditions.checkArgument(

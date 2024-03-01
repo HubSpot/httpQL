@@ -2,6 +2,7 @@ package com.hubspot.httpql.impl.filter;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.httpql.core.filter.JsonStartsWith;
@@ -12,10 +13,9 @@ import org.jooq.Field;
 
 public class JsonStartsWithImpl extends JsonFilterBase implements FilterImpl {
 
-  @SuppressWarnings("unchecked")
   @Override
-  public <T> MultiParamConditionProvider<T> getConditionProvider(final Field<T> field) {
-    return new MultiParamConditionProvider<T>(field) {
+  public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
+    return new MultiParamConditionProvider<>(field) {
 
       @Override
       public Condition getCondition(Collection<T> values) {

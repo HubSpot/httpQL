@@ -13,10 +13,9 @@ import org.jooq.Param;
 
 public class JsonNullImpl extends JsonFilterBase implements FilterImpl {
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
-    return new ConditionProvider<T>(field) {
+    return new ConditionProvider<>(field) {
 
       @Override
       public Condition getCondition(Param<T> value) {

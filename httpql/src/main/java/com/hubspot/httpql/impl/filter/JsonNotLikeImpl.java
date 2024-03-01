@@ -11,15 +11,14 @@ import java.util.Iterator;
 import java.util.Set;
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.JSON;
 
 public class JsonNotLikeImpl extends JsonFilterBase implements FilterImpl {
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
-    return new MultiParamConditionProvider<T>(field) {
+    return new MultiParamConditionProvider<>(field) {
 
-      @SuppressWarnings("unchecked")
       @Override
       public Condition getCondition(Collection<T> values) {
         Preconditions.checkArgument(
@@ -28,14 +27,16 @@ public class JsonNotLikeImpl extends JsonFilterBase implements FilterImpl {
         );
         JsonFilterParts jsonFilterParts = getJsonFilterParts(field, values);
 
-        Iterator<String> iter = values.stream().skip(1).map(Object::toString).iterator();
+        Iterator<JSON> iter = jsonFilterParts.filterValues.iterator();
         Condition notLikeCondition = jsonFilterParts
           .fieldValue.cast(String.class)
-          .notLike(iter.next(), '!');
+          .notLike(iter.next().data(), '!');
         while (iter.hasNext()) {
           notLikeCondition =
             notLikeCondition.and(
-              jsonFilterParts.fieldValue.cast(String.class).notLike(iter.next(), '!')
+              jsonFilterParts
+                .fieldValue.cast(String.class)
+                .notLike(iter.next().data(), '!')
             );
         }
         return notLikeCondition;

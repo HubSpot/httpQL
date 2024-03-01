@@ -16,16 +16,14 @@ import org.jooq.JSON;
 
 public class JsonRangeImpl extends JsonFilterBase implements FilterImpl {
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
     final Comparator<JSON> NUMBER_COMPARATOR = Comparator.comparing(
       a -> new BigDecimal(a.data())
     );
 
-    return new MultiParamConditionProvider<T>(field) {
+    return new MultiParamConditionProvider<>(field) {
 
-      @SuppressWarnings("unchecked")
       @Override
       public Condition getCondition(Collection<T> values) {
         Preconditions.checkArgument(

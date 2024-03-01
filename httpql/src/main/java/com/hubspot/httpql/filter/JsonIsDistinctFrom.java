@@ -1,5 +1,6 @@
 package com.hubspot.httpql.filter;
 
+import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.Filter;
 import com.hubspot.httpql.MultiParamConditionProvider;
 import java.util.Collection;
@@ -19,7 +20,7 @@ public class JsonIsDistinctFrom extends JsonFilterBase implements Filter {
   }
 
   @Override
-  public <T> MultiParamConditionProvider<T> getConditionProvider(final Field<T> field) {
+  public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
     return new MultiParamConditionProvider<>(field) {
 
       @Override
