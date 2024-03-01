@@ -29,6 +29,7 @@ com.hubspot.httpql.impl.filter.JsonNotEqualImpl
 com.hubspot.httpql.impl.filter.JsonNotInImpl
 com.hubspot.httpql.impl.filter.JsonRangeImpl
 com.hubspot.httpql.impl.filter.JsonStartsWithImpl
+com.hubspot.httpql.impl.filter.JsonTextEqualImpl
 com.hubspot.httpql.impl.filter.JsonNullImpl
 com.hubspot.httpql.impl.filter.JsonNotNullImpl
 com.hubspot.httpql.impl.filter.JsonNotLikeImpl

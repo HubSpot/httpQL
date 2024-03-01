@@ -28,6 +28,7 @@ import com.hubspot.httpql.core.filter.JsonNotNull;
 import com.hubspot.httpql.core.filter.JsonNull;
 import com.hubspot.httpql.core.filter.JsonRange;
 import com.hubspot.httpql.core.filter.JsonStartsWith;
+import com.hubspot.httpql.core.filter.JsonTextEqual;
 import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.In;
 import com.hubspot.httpql.filter.NotNull;
@@ -101,6 +102,28 @@ public class QueryParserJsonTest {
       .contains("cast(json_extract(cast(`json_body` as json), '$.a') as decimal) = 1")
       .contains(
         "cast(json_extract(cast(`json_string_body` as json), '$.a') as decimal) = 2"
+      )
+      .endsWith(")\nlimit 20");
+  }
+
+  @Test
+  public void itBindsJsonTextEqual() {
+    query.putAll("jsonBody__json_text_eq", ImmutableList.of("$.a", "abc"));
+    query.putAll("jsonStringBody__json_text_eq", ImmutableList.of("$.a", "def"));
+
+    ParsedQuery<Spec> parsedQuery = parser.parse(query);
+
+    assertThat(
+        SelectBuilder
+          .forParsedQuery(parsedQuery)
+          .build(settings)
+          .getRawSelect()
+          .toString()
+      )
+      .startsWith("select *\nfrom \nwhere (")
+      .contains("cast(json_extract(cast(`json_body` as json), '$.a') as char) = 'abc'")
+      .contains(
+        "cast(json_extract(cast(`json_string_body` as json), '$.a') as char) = 'def'"
       )
       .endsWith(")\nlimit 20");
   }
@@ -520,6 +543,7 @@ public class QueryParserJsonTest {
         JsonNotIn.class,
         JsonRange.class,
         JsonStartsWith.class,
+        JsonTextEqual.class,
         JsonNull.class,
         JsonNotNull.class,
         JsonNotLike.class
@@ -544,6 +568,7 @@ public class QueryParserJsonTest {
         JsonNotIn.class,
         JsonRange.class,
         JsonStartsWith.class,
+        JsonTextEqual.class,
         JsonNull.class,
         JsonNotNull.class,
         JsonNotLike.class
