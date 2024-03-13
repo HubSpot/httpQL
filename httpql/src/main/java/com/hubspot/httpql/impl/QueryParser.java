@@ -32,10 +32,6 @@ import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
 import com.hubspot.rosetta.Rosetta;
-import org.jooq.Operator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,6 +42,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.jooq.Operator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Primary entry point into httpQL.
@@ -55,11 +54,17 @@ import java.util.stream.Collectors;
  *
  */
 public class QueryParser<T extends QuerySpec> {
+
   private static final Logger LOG = LoggerFactory.getLogger(QueryParser.class);
 
-  private static final Function<String, String> SNAKE_CASE_TRANSFORMER = input -> CaseFormat.LOWER_CAMEL.to(
-      CaseFormat.LOWER_UNDERSCORE, input);
-  private static final Set<String> RESERVED_WORDS = ImmutableSet.of("offset", "limit", "order", "includeDeleted");
+  private static final Function<String, String> SNAKE_CASE_TRANSFORMER = input ->
+    CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, input);
+  private static final Set<String> RESERVED_WORDS = ImmutableSet.of(
+    "offset",
+    "limit",
+    "order",
+    "includeDeleted"
+  );
 
   private final Class<T> queryType;
   protected final Collection<String> orderableFields;
@@ -72,7 +77,12 @@ public class QueryParser<T extends QuerySpec> {
   private final boolean strictMode;
   private final UriParamParser uriParamParser;
 
-  protected QueryParser(final Class<T> spec, boolean strictMode, MetaQuerySpec<T> meta, UriParamParser uriParamParser) {
+  protected QueryParser(
+    final Class<T> spec,
+    boolean strictMode,
+    MetaQuerySpec<T> meta,
+    UriParamParser uriParamParser
+  ) {
     this.orderableFields = new ArrayList<>();
     this.queryType = spec;
     this.mapper = Rosetta.getMapper();
@@ -82,8 +92,9 @@ public class QueryParser<T extends QuerySpec> {
   }
 
   protected void setConstraints(final Class<T> spec) {
-
-    com.hubspot.httpql.core.ann.QueryConstraints qc = spec.getAnnotation(com.hubspot.httpql.core.ann.QueryConstraints.class);
+    com.hubspot.httpql.core.ann.QueryConstraints qc = spec.getAnnotation(
+      com.hubspot.httpql.core.ann.QueryConstraints.class
+    );
     if (qc != null) {
       this.defaultLimit = qc.defaultLimit();
       this.maxLimit = qc.maxLimit();
@@ -97,7 +108,12 @@ public class QueryParser<T extends QuerySpec> {
       this.maxLimit = ann.maxLimit();
       this.maxOffset = ann.maxOffset();
     } else {
-      LOG.warn(String.format("Type %s has no @QueryConstraints annotation; using built-in defaults.", spec));
+      LOG.warn(
+        String.format(
+          "Type %s has no @QueryConstraints annotation; using built-in defaults.",
+          spec
+        )
+      );
     }
   }
 
@@ -131,13 +147,16 @@ public class QueryParser<T extends QuerySpec> {
     final Optional<Integer> limit = getLimit(parsedUriParams.getLimit());
     final Optional<Integer> offset = getOffset(parsedUriParams.getOffset());
 
-    final Collection<OrderingIF> orderings = getOrderings(parsedUriParams.getOrderBys(), meta);
+    final Collection<OrderingIF> orderings = getOrderings(
+      parsedUriParams.getOrderBys(),
+      meta
+    );
 
-    final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable = meta.getFilterTable();
+    final Table<BoundFilterEntry<T>, String, BeanPropertyDefinition> filterTable =
+      meta.getFilterTable();
     final Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
 
     for (FieldFilter fieldFilter : parsedUriParams.getFieldFilters()) {
-
       final String filterName = fieldFilter.getFilterName();
 
       // If not in "strict mode", gracefully accept completely unknown query parameters
@@ -151,17 +170,30 @@ public class QueryParser<T extends QuerySpec> {
       }
 
       String finalFieldName = fieldName;
-      Optional<BoundFilterEntry<T>> filterEntryOptional = filterTable.rowKeySet().stream()
-          .filter(f -> Objects.equals(f.getFieldName(), finalFieldName)
-              && Optional.of(f.getFilter()).equals(Filters.getFilterImplByName(filterName)))
-          .findFirst();
+      Optional<BoundFilterEntry<T>> filterEntryOptional = filterTable
+        .rowKeySet()
+        .stream()
+        .filter(f ->
+          Objects.equals(f.getFieldName(), finalFieldName) &&
+          Optional.of(f.getFilter()).equals(Filters.getFilterImplByName(filterName))
+        )
+        .findFirst();
 
       // Use reserved words instead of simple look-up to throw exception on disallowed fields
-      if (filterEntryOptional.isEmpty()
-          || (!RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName())
-              && !filterTable.contains(filterEntryOptional.get(), filterName))) {
-        throw new FilterViolation(String.format("Filtering by \"%s %s\" is not allowed",
-            finalFieldName, filterName));
+      if (
+        filterEntryOptional.isEmpty() ||
+        (
+          !RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName()) &&
+          !filterTable.contains(filterEntryOptional.get(), filterName)
+        )
+      ) {
+        throw new FilterViolation(
+          String.format(
+            "Filtering by \"%s %s\" is not allowed",
+            finalFieldName,
+            filterName
+          )
+        );
       } else if (RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName())) {
         continue;
       }
@@ -170,14 +202,18 @@ public class QueryParser<T extends QuerySpec> {
 
       // Add value using key associated with the Type's field name, *not* the query parameter name.
       BeanPropertyDefinition prop = filterTable.get(filterEntry, filterName);
-      BoundFilterEntry<T> boundColumn = filterTable.rowKeySet().stream()
-          .filter(bfe -> bfe.equals(filterEntry)).findFirst()
-          .orElseThrow(() -> new FilterViolation("Filter column " + filterEntry + " not found"));
+      BoundFilterEntry<T> boundColumn = filterTable
+        .rowKeySet()
+        .stream()
+        .filter(bfe -> bfe.equals(filterEntry))
+        .findFirst()
+        .orElseThrow(() ->
+          new FilterViolation("Filter column " + filterEntry + " not found")
+        );
 
       Class<?> convertToType = null;
 
       if (prop.getPrimaryMember() != null) {
-
         convertToType = DefaultMetaUtils.getFilterByTypeOverride(prop.getPrimaryMember());
 
         String as = DefaultMetaUtils.getFilterByAs(prop.getPrimaryMember());
@@ -195,13 +231,16 @@ public class QueryParser<T extends QuerySpec> {
       if (boundColumn.isMultiValue()) {
         List<String> paramVals = fieldFilter.getValues();
 
-        List<?> boundVals = paramVals.stream()
-            .map(v -> mapper.convertValue(v, finalType))
-            .collect(Collectors.toList());
+        List<?> boundVals = paramVals
+          .stream()
+          .map(v -> mapper.convertValue(v, finalType))
+          .collect(Collectors.toList());
 
         boundColumn = new MultiValuedBoundFilterEntry<>(boundColumn, boundVals);
-
-      } else if (NullImpl.class.equals(boundColumn.getFilter().getClass()) || NotNullImpl.class.equals(boundColumn.getFilter().getClass())) {
+      } else if (
+        NullImpl.class.equals(boundColumn.getFilter().getClass()) ||
+        NotNullImpl.class.equals(boundColumn.getFilter().getClass())
+      ) {
         fieldValues.put(prop.getName(), Defaults.defaultValue(finalType));
       } else {
         fieldValues.put(prop.getName(), fieldFilter.getValue());
@@ -210,13 +249,23 @@ public class QueryParser<T extends QuerySpec> {
       boundFilterEntries.add(boundColumn);
     }
 
-    CombinedConditionCreator<T> combinedConditionCreator = new CombinedConditionCreator<>(Operator.AND, Lists.newArrayList(
-        boundFilterEntries));
+    CombinedConditionCreator<T> combinedConditionCreator = new CombinedConditionCreator<>(
+      Operator.AND,
+      Lists.newArrayList(boundFilterEntries)
+    );
 
     try {
       T boundQuerySpec = mapper.convertValue(fieldValues, queryType);
-      return new ParsedQuery<>(boundQuerySpec, queryType, combinedConditionCreator, meta, limit, offset, orderings,
-          includeDeleted);
+      return new ParsedQuery<>(
+        boundQuerySpec,
+        queryType,
+        combinedConditionCreator,
+        meta,
+        limit,
+        offset,
+        orderings,
+        includeDeleted
+      );
     } catch (IllegalArgumentException e) {
       if (e.getCause() instanceof InvalidFormatException) {
         InvalidFormatException cause = (InvalidFormatException) e.getCause();
@@ -224,8 +273,14 @@ public class QueryParser<T extends QuerySpec> {
         if (cause.getPath().size() > 0 && cause.getPath().get(0).getFieldName() != null) {
           filterLabel = cause.getPath().get(0).getFieldName() + " filter";
         }
-        throw new FilterViolation(String.format("Invalid %s value '%s'; expected a %s", filterLabel, cause.getValue(), cause
-            .getTargetType()));
+        throw new FilterViolation(
+          String.format(
+            "Invalid %s value '%s'; expected a %s",
+            filterLabel,
+            cause.getValue(),
+            cause.getTargetType()
+          )
+        );
       }
       throw e;
     }
@@ -245,7 +300,12 @@ public class QueryParser<T extends QuerySpec> {
       try {
         int parsedLimit = limit.get();
         if (parsedLimit < 0) {
-          throw new ConstraintViolation(ConstraintType.OFFSET, LimitViolationType.MINIMUM, parsedLimit, 0);
+          throw new ConstraintViolation(
+            ConstraintType.OFFSET,
+            LimitViolationType.MINIMUM,
+            parsedLimit,
+            0
+          );
         }
         if (maxLimit > 0 && parsedLimit > maxLimit) {
           return Optional.of(maxLimit);
@@ -262,7 +322,12 @@ public class QueryParser<T extends QuerySpec> {
       try {
         int parsedOffset = offset.get();
         if (parsedOffset < 0) {
-          throw new ConstraintViolation(ConstraintType.OFFSET, LimitViolationType.MINIMUM, parsedOffset, 0);
+          throw new ConstraintViolation(
+            ConstraintType.OFFSET,
+            LimitViolationType.MINIMUM,
+            parsedOffset,
+            0
+          );
         }
         if (maxOffset > 0 && parsedOffset > maxOffset) {
           return Optional.of(maxOffset);
@@ -273,18 +338,32 @@ public class QueryParser<T extends QuerySpec> {
     return Optional.empty();
   }
 
-  protected Collection<OrderingIF> getOrderings(List<String> orderStrings, MetaQuerySpec<T> meta) {
+  protected Collection<OrderingIF> getOrderings(
+    List<String> orderStrings,
+    MetaQuerySpec<T> meta
+  ) {
     Collection<OrderingIF> orderings = new ArrayList<>();
     if (orderStrings != null) {
       for (String order : orderStrings) {
-        com.hubspot.httpql.core.Ordering ordering = com.hubspot.httpql.core.Ordering.fromString(order);
-        FilterEntry entry = new FilterEntry(null, ordering.getFieldName(), getQueryType());
+        com.hubspot.httpql.core.Ordering ordering =
+          com.hubspot.httpql.core.Ordering.fromString(order);
+        FilterEntry entry = new FilterEntry(
+          null,
+          ordering.getFieldName(),
+          getQueryType()
+        );
         BeanPropertyDefinition prop = meta.getFieldMap().get(entry.getQueryName());
         if (prop == null) {
           prop = meta.getFieldMap().get(entry.getFieldName());
         }
         if (prop != null && orderableFields.contains(prop.getName())) {
-          orderings.add(new com.hubspot.httpql.core.Ordering(entry.getFieldName(), entry.getQueryName(), ordering.getOrder()));
+          orderings.add(
+            new com.hubspot.httpql.core.Ordering(
+              entry.getFieldName(),
+              entry.getQueryName(),
+              ordering.getOrder()
+            )
+          );
         }
       }
     }
@@ -304,7 +383,9 @@ public class QueryParser<T extends QuerySpec> {
   }
 
   public static class Builder<T extends QuerySpec> {
-    private static final Table<Class<?>, Boolean, QueryParser<?>> CACHED_PARSERS = HashBasedTable.create();
+
+    private static final Table<Class<?>, Boolean, QueryParser<?>> CACHED_PARSERS =
+      HashBasedTable.create();
 
     protected Class<T> spec;
     protected boolean strictMode;
@@ -350,7 +431,9 @@ public class QueryParser<T extends QuerySpec> {
         uriParamParser = UriParamParser.newBuilder().build();
       }
 
-      Map<String, BeanPropertyDefinition> fields = BeanPropertyIntrospector.getFields(spec);
+      Map<String, BeanPropertyDefinition> fields = BeanPropertyIntrospector.getFields(
+        spec
+      );
 
       qp = new QueryParser<>(spec, strictMode, meta, uriParamParser);
       qp.setConstraints(spec);
@@ -361,5 +444,4 @@ public class QueryParser<T extends QuerySpec> {
       return qp;
     }
   }
-
 }

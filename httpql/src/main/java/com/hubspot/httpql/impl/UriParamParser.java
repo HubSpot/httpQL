@@ -10,25 +10,28 @@ import com.hubspot.httpql.Filters;
 import com.hubspot.httpql.MultiParamConditionProvider;
 import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.filter.Equal;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.jooq.impl.DSL;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nullable;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.jooq.impl.DSL;
 
 public class UriParamParser {
 
-
   private static final String FILTER_PARAM_DELIMITER = "__";
-  private static final Splitter FILTER_PARAM_SPLITTER = Splitter.on(FILTER_PARAM_DELIMITER).trimResults();
+  private static final Splitter FILTER_PARAM_SPLITTER = Splitter
+    .on(FILTER_PARAM_DELIMITER)
+    .trimResults();
   private static final Joiner FILTER_PARAM_JOINER = Joiner.on(FILTER_PARAM_DELIMITER);
-  private static final Splitter MULTIVALUE_PARAM_SPLITTER = Splitter.on(",").omitEmptyStrings().trimResults();
+  private static final Splitter MULTIVALUE_PARAM_SPLITTER = Splitter
+    .on(",")
+    .omitEmptyStrings()
+    .trimResults();
 
   private final Set<String> ignoredParams;
 
@@ -40,7 +43,9 @@ public class UriParamParser {
     return ignoredParams;
   }
 
-  public Map<String, List<String>> multimapToMultivaluedMap(Multimap<String, String> map) {
+  public Map<String, List<String>> multimapToMultivaluedMap(
+    Multimap<String, String> map
+  ) {
     Map<String, List<String>> result = new HashMap<>();
     map.asMap().forEach((key, value) -> result.put(key, new ArrayList<>(value)));
     return result;
@@ -55,8 +60,10 @@ public class UriParamParser {
   }
 
   @SuppressWarnings("rawtypes")
-  public ParsedUriParams parseUriParams(Map<String, List<String>> uriParams, boolean allowDoubleUnderscoreInFieldName) {
-
+  public ParsedUriParams parseUriParams(
+    Map<String, List<String>> uriParams,
+    boolean allowDoubleUnderscoreInFieldName
+  ) {
     final ParsedUriParams result = new ParsedUriParams();
 
     // make a copy so we can modify it
@@ -93,7 +100,10 @@ public class UriParamParser {
         continue;
       }
 
-      final String fieldName = fieldNameFromParts(parts, allowDoubleUnderscoreInFieldName);
+      final String fieldName = fieldNameFromParts(
+        parts,
+        allowDoubleUnderscoreInFieldName
+      );
       final String filterName = filterNameFromParts(parts);
       final Optional<Filter> filter = Filters.getFilterByName(filterName);
 
@@ -102,9 +112,15 @@ public class UriParamParser {
       }
 
       List<String> values = entry.getValue();
-      ConditionProvider conditionProvider = filter.get().getConditionProvider(DSL.field(fieldName));
+      ConditionProvider conditionProvider = filter
+        .get()
+        .getConditionProvider(DSL.field(fieldName));
 
-      if (conditionProvider instanceof MultiParamConditionProvider && values.size() == 1 && values.get(0).contains(",")) {
+      if (
+        conditionProvider instanceof MultiParamConditionProvider &&
+        values.size() == 1 &&
+        values.get(0).contains(",")
+      ) {
         values = MULTIVALUE_PARAM_SPLITTER.splitToList(values.get(0));
       }
 
@@ -122,7 +138,10 @@ public class UriParamParser {
     }
   }
 
-  private static String fieldNameFromParts(List<String> parts, boolean allowDoubleUnderscoreInFieldName) {
+  private static String fieldNameFromParts(
+    List<String> parts,
+    boolean allowDoubleUnderscoreInFieldName
+  ) {
     if (!allowDoubleUnderscoreInFieldName) {
       return parts.get(0);
     }
@@ -155,7 +174,6 @@ public class UriParamParser {
     }
 
     public UriParamParser build() {
-
       if (ignoredParams == null) {
         ignoredParams = ImmutableSet.of();
       }
@@ -166,9 +184,10 @@ public class UriParamParser {
 
   @Nullable
   private static String getFirst(Map<String, List<String>> map, String key) {
-    return Optional.ofNullable(map.get(key))
-        .filter(list -> !list.isEmpty())
-        .map(list -> list.get(0))
-        .orElse(null);
+    return Optional
+      .ofNullable(map.get(key))
+      .filter(list -> !list.isEmpty())
+      .map(list -> list.get(0))
+      .orElse(null);
   }
 }

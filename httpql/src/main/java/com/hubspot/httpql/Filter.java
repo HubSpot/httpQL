@@ -13,5 +13,4 @@ public interface Filter extends com.hubspot.httpql.core.filter.Filter {
    */
 
   <T> ConditionProvider<T> getConditionProvider(Field<T> field);
-
 }

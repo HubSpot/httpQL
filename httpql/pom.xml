@@ -32,6 +32,10 @@
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.hubspot.httpql</groupId>
+      <artifactId>httpql-core</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.hubspot.rosetta</groupId>
       <artifactId>RosettaAnnotations</artifactId>
     </dependency>
@@ -50,10 +54,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.hubspot.httpql</groupId>
-      <artifactId>httpql-core</artifactId>
     </dependency>
 
     <dependency>

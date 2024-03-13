@@ -15,7 +15,7 @@ public class EntityWithSimpleJoin implements QuerySpec {
   @FilterBy(Equal.class)
   private Long id;
 
-  @FilterBy(value = {In.class, Equal.class})
+  @FilterBy(value = { In.class, Equal.class })
   @com.hubspot.httpql.core.ann.FilterJoin(table = "join_tbl", on = "id", eq = "entity_id")
   private Long topicId;
 
@@ -39,5 +39,4 @@ public class EntityWithSimpleJoin implements QuerySpec {
   public String tableName() {
     return "entity_table";
   }
-
 }

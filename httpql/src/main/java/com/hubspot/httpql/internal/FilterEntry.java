@@ -14,7 +14,12 @@ public class FilterEntry {
     this(filter, queryName, queryName, queryType);
   }
 
-  public FilterEntry(FilterImpl filter, String fieldName, String queryName, Class<?> queryType) {
+  public FilterEntry(
+    FilterImpl filter,
+    String fieldName,
+    String queryName,
+    Class<?> queryType
+  ) {
     this.filter = filter;
     this.fieldName = fieldName;
     this.queryName = normalizeQueryName(queryName, queryType);
@@ -40,13 +45,14 @@ public class FilterEntry {
   public boolean equals(Object other) {
     FilterEntry fe = (FilterEntry) other;
 
-    return Objects.equal(getQueryName(), fe.getQueryName()) &&
-        Objects.equal(getFilter(), fe.getFilter());
+    return (
+      Objects.equal(getQueryName(), fe.getQueryName()) &&
+      Objects.equal(getFilter(), fe.getFilter())
+    );
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(getQueryName(), getFilter());
   }
-
 }

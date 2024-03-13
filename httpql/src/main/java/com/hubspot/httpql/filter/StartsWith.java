@@ -14,21 +14,16 @@ public class StartsWith extends FilterBase implements Filter {
 
   @Override
   public String[] names() {
-    return new String[] {
-        "startswith"
-    };
+    return new String[] { "startswith" };
   }
 
   @Override
   public <T> ConditionProvider<T> getConditionProvider(Field<T> field) {
     return new ConditionProvider<T>(field) {
-
       @Override
       public Condition getCondition(Param<T> value) {
         return field.startsWith(value);
       }
-
     };
   }
-
 }

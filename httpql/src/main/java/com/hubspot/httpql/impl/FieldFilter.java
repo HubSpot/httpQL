@@ -1,10 +1,9 @@
 package com.hubspot.httpql.impl;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.ImmutableList;
 import com.hubspot.httpql.Filter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class FieldFilter {
 
@@ -13,7 +12,12 @@ public class FieldFilter {
   private List<String> values;
   private String filterName;
 
-  public FieldFilter(Filter filter, String filterName, String field, List<String> values) {
+  public FieldFilter(
+    Filter filter,
+    String filterName,
+    String field,
+    List<String> values
+  ) {
     this.filter = filter;
     this.filterName = filterName;
     this.field = field;
@@ -52,15 +56,29 @@ public class FieldFilter {
 
   @Override
   public String toString() {
-    return "FieldFilter{" +
-        "filter=" + filter +
-        ", field='" + field + '\'' +
-        ", values=" + values +
-        ", filterName='" + filterName + '\'' +
-        '}';
+    return (
+      "FieldFilter{" +
+      "filter=" +
+      filter +
+      ", field='" +
+      field +
+      '\'' +
+      ", values=" +
+      values +
+      ", filterName='" +
+      filterName +
+      '\'' +
+      '}'
+    );
   }
 
   public String toQueryParam() {
-    return this.field + "__" + filterName + "=" + values.stream().collect(Collectors.joining(","));
+    return (
+      this.field +
+      "__" +
+      filterName +
+      "=" +
+      values.stream().collect(Collectors.joining(","))
+    );
   }
 }

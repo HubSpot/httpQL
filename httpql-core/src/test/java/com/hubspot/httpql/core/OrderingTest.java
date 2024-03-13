@@ -1,11 +1,11 @@
 package com.hubspot.httpql.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class OrderingTest {
 
@@ -18,8 +18,10 @@ public class OrderingTest {
 
   @Test
   public void itGetsOrderString() {
-    assertThat(new Ordering("foo", SortOrder.ASC).getOrderString()).isEqualTo(SortOrder.ASC.toSQL());
-    assertThat(new Ordering("foo", SortOrder.DESC).getOrderString()).isEqualTo(SortOrder.DESC.toSQL());
+    assertThat(new Ordering("foo", SortOrder.ASC).getOrderString())
+      .isEqualTo(SortOrder.ASC.toSQL());
+    assertThat(new Ordering("foo", SortOrder.DESC).getOrderString())
+      .isEqualTo(SortOrder.DESC.toSQL());
   }
 
   @Test
@@ -61,5 +63,4 @@ public class OrderingTest {
     o2 = mapper.readValue(json, Ordering.class);
     assertThat(o2).isEqualToComparingFieldByField(o1);
   }
-
 }

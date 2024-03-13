@@ -9,9 +9,7 @@ import java.lang.annotation.Target;
  * Annotation for QuerySpec providers; defines constraints around query size and seek depth.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({
-  ElementType.TYPE
-})
+@Target({ ElementType.TYPE })
 public @interface QueryConstraints {
   int defaultLimit();
 

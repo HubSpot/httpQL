@@ -16,7 +16,7 @@ public class EntityWithSimpleJoinDescriptor implements QuerySpec {
   @FilterBy(Equal.class)
   private Long id;
 
-  @FilterBy(value = {In.class, Equal.class})
+  @FilterBy(value = { In.class, Equal.class })
   @FilterJoinByDescriptor("com.hubspot.httpql.model.EntitySimpleJoinDescriptor")
   private Long topicId;
 
@@ -40,5 +40,4 @@ public class EntityWithSimpleJoinDescriptor implements QuerySpec {
   public String tableName() {
     return "entity_table";
   }
-
 }

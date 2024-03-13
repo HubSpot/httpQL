@@ -1,7 +1,6 @@
 package com.hubspot.httpql.ann;
 
 import com.hubspot.httpql.Filter;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,9 +11,7 @@ import java.lang.annotation.Target;
  */
 @Deprecated
 @Retention(RetentionPolicy.RUNTIME)
-@Target({
-    ElementType.FIELD, ElementType.METHOD
-})
+@Target({ ElementType.FIELD, ElementType.METHOD })
 public @interface FilterBy {
   Class<? extends Filter>[] value();
 

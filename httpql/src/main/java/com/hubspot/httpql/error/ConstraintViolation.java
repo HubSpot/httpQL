@@ -7,8 +7,21 @@ public class ConstraintViolation extends RuntimeException {
   private final int provided;
   private final int allowed;
 
-  public ConstraintViolation(ConstraintType constraintType, LimitViolationType limitViolationType, int provided, int allowed) {
-    super(String.format("%s constraint violated: %s provided, %s is %s.", constraintType, provided, limitViolationType, allowed));
+  public ConstraintViolation(
+    ConstraintType constraintType,
+    LimitViolationType limitViolationType,
+    int provided,
+    int allowed
+  ) {
+    super(
+      String.format(
+        "%s constraint violated: %s provided, %s is %s.",
+        constraintType,
+        provided,
+        limitViolationType,
+        allowed
+      )
+    );
     this.constraintType = constraintType;
     this.provided = provided;
     this.allowed = allowed;
@@ -25,5 +38,4 @@ public class ConstraintViolation extends RuntimeException {
   public int getAllowed() {
     return allowed;
   }
-
 }

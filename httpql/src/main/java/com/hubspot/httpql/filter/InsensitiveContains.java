@@ -13,32 +13,29 @@ import org.jooq.Param;
  */
 @Deprecated
 public class InsensitiveContains extends FilterBase implements Filter {
-  private static final Escaper ESCAPER = Escapers.builder()
-      .addEscape('\\', "\\\\")
-      .addEscape('%', "!%")
-      .addEscape('_', "!_")
-      .addEscape('!', "!!")
-      .build();
+
+  private static final Escaper ESCAPER = Escapers
+    .builder()
+    .addEscape('\\', "\\\\")
+    .addEscape('%', "!%")
+    .addEscape('_', "!_")
+    .addEscape('!', "!!")
+    .build();
 
   @Override
   public String[] names() {
-    return new String[] {
-        "icontains", "ilike"
-    };
+    return new String[] { "icontains", "ilike" };
   }
 
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
     return new ConditionProvider<T>(field) {
-
       @Override
       public Condition getCondition(Param<T> value) {
         String originalValue = (String) value.getValue();
         String escapedValue = ESCAPER.escape(originalValue);
         return field.likeIgnoreCase('%' + escapedValue + '%', '!');
       }
-
     };
   }
-
 }

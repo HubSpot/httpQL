@@ -2,9 +2,8 @@ package com.hubspot.httpql.impl.filter;
 
 import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.core.filter.Filter;
-import org.jooq.Field;
-
 import java.util.Set;
+import org.jooq.Field;
 
 /**
  * Effectively the operator in a WHERE clause condition.
@@ -18,5 +17,4 @@ public interface FilterImpl {
   <T> ConditionProvider<T> getConditionProvider(Field<T> field);
 
   Set<Class<? extends Filter>> getAnnotationClasses();
-
 }

@@ -4,10 +4,9 @@ import com.hubspot.httpql.ConditionProvider;
 import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.httpql.impl.JoinCondition;
 import com.hubspot.httpql.impl.filter.FilterImpl;
-import org.jooq.Field;
-
 import java.util.Collections;
 import java.util.Set;
+import org.jooq.Field;
 
 /**
  * A special type of filter which brings a join condition into the query
@@ -49,5 +48,4 @@ public class JoinFilter implements FilterImpl {
   public int hashCode() {
     return filter.hashCode();
   }
-
 }

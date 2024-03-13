@@ -11,17 +11,15 @@ import org.jooq.Param;
  */
 @Deprecated
 public class NotNull extends FilterBase implements Filter {
+
   @Override
   public String[] names() {
-    return new String[] {
-        "not_null"
-    };
+    return new String[] { "not_null" };
   }
 
   @Override
   public <T> ConditionProvider<T> getConditionProvider(Field<T> field) {
     return new ConditionProvider<T>(field) {
-
       @Override
       public Condition getCondition(Param<T> value) {
         return field.isNotNull();

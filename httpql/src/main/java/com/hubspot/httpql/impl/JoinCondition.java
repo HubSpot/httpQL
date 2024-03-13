@@ -4,6 +4,7 @@ import org.jooq.Condition;
 import org.jooq.TableLike;
 
 public class JoinCondition {
+
   private final TableLike<?> table;
   private final Condition condition;
   private final boolean leftJoin;
@@ -29,5 +30,4 @@ public class JoinCondition {
   public boolean isLeftJoin() {
     return leftJoin;
   }
-
 }

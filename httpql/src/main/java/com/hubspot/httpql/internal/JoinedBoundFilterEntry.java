@@ -7,9 +7,12 @@ import com.hubspot.httpql.impl.filter.FilterImpl;
 
 public class JoinedBoundFilterEntry<T extends QuerySpec> extends BoundFilterEntry<T> {
 
-  public JoinedBoundFilterEntry(FilterImpl filter, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
+  public JoinedBoundFilterEntry(
+    FilterImpl filter,
+    BeanPropertyDefinition prop,
+    MetaQuerySpec<T> meta
+  ) {
     super(filter, prop, meta);
     // TODO Auto-generated constructor stub
   }
-
 }

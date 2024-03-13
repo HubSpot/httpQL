@@ -2,11 +2,8 @@ package com.hubspot.httpql.core.filter;
 
 public class NotNull implements Filter {
 
-    @Override
-    public String[] names() {
-        return new String[] {
-                "not_null"
-        };
-    }
-
+  @Override
+  public String[] names() {
+    return new String[] { "not_null" };
+  }
 }
