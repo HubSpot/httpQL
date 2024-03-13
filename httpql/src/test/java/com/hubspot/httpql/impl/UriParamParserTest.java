@@ -3,18 +3,17 @@ package com.hubspot.httpql.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.hubspot.httpql.error.FilterViolation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.hubspot.httpql.error.FilterViolation;
-
 public class UriParamParserTest {
+
   UriParamParser uriParamParser;
 
   @Before
@@ -24,7 +23,6 @@ public class UriParamParserTest {
 
   @Test
   public void itRemovesReservedParams() {
-
     Map<String, List<String>> query = new HashMap<>();
     query.put("offset", Lists.newArrayList("1"));
     query.put("limit", Lists.newArrayList("1"));
@@ -39,7 +37,10 @@ public class UriParamParserTest {
 
   @Test
   public void itPreservesCommasInEqValues() {
-    Map<String, List<String>> query = Collections.singletonMap("name", Collections.singletonList("1,2,3"));
+    Map<String, List<String>> query = Collections.singletonMap(
+      "name",
+      Collections.singletonList("1,2,3")
+    );
 
     final ParsedUriParams parsedUriParams = uriParamParser.parseUriParams(query);
     assertThat(parsedUriParams.getFieldFilters().get(0).getValue()).isEqualTo("1,2,3");
@@ -55,13 +56,16 @@ public class UriParamParserTest {
 
     final ParsedUriParams parsedUriParams = uriParamParser.parseUriParams(query, true);
 
-    assertThat(parsedUriParams.getFieldFilters().get(0).getField()).isEqualTo("foo2__bar2");
-    assertThat(parsedUriParams.getFieldFilters().get(0).getFilterName()).isEqualTo("contains");
+    assertThat(parsedUriParams.getFieldFilters().get(0).getField())
+      .isEqualTo("foo2__bar2");
+    assertThat(parsedUriParams.getFieldFilters().get(0).getFilterName())
+      .isEqualTo("contains");
 
     assertThat(parsedUriParams.getFieldFilters().get(1).getField()).isEqualTo("foo3");
     assertThat(parsedUriParams.getFieldFilters().get(1).getFilterName()).isEqualTo("eq");
 
-    assertThat(parsedUriParams.getFieldFilters().get(2).getField()).isEqualTo("foo1__bar1");
+    assertThat(parsedUriParams.getFieldFilters().get(2).getField())
+      .isEqualTo("foo1__bar1");
     assertThat(parsedUriParams.getFieldFilters().get(2).getFilterName()).isEqualTo("eq");
 
     assertThat(parsedUriParams.getFieldFilters().get(3).getField()).isEqualTo("foo4");
@@ -73,9 +77,7 @@ public class UriParamParserTest {
     Map<String, List<String>> query = new HashMap<>();
     query.put("foo2__bar2", Lists.newArrayList("1"));
 
-    assertThatThrownBy(
-        () -> uriParamParser.parseUriParams(query, true)
-    )
-        .isInstanceOf(FilterViolation.class);
+    assertThatThrownBy(() -> uriParamParser.parseUriParams(query, true))
+      .isInstanceOf(FilterViolation.class);
   }
 }

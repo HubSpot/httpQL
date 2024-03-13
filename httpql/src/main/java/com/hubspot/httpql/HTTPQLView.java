@@ -9,6 +9,4 @@ package com.hubspot.httpql;
  * @deprecated Use #{@link com.hubspot.httpql.core.HTTPQLView}
  */
 @Deprecated
-public class HTTPQLView {
-
-}
+public class HTTPQLView {}

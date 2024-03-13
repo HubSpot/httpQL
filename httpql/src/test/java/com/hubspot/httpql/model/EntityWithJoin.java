@@ -40,5 +40,4 @@ public class EntityWithJoin implements QuerySpec {
   public String tableName() {
     return "entity_table";
   }
-
 }

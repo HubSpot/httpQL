@@ -1,5 +1,7 @@
 package com.hubspot.httpql.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -16,13 +18,10 @@ import com.hubspot.httpql.filter.In;
 import com.hubspot.httpql.filter.NotNull;
 import com.hubspot.httpql.filter.Null;
 import com.hubspot.rosetta.annotations.RosettaNaming;
+import java.util.Optional;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class QueryParserTest {
 
@@ -52,8 +51,12 @@ public class QueryParserTest {
 
     ParsedQuery<Spec> parsedQuery = parser.parse(query);
 
-    assertThat(StringUtils.normalizeSpace(SelectBuilder.forParsedQuery(parsedQuery).build().getRawSelect().toString()))
-        .isEqualTo("select * from where `id` in ( 1, 2, 3 ) limit 20");
+    assertThat(
+      StringUtils.normalizeSpace(
+        SelectBuilder.forParsedQuery(parsedQuery).build().getRawSelect().toString()
+      )
+    )
+      .isEqualTo("select * from where `id` in ( 1, 2, 3 ) limit 20");
   }
 
   @Test
@@ -62,8 +65,12 @@ public class QueryParserTest {
 
     ParsedQuery<Spec> parsedQuery = parser.parse(query);
 
-    assertThat(StringUtils.normalizeSpace(SelectBuilder.forParsedQuery(parsedQuery).build().getRawSelect().toString()))
-        .isEqualTo("select * from where `id` in ( 1, 2, 3 ) limit 20");
+    assertThat(
+      StringUtils.normalizeSpace(
+        SelectBuilder.forParsedQuery(parsedQuery).build().getRawSelect().toString()
+      )
+    )
+      .isEqualTo("select * from where `id` in ( 1, 2, 3 ) limit 20");
   }
 
   @Test
@@ -159,25 +166,34 @@ public class QueryParserTest {
     assertThat(spec.getId()).isNull();
   }
 
-  @com.hubspot.httpql.core.ann.QueryConstraints(defaultLimit = 20, maxLimit = 200, maxOffset = 200)
+  @com.hubspot.httpql.core.ann.QueryConstraints(
+    defaultLimit = 20,
+    maxLimit = 200,
+    maxOffset = 200
+  )
   @QueryConstraints(defaultLimit = 10, maxLimit = 100, maxOffset = 100)
   @RosettaNaming(SnakeCaseStrategy.class)
   public static class Spec implements QuerySpec {
 
-    @FilterBy({
-        Equal.class, In.class, Null.class, NotNull.class
-    })
+    @FilterBy({ Equal.class, In.class, Null.class, NotNull.class })
     @OrderBy
     Integer id;
 
     @com.hubspot.httpql.core.ann.OrderBy
-    @com.hubspot.httpql.core.ann.FilterBy({ com.hubspot.httpql.core.filter.GreaterThan.class, com.hubspot.httpql.core.filter.Null.class })
+    @com.hubspot.httpql.core.ann.FilterBy(
+      {
+        com.hubspot.httpql.core.filter.GreaterThan.class,
+        com.hubspot.httpql.core.filter.Null.class,
+      }
+    )
     Long count;
 
     @FilterBy(Equal.class)
     String fullName;
+
     @com.hubspot.httpql.core.ann.FilterBy(com.hubspot.httpql.core.filter.Equal.class)
     String middleName;
+
     boolean secret;
 
     @Override
@@ -190,8 +206,8 @@ public class QueryParserTest {
     }
 
     public void setId(Integer id) {
-          this.id = id;
-        }
+      this.id = id;
+    }
 
     public Long getCount() {
       return count;
@@ -225,5 +241,4 @@ public class QueryParserTest {
       this.middleName = middleName;
     }
   }
-
 }

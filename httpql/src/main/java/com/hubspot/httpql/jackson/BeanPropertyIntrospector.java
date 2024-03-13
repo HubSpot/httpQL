@@ -1,11 +1,5 @@
 package com.hubspot.httpql.jackson;
 
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
@@ -15,18 +9,26 @@ import com.google.common.primitives.Primitives;
 import com.hubspot.rosetta.Rosetta;
 import com.hubspot.rosetta.annotations.RosettaProperty;
 import com.hubspot.rosetta.annotations.StoredAsJson;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class BeanPropertyIntrospector {
 
   public static Map<String, BeanPropertyDefinition> getFields(Class<?> type) {
-    return introspect(type).findProperties().stream()
-        .collect(Collectors.toMap(p -> p.getName(), Function.identity()));
+    return introspect(type)
+      .findProperties()
+      .stream()
+      .collect(Collectors.toMap(p -> p.getName(), Function.identity()));
   }
 
   public static Map<String, Object> makeBoundMap(Object object) {
     Map<String, Object> propertyMap = new HashMap<>();
 
-    for (Map.Entry<String, BeanPropertyDefinition> entry : getFields(object.getClass()).entrySet()) {
+    for (Map.Entry<String, BeanPropertyDefinition> entry : getFields(object.getClass())
+      .entrySet()) {
       BeanPropertyDefinition definition = entry.getValue();
 
       if (!definition.couldSerialize()) {
@@ -36,9 +38,10 @@ public class BeanPropertyIntrospector {
       Object value = definition.getAccessor().getValue(object);
 
       if (value != null) {
-        if (hasAnnotation(definition, StoredAsJson.class) ||
-            !Primitives.wrap(getFieldType(definition)).isAssignableFrom(value.getClass())) {
-
+        if (
+          hasAnnotation(definition, StoredAsJson.class) ||
+          !Primitives.wrap(getFieldType(definition)).isAssignableFrom(value.getClass())
+        ) {
           try {
             value = Rosetta.getMapper().writeValueAsString(value);
           } catch (JsonProcessingException e) {
@@ -67,16 +70,26 @@ public class BeanPropertyIntrospector {
     return fieldType;
   }
 
-  public static boolean hasAnnotation(BeanPropertyDefinition definition, Class<? extends Annotation> type) {
+  public static boolean hasAnnotation(
+    BeanPropertyDefinition definition,
+    Class<? extends Annotation> type
+  ) {
     return getAnnotation(definition, type) != null;
   }
 
-  public static <T extends Annotation> T getAnnotation(BeanPropertyDefinition definition, Class<T> type) {
+  public static <T extends Annotation> T getAnnotation(
+    BeanPropertyDefinition definition,
+    Class<T> type
+  ) {
     if (definition.hasField() && definition.getField().getAnnotation(type) != null) {
       return definition.getField().getAnnotation(type);
-    } else if (definition.hasGetter() && definition.getGetter().getAnnotation(type) != null) {
+    } else if (
+      definition.hasGetter() && definition.getGetter().getAnnotation(type) != null
+    ) {
       return definition.getGetter().getAnnotation(type);
-    } else if (definition.hasSetter() && definition.getSetter().getAnnotation(type) != null) {
+    } else if (
+      definition.hasSetter() && definition.getSetter().getAnnotation(type) != null
+    ) {
       return definition.getSetter().getAnnotation(type);
     }
     return null;
@@ -84,10 +97,12 @@ public class BeanPropertyIntrospector {
 
   private static BeanDescription introspect(Class<?> type) {
     final JavaType javaType;
-    SerializationConfig sc = Rosetta.getMapper().getSerializationConfig().withView(RosettaProperty.class);
+    SerializationConfig sc = Rosetta
+      .getMapper()
+      .getSerializationConfig()
+      .withView(RosettaProperty.class);
 
     javaType = Rosetta.getMapper().getTypeFactory().constructType(type);
     return sc.introspect(javaType);
   }
-
 }

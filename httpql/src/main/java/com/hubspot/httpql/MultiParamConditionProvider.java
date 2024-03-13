@@ -1,7 +1,6 @@
 package com.hubspot.httpql;
 
 import java.util.Collection;
-
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Param;
@@ -33,9 +32,10 @@ public abstract class MultiParamConditionProvider<T> extends ConditionProvider<T
 
   @Override
   public Condition getCondition(Param<T> value) {
-    throw new RuntimeException("Single-value getCondition() called for multi-value filter!");
+    throw new RuntimeException(
+      "Single-value getCondition() called for multi-value filter!"
+    );
   }
 
   public abstract Condition getCondition(Collection<T> values);
-
 }

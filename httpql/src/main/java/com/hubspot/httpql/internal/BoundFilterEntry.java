@@ -12,36 +12,55 @@ import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.httpql.impl.DefaultFieldFactory;
 import com.hubspot.httpql.impl.FilterJoinInfo;
 import com.hubspot.httpql.impl.filter.FilterImpl;
+import java.util.Collection;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
-import java.util.Collection;
-
-public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry implements FilterEntryConditionCreator<T> {
+public class BoundFilterEntry<T extends QuerySpec>
+  extends FilterEntry
+  implements FilterEntryConditionCreator<T> {
 
   private final BeanPropertyDefinition prop;
   private final MetaQuerySpec<T> meta;
   private BeanPropertyDefinition actualField;
 
-  public BoundFilterEntry(FilterImpl filter, String fieldName, String queryName, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
+  public BoundFilterEntry(
+    FilterImpl filter,
+    String fieldName,
+    String queryName,
+    BeanPropertyDefinition prop,
+    MetaQuerySpec<T> meta
+  ) {
     super(filter, fieldName, queryName, meta.getQueryType());
     this.prop = prop;
     this.meta = meta;
   }
 
-  public BoundFilterEntry(FilterImpl filter, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
+  public BoundFilterEntry(
+    FilterImpl filter,
+    BeanPropertyDefinition prop,
+    MetaQuerySpec<T> meta
+  ) {
     super(filter, prop.getName(), getBestQueryName(prop), meta.getQueryType());
     this.prop = prop;
     this.meta = meta;
   }
 
-  public BoundFilterEntry(FilterEntry entry, BeanPropertyDefinition prop, MetaQuerySpec<T> meta) {
+  public BoundFilterEntry(
+    FilterEntry entry,
+    BeanPropertyDefinition prop,
+    MetaQuerySpec<T> meta
+  ) {
     this(entry.getFilter(), prop, meta);
   }
 
   public boolean isMultiValue() {
-    return getConditionProvider(new DefaultFieldFactory()) instanceof MultiParamConditionProvider;
+    return (
+      getConditionProvider(
+        new DefaultFieldFactory()
+      ) instanceof MultiParamConditionProvider
+    );
   }
 
   private static String getBestQueryName(BeanPropertyDefinition prop) {
@@ -79,7 +98,8 @@ public class BoundFilterEntry<T extends QuerySpec> extends FilterEntry implement
 
   @Override
   public Condition getCondition(QuerySpec value, FieldFactory fieldFactory) {
-    return getConditionProvider(fieldFactory).getCondition(getProperty().getGetter().getValue(value), getProperty().getName());
+    return getConditionProvider(fieldFactory)
+      .getCondition(getProperty().getGetter().getValue(value), getProperty().getName());
   }
 
   public void setActualField(BeanPropertyDefinition actualField) {

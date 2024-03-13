@@ -1,9 +1,8 @@
 package com.hubspot.httpql.filter;
 
-import java.util.Objects;
-
 import com.hubspot.httpql.Filter;
 import com.hubspot.httpql.internal.JoinFilter;
+import java.util.Objects;
 
 public abstract class FilterBase implements Filter {
 
@@ -26,5 +25,4 @@ public abstract class FilterBase implements Filter {
   public int hashCode() {
     return Objects.hash(getClass());
   }
-
 }

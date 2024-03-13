@@ -63,12 +63,19 @@ public class ParsedUriParams {
 
   @Override
   public String toString() {
-    return "ParsedUriParams{" +
-        "orderBys=" + orderBys +
-        ", offset=" + offset +
-        ", limit=" + limit +
-        ", includeDeleted=" + includeDeleted +
-        ", fieldFilters=" + fieldFilters +
-        '}';
+    return (
+      "ParsedUriParams{" +
+      "orderBys=" +
+      orderBys +
+      ", offset=" +
+      offset +
+      ", limit=" +
+      limit +
+      ", includeDeleted=" +
+      includeDeleted +
+      ", fieldFilters=" +
+      fieldFilters +
+      '}'
+    );
   }
 }

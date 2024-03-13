@@ -1,5 +1,7 @@
 package com.hubspot.httpql;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
@@ -25,14 +27,11 @@ import com.hubspot.httpql.impl.QueryParser;
 import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.rosetta.annotations.RosettaNaming;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Param;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParsedQueryTest {
 
@@ -70,7 +69,6 @@ public class ParsedQueryTest {
     assertThat(provider.getField().getName()).isEqualTo("count");
     assertThat(provider.getField().getType()).isEqualTo(Long.class);
     assertThat(value.getValue()).isEqualTo(100L);
-
   }
 
   @Test
@@ -147,15 +145,25 @@ public class ParsedQueryTest {
     ParsedQuery<Spec> parsed = parser.parse(query);
 
     BoundFilterEntry<Spec> idFilter = new MultiValuedBoundFilterEntry<>(
-        parsed.getMetaData().getNewBoundFilterEntry("id", Equal.class),
-        ImmutableSet.of(4));
+      parsed.getMetaData().getNewBoundFilterEntry("id", Equal.class),
+      ImmutableSet.of(4)
+    );
 
     parsed.addFilterEntryConditionCreatorExclusively("id", idFilter);
 
     assertThat(parsed.getBoundFilterEntries()).hasSize(1);
-    assertThat(((MultiValuedBoundFilterEntry<Spec>) parsed.getBoundFilterEntries().get(0)).getValues()).hasSize(1);
-    assertThat((Set<Integer>) ((MultiValuedBoundFilterEntry<Spec>) parsed.getBoundFilterEntries().get(0)).getValues())
-        .containsExactly(4);
+    assertThat(
+      (
+        (MultiValuedBoundFilterEntry<Spec>) parsed.getBoundFilterEntries().get(0)
+      ).getValues()
+    )
+      .hasSize(1);
+    assertThat(
+      (Set<Integer>) (
+        (MultiValuedBoundFilterEntry<Spec>) parsed.getBoundFilterEntries().get(0)
+      ).getValues()
+    )
+      .containsExactly(4);
   }
 
   @Test
@@ -238,6 +246,7 @@ public class ParsedQueryTest {
   }
 
   public static class SpecParent {
+
     Integer id;
 
     public Integer getId() {
@@ -247,7 +256,6 @@ public class ParsedQueryTest {
     public void setId(Integer id) {
       this.id = id;
     }
-
   }
 
   public enum SpecEnum {
@@ -281,24 +289,19 @@ public class ParsedQueryTest {
 
     @OrderBy
     @FilterBy(
-        value = {
-            GreaterThan.class, Equal.class, IsDistinctFrom.class, IsNotDistinctFrom.class
-        })
+      value = {
+        GreaterThan.class, Equal.class, IsDistinctFrom.class, IsNotDistinctFrom.class,
+      }
+    )
     Long count;
 
     @OrderBy
-    @FilterBy(
-        value = {
-            GreaterThan.class, Equal.class
-        })
+    @FilterBy(value = { GreaterThan.class, Equal.class })
     private Long createDate;
 
     boolean secret;
 
-    @FilterBy(
-        value = {
-            In.class, NotIn.class
-        })
+    @FilterBy(value = { In.class, NotIn.class })
     private SpecEnum specEnum;
 
     @Override
@@ -307,9 +310,7 @@ public class ParsedQueryTest {
     }
 
     @Override
-    @FilterBy({
-        Equal.class, In.class
-    })
+    @FilterBy({ Equal.class, In.class })
     public Integer getId() {
       return super.getId();
     }
@@ -329,9 +330,7 @@ public class ParsedQueryTest {
       return secret;
     }
 
-    @FilterBy({
-        Contains.class, NotLike.class
-    })
+    @FilterBy({ Contains.class, NotLike.class })
     String comments;
 
     /**
@@ -366,5 +365,4 @@ public class ParsedQueryTest {
       this.comments = comments;
     }
   }
-
 }

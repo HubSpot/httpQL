@@ -35,5 +35,4 @@ public abstract class ConditionProvider<T> {
   }
 
   public abstract Condition getCondition(Param<T> value);
-
 }

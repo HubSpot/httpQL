@@ -5,6 +5,4 @@ package com.hubspot.httpql.core;
  *
  * @author tdavis
  */
-public class HTTPQLView {
-
-}
+public class HTTPQLView {}

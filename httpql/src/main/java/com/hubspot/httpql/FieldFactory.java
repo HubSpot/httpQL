@@ -1,11 +1,9 @@
 package com.hubspot.httpql;
 
+import com.hubspot.httpql.impl.DefaultFieldFactory;
 import java.util.Optional;
-
 import org.jooq.Field;
 import org.jooq.Table;
-
-import com.hubspot.httpql.impl.DefaultFieldFactory;
 
 /**
  * A provider of JOOQ fields.
@@ -16,11 +14,9 @@ import com.hubspot.httpql.impl.DefaultFieldFactory;
  * @author tdavis
  */
 public interface FieldFactory {
-
   <T> Field<T> createField(String name, Class<T> fieldType, Table<?> table);
 
   String getFieldName(String name, Table<?> table);
 
   Optional<String> tableAlias(String name);
-
 }

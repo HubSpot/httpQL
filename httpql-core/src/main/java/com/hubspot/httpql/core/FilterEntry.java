@@ -7,7 +7,6 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.Objects;
 import com.hubspot.httpql.core.filter.Filter;
 import com.hubspot.rosetta.annotations.RosettaNaming;
-
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 
@@ -21,7 +20,12 @@ public class FilterEntry {
     this(filter, queryName, queryName, queryType);
   }
 
-  public FilterEntry(Filter filter, String fieldName, String queryName, Class<?> queryType) {
+  public FilterEntry(
+    Filter filter,
+    String fieldName,
+    String queryName,
+    Class<?> queryType
+  ) {
     this.filter = filter;
     this.fieldName = fieldName;
     this.queryName = convertToSnakeCaseIfSupported(queryName, queryType);
@@ -47,11 +51,16 @@ public class FilterEntry {
   public boolean equals(Object other) {
     FilterEntry fe = (FilterEntry) other;
 
-    return Objects.equal(getQueryName(), fe.getQueryName()) &&
-        Objects.equal(getFilterClassMaybe(), fe.getFilterClassMaybe());
+    return (
+      Objects.equal(getQueryName(), fe.getQueryName()) &&
+      Objects.equal(getFilterClassMaybe(), fe.getFilterClassMaybe())
+    );
   }
 
-  private static <T extends Annotation> T getAnnotation(Class<?> clazz, Class<T> annClazz) {
+  private static <T extends Annotation> T getAnnotation(
+    Class<?> clazz,
+    Class<T> annClazz
+  ) {
     while (clazz != null) {
       T ann = clazz.getAnnotation(annClazz);
       if (ann != null) {
@@ -65,10 +74,13 @@ public class FilterEntry {
   private static String convertToSnakeCaseIfSupported(String name, Class<?> specType) {
     RosettaNaming rosettaNaming = getAnnotation(specType, RosettaNaming.class);
 
-    boolean snakeCasing = rosettaNaming != null &&
-        (rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class) ||
-            rosettaNaming.value().equals(SnakeCaseStrategy.class) ||
-            rosettaNaming.value().equals(PropertyNamingStrategies.SnakeCaseStrategy.class));
+    boolean snakeCasing =
+      rosettaNaming != null &&
+      (
+        rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class) ||
+        rosettaNaming.value().equals(SnakeCaseStrategy.class) ||
+        rosettaNaming.value().equals(PropertyNamingStrategies.SnakeCaseStrategy.class)
+      );
 
     if (snakeCasing && !name.contains("_")) {
       return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
@@ -80,5 +92,4 @@ public class FilterEntry {
   public int hashCode() {
     return Objects.hashCode(getQueryName(), getFilterClassMaybe());
   }
-
 }

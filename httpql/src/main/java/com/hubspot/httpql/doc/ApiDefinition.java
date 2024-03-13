@@ -3,7 +3,6 @@ package com.hubspot.httpql.doc;
 import com.hubspot.httpql.Filters;
 import com.hubspot.httpql.impl.QueryParser;
 import com.hubspot.httpql.internal.BoundFilterEntry;
-
 import java.util.Collection;
 import java.util.Objects;
 import java.util.SortedMap;
@@ -18,11 +17,19 @@ public class ApiDefinition {
   public ApiDefinition(QueryParser<?> queryParser) {
     this.fields = new TreeMap<>();
 
-    for (BoundFilterEntry<?> filterEntry : queryParser.getMeta().getFilterTable().rowKeySet()) {
+    for (BoundFilterEntry<?> filterEntry : queryParser
+      .getMeta()
+      .getFilterTable()
+      .rowKeySet()) {
       FilterableField f = fields.get(filterEntry.getFieldName());
 
       if (f == null) {
-        f = new FilterableField(filterEntry.getFieldName(), filterEntry.getFieldType(), queryParser.getOrderableFields().contains(filterEntry.getFieldName()));
+        f =
+          new FilterableField(
+            filterEntry.getFieldName(),
+            filterEntry.getFieldType(),
+            queryParser.getOrderableFields().contains(filterEntry.getFieldName())
+          );
         fields.put(filterEntry.getFieldName(), f);
       }
 
@@ -37,6 +44,7 @@ public class ApiDefinition {
   }
 
   static class FilterableField implements Comparable<FilterableField> {
+
     private final String field;
     private final Class<?> fieldType;
     private final boolean sortable;

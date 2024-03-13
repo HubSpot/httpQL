@@ -1,12 +1,10 @@
 package com.hubspot.httpql.impl;
 
+import com.hubspot.httpql.FieldFactory;
 import java.util.Optional;
-
 import org.jooq.Field;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
-
-import com.hubspot.httpql.FieldFactory;
 
 /**
  * Basic field factory that creates fields by name.
@@ -29,5 +27,4 @@ public class DefaultFieldFactory implements FieldFactory {
   public Optional<String> tableAlias(String name) {
     return Optional.empty();
   }
-
 }

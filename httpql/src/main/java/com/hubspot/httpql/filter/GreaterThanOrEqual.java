@@ -14,21 +14,16 @@ public class GreaterThanOrEqual extends FilterBase implements Filter {
 
   @Override
   public String[] names() {
-    return new String[] {
-        "gte"
-    };
+    return new String[] { "gte" };
   }
 
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
     return new ConditionProvider<T>(field) {
-
       @Override
       public Condition getCondition(Param<T> value) {
         return field.greaterOrEqual(value);
       }
-
     };
   }
-
 }

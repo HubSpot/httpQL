@@ -14,21 +14,16 @@ public class GreaterThan extends FilterBase implements Filter {
 
   @Override
   public String[] names() {
-    return new String[] {
-        "gt"
-    };
+    return new String[] { "gt" };
   }
 
   @Override
   public <T> ConditionProvider<T> getConditionProvider(final Field<T> field) {
     return new ConditionProvider<T>(field) {
-
       @Override
       public Condition getCondition(Param<T> value) {
         return field.gt(value);
       }
-
     };
   }
-
 }

@@ -3,11 +3,11 @@ package com.hubspot.httpql.core;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Splitter;
-
 import java.util.List;
 import java.util.Objects;
 
 public class Ordering implements OrderingIF {
+
   private static final Splitter FIELD_SPLITTER = Splitter.on(',');
 
   private final String queryName;
@@ -73,7 +73,7 @@ public class Ordering implements OrderingIF {
   }
 
   /**
-    * @return either "asc" or "desc"
+   * @return either "asc" or "desc"
    */
   @Override
   public String getOrderString() {
@@ -106,8 +106,6 @@ public class Ordering implements OrderingIF {
 
     Ordering o = (Ordering) obj;
 
-    return Objects.equals(queryName, o.queryName)
-        && Objects.equals(order, o.order);
+    return Objects.equals(queryName, o.queryName) && Objects.equals(order, o.order);
   }
-
 }

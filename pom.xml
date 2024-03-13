@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>25.7</version>
+    <version>59.4</version>
   </parent>
 
   <groupId>com.hubspot.httpql</groupId>
@@ -22,12 +22,7 @@
   </modules>
 
   <properties>
-    <project.build.targetJdk>11</project.build.targetJdk>
-    <project.build.sourceJdk>11</project.build.sourceJdk>
-    <project.build.releaseJdk>11</project.build.releaseJdk>
-    <basepom.check.skip-findbugs>true</basepom.check.skip-findbugs>
-    <dep.jackson.version>2.12.6</dep.jackson.version>
-    <dep.jackson-databind.version>${dep.jackson.version}</dep.jackson-databind.version>
+    <basepom.check.skip-spotbugs>true</basepom.check.skip-spotbugs>
   </properties>
 
   <dependencyManagement>
@@ -39,12 +34,12 @@
       </dependency>
       <dependency>
         <groupId>com.hubspot.httpql</groupId>
-        <artifactId>httpql-jersey1</artifactId>
+        <artifactId>httpql-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>com.hubspot.httpql</groupId>
-        <artifactId>httpql-core</artifactId>
+        <artifactId>httpql-jersey1</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -67,6 +62,12 @@
         <groupId>org.jooq</groupId>
         <artifactId>jooq</artifactId>
         <version>3.15.5</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -75,12 +76,12 @@
     <pluginManagement>
       <plugins>
         <!--
-          Overriding from 1.2.1 provided by basepom.
-          This is to prevent issues with module-info being flagged as a duplicate class
+                  Overriding from 1.2.1 provided by basepom.
+                  This is to prevent issues with module-info being flagged as a duplicate class
 
-          [WARNING] Found duplicate and different classes in [javax.xml.bind:jaxb-api:2.3.1, org.jooq:jooq:3.15.5]:
-          [WARNING]   module-info
-        -->
+                  [WARNING] Found duplicate and different classes in [javax.xml.bind:jaxb-api:2.3.1, org.jooq:jooq:3.15.5]:
+                  [WARNING]   module-info
+                -->
         <plugin>
           <groupId>org.basepom.maven</groupId>
           <artifactId>duplicate-finder-maven-plugin</artifactId>

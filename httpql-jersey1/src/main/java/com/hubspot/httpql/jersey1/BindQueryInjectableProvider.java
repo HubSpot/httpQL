@@ -11,7 +11,8 @@ import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.InjectableProvider;
 
-public class BindQueryInjectableProvider implements InjectableProvider<BindQuery, Parameter> {
+public class BindQueryInjectableProvider
+  implements InjectableProvider<BindQuery, Parameter> {
 
   @Override
   public ComponentScope getScope() {
@@ -19,13 +20,19 @@ public class BindQueryInjectableProvider implements InjectableProvider<BindQuery
   }
 
   @Override
-  public Injectable<ParsedQuery<? extends QuerySpec>> getInjectable(ComponentContext ic, final BindQuery a, Parameter c) {
+  public Injectable<ParsedQuery<? extends QuerySpec>> getInjectable(
+    ComponentContext ic,
+    final BindQuery a,
+    Parameter c
+  ) {
     return new AbstractHttpContextInjectable<ParsedQuery<? extends QuerySpec>>() {
       @Override
       public ParsedQuery<? extends QuerySpec> getValue(HttpContext context) {
-        return QueryParser.newBuilder(a.value()).build().parse(context.getUriInfo().getQueryParameters());
+        return QueryParser
+          .newBuilder(a.value())
+          .build()
+          .parse(context.getUriInfo().getQueryParameters());
       }
     };
   }
-
 }

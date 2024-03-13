@@ -15,20 +15,27 @@ import com.hubspot.httpql.ann.desc.JoinDescriptor;
 import com.hubspot.httpql.impl.FilterJoinInfo;
 import com.hubspot.httpql.impl.filter.FilterImpl;
 import com.hubspot.rosetta.annotations.RosettaNaming;
-
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 @SuppressWarnings("deprecation")
 public class DefaultMetaUtils {
 
   public static boolean hasOrderBy(BeanPropertyDefinition prop) {
-    return findAnnotation(prop, com.hubspot.httpql.core.ann.OrderBy.class) != null || findAnnotation(prop, OrderBy.class) != null;
+    return (
+      findAnnotation(prop, com.hubspot.httpql.core.ann.OrderBy.class) != null ||
+      findAnnotation(prop, OrderBy.class) != null
+    );
   }
 
-  public static Class<? extends com.hubspot.httpql.core.filter.Filter>[] getFilterByClasses(BeanPropertyDefinition prop) {
-    com.hubspot.httpql.core.ann.FilterBy annotation = findAnnotation(prop, com.hubspot.httpql.core.ann.FilterBy.class);
+  public static Class<? extends com.hubspot.httpql.core.filter.Filter>[] getFilterByClasses(
+    BeanPropertyDefinition prop
+  ) {
+    com.hubspot.httpql.core.ann.FilterBy annotation = findAnnotation(
+      prop,
+      com.hubspot.httpql.core.ann.FilterBy.class
+    );
     if (annotation != null) {
       return annotation.value();
     }
@@ -43,20 +50,28 @@ public class DefaultMetaUtils {
 
   @Nullable
   public static FilterJoinInfo findFilterJoin(BeanPropertyDefinition prop) {
-    return Optional.ofNullable(FilterJoinInfo.of(findAnnotation(prop, FilterJoin.class)))
-            .orElse(FilterJoinInfo.of(findAnnotation(prop, com.hubspot.httpql.core.ann.FilterJoin.class)));
+    return Optional
+      .ofNullable(FilterJoinInfo.of(findAnnotation(prop, FilterJoin.class)))
+      .orElse(
+        FilterJoinInfo.of(
+          findAnnotation(prop, com.hubspot.httpql.core.ann.FilterJoin.class)
+        )
+      );
   }
 
   @Nullable
-  private static FilterJoinByDescriptor findFilterJoinByDescriptor(BeanPropertyDefinition prop) {
+  private static FilterJoinByDescriptor findFilterJoinByDescriptor(
+    BeanPropertyDefinition prop
+  ) {
     return findAnnotation(prop, FilterJoinByDescriptor.class);
   }
 
   @Nullable
-  private static com.hubspot.httpql.core.ann.FilterJoinByDescriptor findCoreFilterJoinByDescriptor(BeanPropertyDefinition prop) {
+  private static com.hubspot.httpql.core.ann.FilterJoinByDescriptor findCoreFilterJoinByDescriptor(
+    BeanPropertyDefinition prop
+  ) {
     return findAnnotation(prop, com.hubspot.httpql.core.ann.FilterJoinByDescriptor.class);
   }
-
 
   @Nullable
   public static JoinDescriptor findJoinDescriptor(BeanPropertyDefinition prop) {
@@ -65,7 +80,8 @@ public class DefaultMetaUtils {
       if (filterJoinByDescriptor != null) {
         return filterJoinByDescriptor.value().newInstance();
       }
-      com.hubspot.httpql.core.ann.FilterJoinByDescriptor desc = findCoreFilterJoinByDescriptor(prop);
+      com.hubspot.httpql.core.ann.FilterJoinByDescriptor desc =
+        findCoreFilterJoinByDescriptor(prop);
       if (desc != null) {
         return (JoinDescriptor) Class.forName(desc.value()).newInstance();
       }
@@ -75,7 +91,10 @@ public class DefaultMetaUtils {
     return null;
   }
 
-  public static <T extends Annotation> T findAnnotation(BeanPropertyDefinition prop, Class<T> type) {
+  public static <T extends Annotation> T findAnnotation(
+    BeanPropertyDefinition prop,
+    Class<T> type
+  ) {
     T ann = null;
     if (prop.hasField()) {
       ann = prop.getField().getAnnotation(type);
@@ -89,7 +108,10 @@ public class DefaultMetaUtils {
     return ann;
   }
 
-  public static <T extends Annotation> T getAnnotation(Class<?> clazz, Class<T> annClazz) {
+  public static <T extends Annotation> T getAnnotation(
+    Class<?> clazz,
+    Class<T> annClazz
+  ) {
     while (clazz != null) {
       T ann = clazz.getAnnotation(annClazz);
       if (ann != null) {
@@ -103,10 +125,13 @@ public class DefaultMetaUtils {
   public static String convertToSnakeCaseIfSupported(String name, Class<?> specType) {
     RosettaNaming rosettaNaming = getAnnotation(specType, RosettaNaming.class);
 
-    boolean snakeCasing = rosettaNaming != null &&
-        (rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class) ||
-            rosettaNaming.value().equals(SnakeCaseStrategy.class) ||
-                rosettaNaming.value().equals(PropertyNamingStrategies.SnakeCaseStrategy.class));
+    boolean snakeCasing =
+      rosettaNaming != null &&
+      (
+        rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class) ||
+        rosettaNaming.value().equals(SnakeCaseStrategy.class) ||
+        rosettaNaming.value().equals(PropertyNamingStrategies.SnakeCaseStrategy.class)
+      );
 
     if (snakeCasing && !name.contains("_")) {
       return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
@@ -114,12 +139,16 @@ public class DefaultMetaUtils {
     return name;
   }
 
-  public static FilterImpl getFilterInstance(Class<? extends com.hubspot.httpql.core.filter.Filter> filterType) {
-      return Filters.getFilterImpl(filterType).orElse(null);
+  public static FilterImpl getFilterInstance(
+    Class<? extends com.hubspot.httpql.core.filter.Filter> filterType
+  ) {
+    return Filters.getFilterImpl(filterType).orElse(null);
   }
 
   public static String getFilterByAs(AnnotatedMember member) {
-    com.hubspot.httpql.core.ann.FilterBy coreAnn = member.getAnnotation(com.hubspot.httpql.core.ann.FilterBy.class);
+    com.hubspot.httpql.core.ann.FilterBy coreAnn = member.getAnnotation(
+      com.hubspot.httpql.core.ann.FilterBy.class
+    );
     if (coreAnn != null) {
       return Strings.emptyToNull(coreAnn.as());
     }
@@ -133,7 +162,9 @@ public class DefaultMetaUtils {
   }
 
   public static Class<?> getFilterByTypeOverride(AnnotatedMember member) {
-    com.hubspot.httpql.core.ann.FilterBy coreAnn = member.getAnnotation(com.hubspot.httpql.core.ann.FilterBy.class);
+    com.hubspot.httpql.core.ann.FilterBy coreAnn = member.getAnnotation(
+      com.hubspot.httpql.core.ann.FilterBy.class
+    );
     if (coreAnn != null) {
       return coreAnn.typeOverride();
     }
@@ -146,9 +177,11 @@ public class DefaultMetaUtils {
     return null;
   }
 
-
   public static String getFilterByAs(BeanPropertyDefinition prop) {
-    com.hubspot.httpql.core.ann.FilterBy coreFilterBy = findAnnotation(prop, com.hubspot.httpql.core.ann.FilterBy.class);
+    com.hubspot.httpql.core.ann.FilterBy coreFilterBy = findAnnotation(
+      prop,
+      com.hubspot.httpql.core.ann.FilterBy.class
+    );
     if (coreFilterBy != null) {
       return Strings.emptyToNull(coreFilterBy.as());
     }

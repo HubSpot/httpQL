@@ -4,16 +4,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Splitter;
 import com.hubspot.httpql.core.OrderingIF;
-import org.jooq.SortOrder;
-
 import java.util.List;
 import java.util.Objects;
+import org.jooq.SortOrder;
 
 /**
  * @deprecated Use {@link com.hubspot.httpql.core.Ordering}
  */
 @Deprecated
 public class Ordering implements OrderingIF {
+
   private static final Splitter FIELD_SPLITTER = Splitter.on(',');
 
   private final String queryName;
@@ -110,8 +110,6 @@ public class Ordering implements OrderingIF {
 
     Ordering o = (Ordering) obj;
 
-    return Objects.equals(queryName, o.queryName)
-        && Objects.equals(order, o.order);
+    return Objects.equals(queryName, o.queryName) && Objects.equals(order, o.order);
   }
-
 }

@@ -10,9 +10,7 @@ import java.lang.annotation.Target;
  */
 @Deprecated
 @Retention(RetentionPolicy.RUNTIME)
-@Target({
-  ElementType.TYPE
-})
+@Target({ ElementType.TYPE })
 public @interface QueryConstraints {
   int defaultLimit();
 

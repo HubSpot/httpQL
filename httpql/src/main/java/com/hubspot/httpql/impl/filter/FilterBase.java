@@ -24,5 +24,4 @@ public abstract class FilterBase implements FilterImpl {
   public int hashCode() {
     return Objects.hash(getClass());
   }
-
 }

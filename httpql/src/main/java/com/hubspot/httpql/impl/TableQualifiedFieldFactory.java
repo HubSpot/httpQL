@@ -1,12 +1,10 @@
 package com.hubspot.httpql.impl;
 
+import com.hubspot.httpql.FieldFactory;
 import java.util.Optional;
-
 import org.jooq.Field;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
-
-import com.hubspot.httpql.FieldFactory;
 
 /**
  * A field factory that prefixes fields for the purposes of disambiguation.
@@ -34,5 +32,4 @@ public class TableQualifiedFieldFactory implements FieldFactory {
   public Optional<String> tableAlias(String name) {
     return Optional.empty();
   }
-
 }
