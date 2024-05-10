@@ -76,11 +76,9 @@ public class FilterEntry {
 
     boolean snakeCasing =
       rosettaNaming != null &&
-      (
-        rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class) ||
+      (rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class) ||
         rosettaNaming.value().equals(SnakeCaseStrategy.class) ||
-        rosettaNaming.value().equals(PropertyNamingStrategies.SnakeCaseStrategy.class)
-      );
+        rosettaNaming.value().equals(PropertyNamingStrategies.SnakeCaseStrategy.class));
 
     if (snakeCasing && !name.contains("_")) {
       return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
