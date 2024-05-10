@@ -182,10 +182,8 @@ public class QueryParser<T extends QuerySpec> {
       // Use reserved words instead of simple look-up to throw exception on disallowed fields
       if (
         filterEntryOptional.isEmpty() ||
-        (
-          !RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName()) &&
-          !filterTable.contains(filterEntryOptional.get(), filterName)
-        )
+        (!RESERVED_WORDS.contains(filterEntryOptional.get().getQueryName()) &&
+          !filterTable.contains(filterEntryOptional.get(), filterName))
       ) {
         throw new FilterViolation(
           String.format(

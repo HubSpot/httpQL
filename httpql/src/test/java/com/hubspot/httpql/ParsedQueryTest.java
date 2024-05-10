@@ -153,15 +153,15 @@ public class ParsedQueryTest {
 
     assertThat(parsed.getBoundFilterEntries()).hasSize(1);
     assertThat(
-      (
-        (MultiValuedBoundFilterEntry<Spec>) parsed.getBoundFilterEntries().get(0)
-      ).getValues()
+      ((MultiValuedBoundFilterEntry<Spec>) parsed
+          .getBoundFilterEntries()
+          .get(0)).getValues()
     )
       .hasSize(1);
     assertThat(
-      (Set<Integer>) (
-        (MultiValuedBoundFilterEntry<Spec>) parsed.getBoundFilterEntries().get(0)
-      ).getValues()
+      (Set<Integer>) ((MultiValuedBoundFilterEntry<Spec>) parsed
+          .getBoundFilterEntries()
+          .get(0)).getValues()
     )
       .containsExactly(4);
   }

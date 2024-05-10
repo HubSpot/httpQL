@@ -57,9 +57,8 @@ public class BoundFilterEntry<T extends QuerySpec>
 
   public boolean isMultiValue() {
     return (
-      getConditionProvider(
-        new DefaultFieldFactory()
-      ) instanceof MultiParamConditionProvider
+      getConditionProvider(new DefaultFieldFactory()) instanceof
+      MultiParamConditionProvider
     );
   }
 
