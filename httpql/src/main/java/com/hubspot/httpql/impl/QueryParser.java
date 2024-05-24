@@ -30,11 +30,17 @@ import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
+import com.hubspot.httpql.internal.OverridableBoundFilterEntry;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
 import com.hubspot.rosetta.Rosetta;
+import org.jooq.Operator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,9 +48,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.jooq.Operator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Primary entry point into httpQL.
@@ -156,6 +159,7 @@ public class QueryParser<T extends QuerySpec> {
       meta.getFilterTable();
     final Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
 
+    final Set<String> alreadyProcessedColumns = new HashSet<>();
     for (FieldFilter fieldFilter : parsedUriParams.getFieldFilters()) {
       final String filterName = fieldFilter.getFilterName();
 
@@ -239,12 +243,21 @@ public class QueryParser<T extends QuerySpec> {
         NullImpl.class.equals(boundColumn.getFilter().getClass()) ||
         NotNullImpl.class.equals(boundColumn.getFilter().getClass())
       ) {
-        fieldValues.put(prop.getName(), Defaults.defaultValue(finalType));
+        if (alreadyProcessedColumns.contains(prop.getName())) {
+          boundColumn = new OverridableBoundFilterEntry<>(boundColumn, Defaults.defaultValue(finalType));
+        } else {
+          fieldValues.put(prop.getName(), Defaults.defaultValue(finalType));
+        }
       } else {
-        fieldValues.put(prop.getName(), fieldFilter.getValue());
+        if (alreadyProcessedColumns.contains(prop.getName())) {
+          boundColumn = new OverridableBoundFilterEntry<>(boundColumn, fieldFilter.getValue());
+        } else {
+          fieldValues.put(prop.getName(), fieldFilter.getValue());
+        }
       }
 
       boundFilterEntries.add(boundColumn);
+      alreadyProcessedColumns.add(prop.getName());
     }
 
     CombinedConditionCreator<T> combinedConditionCreator = new CombinedConditionCreator<>(
