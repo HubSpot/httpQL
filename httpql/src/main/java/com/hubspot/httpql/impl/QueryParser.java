@@ -33,10 +33,6 @@ import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
 import com.hubspot.httpql.internal.OverridableBoundFilterEntry;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
 import com.hubspot.rosetta.Rosetta;
-import org.jooq.Operator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,6 +43,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.jooq.Operator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Primary entry point into httpQL.
@@ -242,13 +241,18 @@ public class QueryParser<T extends QuerySpec> {
         NotNullImpl.class.equals(boundColumn.getFilter().getClass())
       ) {
         if (fieldValues.containsKey(prop.getName())) {
-          boundColumn = new OverridableBoundFilterEntry<>(boundColumn, Defaults.defaultValue(finalType));
+          boundColumn =
+            new OverridableBoundFilterEntry<>(
+              boundColumn,
+              Defaults.defaultValue(finalType)
+            );
         } else {
           fieldValues.put(prop.getName(), Defaults.defaultValue(finalType));
         }
       } else {
         if (fieldValues.containsKey(prop.getName())) {
-          boundColumn = new OverridableBoundFilterEntry<>(boundColumn, fieldFilter.getValue());
+          boundColumn =
+            new OverridableBoundFilterEntry<>(boundColumn, fieldFilter.getValue());
         } else {
           fieldValues.put(prop.getName(), fieldFilter.getValue());
         }

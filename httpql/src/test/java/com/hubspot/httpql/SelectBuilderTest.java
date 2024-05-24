@@ -1,5 +1,8 @@
 package com.hubspot.httpql;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -29,9 +32,6 @@ import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class SelectBuilderTest {
 
@@ -318,7 +318,9 @@ public class SelectBuilderTest {
     query.put("updated__not_null", "");
     // GreaterThanOrEqual not supported on this filter in the spec
     query.put("updated__gte", "100");
-    assertThatThrownBy(() -> selectBuilder = parser.newSelectBuilder(query)).isInstanceOf(FilterViolation.class).hasMessageContaining("Filtering by \"updated gte\" is not allowed");
+    assertThatThrownBy(() -> selectBuilder = parser.newSelectBuilder(query))
+      .isInstanceOf(FilterViolation.class)
+      .hasMessageContaining("Filtering by \"updated gte\" is not allowed");
   }
 
   @Test
@@ -455,7 +457,6 @@ public class SelectBuilderTest {
 
     @FilterBy({ Contains.class, NotLike.class })
     String comments;
-
 
     @FilterBy({ GreaterThan.class, LessThan.class, NotNull.class })
     Long updated;
