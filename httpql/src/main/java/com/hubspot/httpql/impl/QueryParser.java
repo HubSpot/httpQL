@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -159,7 +158,6 @@ public class QueryParser<T extends QuerySpec> {
       meta.getFilterTable();
     final Map<String, BeanPropertyDefinition> fieldMap = meta.getFieldMap();
 
-    final Set<String> alreadyProcessedColumns = new HashSet<>();
     for (FieldFilter fieldFilter : parsedUriParams.getFieldFilters()) {
       final String filterName = fieldFilter.getFilterName();
 
@@ -243,13 +241,13 @@ public class QueryParser<T extends QuerySpec> {
         NullImpl.class.equals(boundColumn.getFilter().getClass()) ||
         NotNullImpl.class.equals(boundColumn.getFilter().getClass())
       ) {
-        if (alreadyProcessedColumns.contains(prop.getName())) {
+        if (fieldValues.containsKey(prop.getName())) {
           boundColumn = new OverridableBoundFilterEntry<>(boundColumn, Defaults.defaultValue(finalType));
         } else {
           fieldValues.put(prop.getName(), Defaults.defaultValue(finalType));
         }
       } else {
-        if (alreadyProcessedColumns.contains(prop.getName())) {
+        if (fieldValues.containsKey(prop.getName())) {
           boundColumn = new OverridableBoundFilterEntry<>(boundColumn, fieldFilter.getValue());
         } else {
           fieldValues.put(prop.getName(), fieldFilter.getValue());
@@ -257,7 +255,6 @@ public class QueryParser<T extends QuerySpec> {
       }
 
       boundFilterEntries.add(boundColumn);
-      alreadyProcessedColumns.add(prop.getName());
     }
 
     CombinedConditionCreator<T> combinedConditionCreator = new CombinedConditionCreator<>(
