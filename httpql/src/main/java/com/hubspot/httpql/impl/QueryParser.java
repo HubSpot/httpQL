@@ -30,6 +30,7 @@ import com.hubspot.httpql.internal.BoundFilterEntry;
 import com.hubspot.httpql.internal.CombinedConditionCreator;
 import com.hubspot.httpql.internal.FilterEntry;
 import com.hubspot.httpql.internal.MultiValuedBoundFilterEntry;
+import com.hubspot.httpql.internal.OverridableBoundFilterEntry;
 import com.hubspot.httpql.jackson.BeanPropertyIntrospector;
 import com.hubspot.rosetta.Rosetta;
 import java.util.ArrayList;
@@ -239,9 +240,22 @@ public class QueryParser<T extends QuerySpec> {
         NullImpl.class.equals(boundColumn.getFilter().getClass()) ||
         NotNullImpl.class.equals(boundColumn.getFilter().getClass())
       ) {
-        fieldValues.put(prop.getName(), Defaults.defaultValue(finalType));
+        if (fieldValues.containsKey(prop.getName())) {
+          boundColumn =
+            new OverridableBoundFilterEntry<>(
+              boundColumn,
+              Defaults.defaultValue(finalType)
+            );
+        } else {
+          fieldValues.put(prop.getName(), Defaults.defaultValue(finalType));
+        }
       } else {
-        fieldValues.put(prop.getName(), fieldFilter.getValue());
+        if (fieldValues.containsKey(prop.getName())) {
+          boundColumn =
+            new OverridableBoundFilterEntry<>(boundColumn, fieldFilter.getValue());
+        } else {
+          fieldValues.put(prop.getName(), fieldFilter.getValue());
+        }
       }
 
       boundFilterEntries.add(boundColumn);

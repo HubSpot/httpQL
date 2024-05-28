@@ -1,6 +1,7 @@
 package com.hubspot.httpql;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.google.common.collect.ArrayListMultimap;
@@ -9,11 +10,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.hubspot.httpql.ann.FilterBy;
 import com.hubspot.httpql.ann.OrderBy;
+import com.hubspot.httpql.error.FilterViolation;
 import com.hubspot.httpql.filter.Contains;
 import com.hubspot.httpql.filter.Equal;
 import com.hubspot.httpql.filter.GreaterThan;
 import com.hubspot.httpql.filter.In;
+import com.hubspot.httpql.filter.LessThan;
 import com.hubspot.httpql.filter.NotLike;
+import com.hubspot.httpql.filter.NotNull;
 import com.hubspot.httpql.impl.PrefixingAliasFieldFactory;
 import com.hubspot.httpql.impl.QueryParser;
 import com.hubspot.httpql.impl.SelectBuilder;
@@ -296,6 +300,30 @@ public class SelectBuilderTest {
   }
 
   @Test
+  public void withMultipleConditionsOnSameField() {
+    query.put("updated__not_null", "");
+    query.put("updated__gt", "100");
+    query.put("updated__lt", "200");
+    selectBuilder = parser.newSelectBuilder(query);
+
+    String sql = selectBuilder.build().toString();
+
+    assertThat(sql).contains("`updated` is not null");
+    assertThat(sql).contains("`updated` > 100");
+    assertThat(sql).contains("`updated` < 200");
+  }
+
+  @Test
+  public void itThrowsExceptionOnUnsupportedFilterWithMultipleConditionsOnSameFields() {
+    query.put("updated__not_null", "");
+    // GreaterThanOrEqual not supported on this filter in the spec
+    query.put("updated__gte", "100");
+    assertThatThrownBy(() -> selectBuilder = parser.newSelectBuilder(query))
+      .isInstanceOf(FilterViolation.class)
+      .hasMessageContaining("Filtering by \"updated gte\" is not allowed");
+  }
+
+  @Test
   public void withJoin() {
     parser = QueryParser.newBuilder(Spec.class).build();
     selectBuilder =
@@ -430,6 +458,9 @@ public class SelectBuilderTest {
     @FilterBy({ Contains.class, NotLike.class })
     String comments;
 
+    @FilterBy({ GreaterThan.class, LessThan.class, NotNull.class })
+    Long updated;
+
     @Override
     public String tableName() {
       return "example";
@@ -481,6 +512,14 @@ public class SelectBuilderTest {
 
     public void setComments(String comments) {
       this.comments = comments;
+    }
+
+    public Long getUpdated() {
+      return updated;
+    }
+
+    public void setUpdated(Long updated) {
+      this.updated = updated;
     }
   }
 }
