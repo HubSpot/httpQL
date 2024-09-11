@@ -1,7 +1,6 @@
 package com.hubspot.httpql;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
@@ -21,6 +20,9 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("deprecation")
 public class DefaultMetaUtils {
+
+  private static final String LOWER_CASE_WITH_UNDERSCORES_STRATEGY_CLASS_NAME =
+    "com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy";
 
   public static boolean hasOrderBy(BeanPropertyDefinition prop) {
     return (
@@ -127,7 +129,9 @@ public class DefaultMetaUtils {
 
     boolean snakeCasing =
       rosettaNaming != null &&
-      (rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class) ||
+      (LOWER_CASE_WITH_UNDERSCORES_STRATEGY_CLASS_NAME.equals(
+          rosettaNaming.value().getCanonicalName()
+        ) ||
         rosettaNaming.value().equals(SnakeCaseStrategy.class) ||
         rosettaNaming.value().equals(PropertyNamingStrategies.SnakeCaseStrategy.class));
 
