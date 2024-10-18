@@ -38,7 +38,7 @@ public class QueryParserSimpleJoinDescriptorTest {
       .isEqualTo(
         "select distinct entity_table.* from entity_table " +
         "join `join_tbl` on `entity_table`.`id` = `join_tbl`.`entity_id` " +
-        "where `join_tbl`.`topic_id` = '123' limit 10"
+        "where `join_tbl`.`topic_id` = 123 limit 10"
       );
   }
 

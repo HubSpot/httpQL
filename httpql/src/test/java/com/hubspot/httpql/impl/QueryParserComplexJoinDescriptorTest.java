@@ -41,7 +41,7 @@ public class QueryParserComplexJoinDescriptorTest {
         "`entity_table`.`group_id` = `join_tbl`.`id` " +
         "and `entity_table`.`tag` = `join_tbl`.`id` " +
         "and `join_tbl`.`meta_type` = 'joinObjects' ) " +
-        "where ifnull(`join_tbl`.`topic_id`, 0) = '123' " +
+        "where ifnull(`join_tbl`.`topic_id`, 0) = 123 " +
         "limit 10"
       );
   }
