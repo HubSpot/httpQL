@@ -10,7 +10,7 @@
 
   <groupId>com.hubspot.httpql</groupId>
   <artifactId>httpql-parent</artifactId>
-  <version>1.4-SNAPSHOT</version>
+  <version>1.5-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <description>A library that exposes SELECT queries through HTTP query parameters.</description>
