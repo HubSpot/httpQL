@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.hubspot</groupId>
     <artifactId>basepom</artifactId>
-    <version>61.2</version>
+    <version>63.0</version>
   </parent>
 
   <groupId>com.hubspot.httpql</groupId>
@@ -13,11 +13,11 @@
   <version>1.5-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <name>${project.groupId}:${project.artifactId}</name>
   <description>A library that exposes SELECT queries through HTTP query parameters.</description>
 
   <modules>
     <module>httpql</module>
-    <module>httpql-jersey1</module>
     <module>httpql-core</module>
   </modules>
 
@@ -37,26 +37,16 @@
         <artifactId>httpql-core</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>com.hubspot.httpql</groupId>
-        <artifactId>httpql-jersey1</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.hubspot.httpql</groupId>
-        <artifactId>httpql-lib</artifactId>
-        <version>${project.version}</version>
-      </dependency>
 
       <dependency>
         <groupId>com.hubspot.rosetta</groupId>
         <artifactId>RosettaAnnotations</artifactId>
-        <version>3.11.9</version>
+        <version>3.13.0</version>
       </dependency>
       <dependency>
         <groupId>com.hubspot.rosetta</groupId>
         <artifactId>RosettaCore</artifactId>
-        <version>3.11.9</version>
+        <version>3.13.0</version>
       </dependency>
       <dependency>
         <groupId>org.jooq</groupId>
@@ -94,7 +84,15 @@
       </plugin>
     </plugins>
   </build>
+
   <url>https://github.com/HubSpot/httpQL</url>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
 
   <developers>
     <developer>
