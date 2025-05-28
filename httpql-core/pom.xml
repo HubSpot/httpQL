@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.hubspot.httpql</groupId>
     <artifactId>httpql-parent</artifactId>
-    <version>1.5</version>
+    <version>1.6-SNAPSHOT</version>
   </parent>
 
   <artifactId>httpql-core</artifactId>
