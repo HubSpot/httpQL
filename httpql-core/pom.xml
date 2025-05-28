@@ -32,7 +32,7 @@
     </dependency>
     <dependency>
       <groupId>com.hubspot.rosetta</groupId>
-      <artifactId>RosettaCore</artifactId>
+      <artifactId>RosettaAnnotations</artifactId>
     </dependency>
 
     <dependency>
@@ -46,7 +46,5 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
-
 </project>

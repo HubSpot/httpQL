@@ -3,7 +3,6 @@ package com.hubspot.httpql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.hubspot.rosetta.annotations.RosettaNaming;
 import org.junit.Test;
 
@@ -11,8 +10,6 @@ public class DefaultMetaUtilsTest {
 
   @Test
   public void itCorrectlyDetectsAndConvertsToSnakeCase() {
-    assertThat(DefaultMetaUtils.convertToSnakeCaseIfSupported("aCamelCase", test.class))
-      .isEqualTo("a_camel_case");
     assertThat(DefaultMetaUtils.convertToSnakeCaseIfSupported("ACamelCase", test1.class))
       .isEqualTo("a_camel_case");
     /*
@@ -28,9 +25,6 @@ public class DefaultMetaUtilsTest {
     )
       .isEqualTo("ACamelCase");
   }
-
-  @RosettaNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-  public static class test {}
 
   @RosettaNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
   public static class test1 {}

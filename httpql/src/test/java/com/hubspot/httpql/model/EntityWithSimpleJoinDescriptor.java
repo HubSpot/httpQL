@@ -1,6 +1,6 @@
 package com.hubspot.httpql.model;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.hubspot.httpql.QueryConstraints;
 import com.hubspot.httpql.QuerySpec;
 import com.hubspot.httpql.ann.FilterBy;

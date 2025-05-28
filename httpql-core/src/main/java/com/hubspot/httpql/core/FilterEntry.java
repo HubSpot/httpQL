@@ -1,8 +1,6 @@
 package com.hubspot.httpql.core;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Objects;
 import com.hubspot.httpql.core.filter.Filter;
@@ -75,10 +73,7 @@ public class FilterEntry {
     RosettaNaming rosettaNaming = getAnnotation(specType, RosettaNaming.class);
 
     boolean snakeCasing =
-      rosettaNaming != null &&
-      (rosettaNaming.value().equals(LowerCaseWithUnderscoresStrategy.class) ||
-        rosettaNaming.value().equals(SnakeCaseStrategy.class) ||
-        rosettaNaming.value().equals(PropertyNamingStrategies.SnakeCaseStrategy.class));
+      rosettaNaming != null && rosettaNaming.value().equals(SnakeCaseStrategy.class);
 
     if (snakeCasing && !name.contains("_")) {
       return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
