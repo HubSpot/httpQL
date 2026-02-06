@@ -10,7 +10,7 @@
 
   <groupId>com.hubspot.httpql</groupId>
   <artifactId>httpql-parent</artifactId>
-  <version>1.6-SNAPSHOT</version>
+  <version>1.6</version>
   <packaging>pom</packaging>
 
   <name>${project.groupId}:${project.artifactId}</name>
@@ -109,6 +109,6 @@
     <connection>scm:git:git@github.com:HubSpot/httpQL.git</connection>
     <developerConnection>scm:git:git@github.com:HubSpot/httpQL.git</developerConnection>
     <url>git@github.com:HubSpot/httpQL.git</url>
-    <tag>HEAD</tag>
+    <tag>httpql-parent-1.6</tag>
   </scm>
 </project>
